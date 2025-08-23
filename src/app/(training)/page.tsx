@@ -1,8 +1,8 @@
 'use client';
 
-import { NextPage } from 'next';
 import React from 'react';
+import { TrainingPage } from './Training/TrainingPage';
 
 export default function DashboardPage() {
-  return <>test</>;
+  return <TrainingPage />;
 }

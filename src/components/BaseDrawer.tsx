@@ -15,34 +15,11 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
 import { Avatar } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-
-const navigationItems = [
-  {
-    section: 'Data Input',
-    items: [
-      { text: 'Training', icon: <DashboardIcon />, href: '/' },
-      { text: 'Village', icon: <DashboardIcon />, href: '/' },
-      { text: 'Monthly Report', icon: <DashboardIcon />, href: '/' },
-    ],
-  },
-  {
-    section: 'Others',
-    items: [
-      { text: 'User Management', icon: <InboxIcon />, href: '/' },
-      { text: 'Dashboard', icon: <MailIcon />, href: '/' },
-      {
-        text: 'Collapse Menu',
-        icon: <InboxIcon />,
-        href: '/',
-        onClick: () => {},
-      },
-    ],
-  },
-];
+import { PresentationChartIcon } from '@phosphor-icons/react';
+import { usePathname } from 'next/navigation';
+import { SolarRoofIcon } from '@phosphor-icons/react/dist/ssr';
 
 const drawerWidth = 240;
 
@@ -135,6 +112,44 @@ interface BaseDrawerProps {
 export default function BaseDrawer({ children }: BaseDrawerProps) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(true);
+  const pathname = usePathname();
+
+  const navigationItems = [
+    {
+      section: 'Data Input',
+      items: [
+        {
+          text: 'Training',
+          icon: <PresentationChartIcon size={20} />,
+          activeIcon: (
+            <PresentationChartIcon
+              size={20}
+              color={theme.palette.primary.main}
+              weight="fill"
+            />
+          ),
+          href: '/',
+        },
+        {
+          text: 'Village',
+          icon: <SolarRoofIcon size={20} />,
+          activeIcon: (
+            <SolarRoofIcon
+              size={20}
+              color={theme.palette.primary.main}
+              weight="fill"
+            />
+          ),
+          href: '/village',
+        },
+        {
+          text: 'Monthly Report',
+          icon: <DashboardIcon />,
+          href: '/monthly-report',
+        },
+      ],
+    },
+  ];
 
   React.useEffect(() => {
     const checkIsTabletOrLower = () => {
@@ -220,7 +235,11 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
             <Box key={item.section}>
               <Typography
                 variant="subtitle1"
-                sx={{ padding: 2, color: theme.palette.text.secondary }}
+                sx={{
+                  padding: 2,
+                  color: theme.palette.text.secondary,
+                  fontWeight: 300,
+                }}
               >
                 {item.section}
               </Typography>
@@ -228,7 +247,17 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
                 <ListItem
                   key={subItem.text}
                   disablePadding
-                  sx={{ display: 'block' }}
+                  sx={{
+                    display: 'block',
+                    backgroundColor:
+                      pathname === subItem.href
+                        ? theme.palette.primary.light
+                        : 'transparent',
+                    color:
+                      pathname === subItem.href
+                        ? theme.palette.primary.main
+                        : theme.palette.grey[400],
+                  }}
                 >
                   <ListItemButton
                     component="a"
@@ -262,11 +291,18 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
                             },
                       ]}
                     >
-                      {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                      {pathname === subItem.href
+                        ? subItem.activeIcon
+                        : subItem.icon}
                     </ListItemIcon>
                     <ListItemText
                       primary={subItem.text}
                       sx={[
+                        {
+                          '& .MuiTypography-root': {
+                            fontWeight: 600,
+                          },
+                        },
                         open
                           ? {
                               opacity: 1,
