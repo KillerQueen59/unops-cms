@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import BaseDrawer from '../molecules/BaseDrawer';
+import BaseDrawer from './BaseDrawer';
 
 type Props = {
   children: React.ReactNode;
