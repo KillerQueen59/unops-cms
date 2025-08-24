@@ -17,7 +17,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import { Avatar } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import { PresentationChartIcon } from '@phosphor-icons/react';
+import { PresentationChartIcon, PuzzlePieceIcon } from '@phosphor-icons/react';
 import { usePathname } from 'next/navigation';
 import { SolarRoofIcon } from '@phosphor-icons/react/dist/ssr';
 
@@ -143,9 +143,16 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
           href: '/village',
         },
         {
-          text: 'Monthly Report',
-          icon: <DashboardIcon />,
-          href: '/monthly-report',
+          text: 'Activity',
+          icon: <PuzzlePieceIcon size={20} />,
+          activeIcon: (
+            <PuzzlePieceIcon
+              size={20}
+              color={theme.palette.primary.main}
+              weight="fill"
+            />
+          ),
+          href: '/activity',
         },
       ],
     },

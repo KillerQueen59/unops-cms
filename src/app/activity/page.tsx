@@ -17,33 +17,33 @@ import {
   TuneOutlined,
 } from '@mui/icons-material';
 import React from 'react';
-import { useVillagePageImpl } from './useVillagePageImpl';
-import { VillagePageEnum } from '@/stores/villageStore';
-import { AddVillagePage } from './AddVillagePage/AddVillagePage';
-import { DetailVillagePage } from './DetailVillagePage/DetailVillagePage';
-import { VillageTable } from '@/types/village';
+import { useActivityPageImpl } from './useActivityPageImpl';
+import { ActivityTable } from '@/types/activity';
+import { ActivityPageEnum } from '@/stores/activityStore';
+import { AddActivityPage } from './AddActivityPage/AddActivityPage';
+import { DetailActivityPage } from './DetailActivityPage/DetailActivityPage';
 
-export default function VillagePage() {
-  const { state, action } = useVillagePageImpl();
+export default function ActivityPage() {
+  const { state, action } = useActivityPageImpl();
 
-  const { searchQuery, page, columns, villages, error, isLoading } = state;
+  const { searchQuery, page, columns, activities, error, isLoading } = state;
 
   const { handleAddNew, setSearchQuery } = action;
 
   if (error) {
     return (
       <Alert severity="error" sx={{ m: 2 }}>
-        Failed to load village data. Please try again.
+        Failed to load activity data. Please try again.
       </Alert>
     );
   }
 
-  if (page === VillagePageEnum.DETAIL) {
-    return <DetailVillagePage />;
+  if (page === ActivityPageEnum.DETAIL) {
+    return <DetailActivityPage />;
   }
 
-  if (page === VillagePageEnum.ADD) {
-    return <AddVillagePage />;
+  if (page === ActivityPageEnum.ADD) {
+    return <AddActivityPage />;
   }
 
   return (
@@ -66,7 +66,7 @@ export default function VillagePage() {
                 color: '#374151',
               }}
             >
-              Village Data
+              Activity Data
             </Typography>
             <Typography
               variant="subtitle1"
@@ -75,8 +75,10 @@ export default function VillagePage() {
                 fontSize: '18px',
               }}
             >
-              This page shows a list of village programs.{' '}
-              {isLoading ? 'Loading...' : `${villages.length} villages found`}
+              This page shows a list of activity programs.{' '}
+              {isLoading
+                ? 'Loading...'
+                : `${activities.length} activities found`}
             </Typography>
           </Box>
         </Box>
@@ -91,7 +93,7 @@ export default function VillagePage() {
             }}
           >
             <TextField
-              placeholder="Search villages..."
+              placeholder="Search activities..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               sx={{
@@ -161,20 +163,20 @@ export default function VillagePage() {
           <CircularProgress />
         </Box>
       ) : (
-        <DataTable<VillageTable>
-          data={villages.filter((village) => {
+        <DataTable<ActivityTable>
+          data={activities.filter((activity) => {
             if (!searchQuery) return true;
             return (
-              village.villageName
+              activity.activityName
                 .toLowerCase()
                 .includes(searchQuery.toLowerCase()) ||
-              village.villageCode
+              activity.activityCategory
                 .toLowerCase()
                 .includes(searchQuery.toLowerCase())
             );
           })}
           columns={columns}
-          title="Village Data"
+          title="Activity Data"
           searchable={true}
           filterable={true}
           pageSize={10}
