@@ -1,6 +1,6 @@
+'use client';
+
 import DataTable from '@/components/DataTable/DataTable';
-import { TrainingTable } from '@/types/training';
-import { TrainingPageEnum } from '@/stores/trainingStore';
 import {
   Paper,
   Box,
@@ -17,31 +17,33 @@ import {
   TuneOutlined,
 } from '@mui/icons-material';
 import React from 'react';
-import { AddTrainingPage } from './AddTrainingPage/AddTrainingPage';
-import { useTrainingPageImpl } from './useTrainingPageImpl';
-import { DetailTrainingPage } from './DetailTrainingPage/DetailTrainingPage';
+import { useVillagePageImpl } from './useVillagePageImpl';
+import { VillagePageEnum } from '@/stores/villageStore';
+import { AddVillagePage } from './AddVillagePage/AddVillagePage';
+import { DetailVillagePage } from './DetailVillagePage/DetailTrainingPage';
+import { VillageTable } from '@/types/village';
 
-export const TrainingPage = () => {
-  const { state, action } = useTrainingPageImpl();
+export default function VillagePage() {
+  const { state, action } = useVillagePageImpl();
 
-  const { searchQuery, page, columns, trainings, error, isLoading } = state;
+  const { searchQuery, page, columns, villages, error, isLoading } = state;
 
   const { handleAddNew, setSearchQuery } = action;
 
   if (error) {
     return (
       <Alert severity="error" sx={{ m: 2 }}>
-        Failed to load training data. Please try again.
+        Failed to load village data. Please try again.
       </Alert>
     );
   }
 
-  if (page === TrainingPageEnum.DETAIL) {
-    return <DetailTrainingPage />;
+  if (page === VillagePageEnum.DETAIL) {
+    return <DetailVillagePage />;
   }
 
-  if (page === TrainingPageEnum.ADD) {
-    return <AddTrainingPage />;
+  if (page === VillagePageEnum.ADD) {
+    return <AddVillagePage />;
   }
 
   return (
@@ -64,7 +66,7 @@ export const TrainingPage = () => {
                 color: '#374151',
               }}
             >
-              Training Data
+              Village Data
             </Typography>
             <Typography
               variant="subtitle1"
@@ -73,8 +75,8 @@ export const TrainingPage = () => {
                 fontSize: '18px',
               }}
             >
-              This page shows a list of training programs.{' '}
-              {isLoading ? 'Loading...' : `${trainings.length} trainings found`}
+              This page shows a list of village programs.{' '}
+              {isLoading ? 'Loading...' : `${villages.length} villages found`}
             </Typography>
           </Box>
         </Box>
@@ -89,7 +91,7 @@ export const TrainingPage = () => {
             }}
           >
             <TextField
-              placeholder="Search trainings..."
+              placeholder="Search villages..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               sx={{
@@ -159,21 +161,20 @@ export const TrainingPage = () => {
           <CircularProgress />
         </Box>
       ) : (
-        <DataTable<TrainingTable>
-          data={trainings.filter((training) => {
+        <DataTable<VillageTable>
+          data={villages.filter((village) => {
             if (!searchQuery) return true;
             return (
-              training.trainingName
+              village.villageName
                 .toLowerCase()
                 .includes(searchQuery.toLowerCase()) ||
-              training.trainingType
+              village.villageCode
                 .toLowerCase()
-                .includes(searchQuery.toLowerCase()) ||
-              training.village.toLowerCase().includes(searchQuery.toLowerCase())
+                .includes(searchQuery.toLowerCase())
             );
           })}
           columns={columns}
-          title="Training Data"
+          title="Village Data"
           searchable={true}
           filterable={true}
           pageSize={10}
@@ -186,4 +187,4 @@ export const TrainingPage = () => {
       )}
     </Paper>
   );
-};
+}

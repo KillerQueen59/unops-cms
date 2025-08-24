@@ -7,33 +7,34 @@ import {
   PencilIcon,
   TrashIcon,
 } from '@phosphor-icons/react';
+import { VillageData } from '@/types/village';
 
-interface TrainingColumnProps {
-  onView?: (data: TrainingData) => void;
-  onEdit?: (data: TrainingData) => void;
-  onDelete?: (data: TrainingData) => void;
+interface VillageColumnProps {
+  onView?: (data: VillageData) => void;
+  onEdit?: (data: VillageData) => void;
+  onDelete?: (data: VillageData) => void;
 }
 
-export const createTrainingColumns = ({
+export const createVillageColumns = ({
   onView,
   onEdit,
   onDelete,
-}: TrainingColumnProps): ColumnDef<TrainingData, unknown>[] => [
+}: VillageColumnProps): ColumnDef<VillageData, unknown>[] => [
   {
-    accessorKey: 'trainingName',
-    header: 'Training Name',
+    accessorKey: 'villageName',
+    header: 'Village Name',
   },
   {
-    accessorKey: 'trainingType',
-    header: 'Training Type',
+    accessorKey: 'villageCode',
+    header: 'Village Code',
   },
   {
-    accessorKey: 'startDate',
-    header: 'Start Date',
+    accessorKey: 'totalLandManage',
+    header: 'Total Land Managed',
   },
   {
-    accessorKey: 'village',
-    header: 'Village',
+    accessorKey: 'totalPopulation',
+    header: 'Total Population',
   },
   {
     id: 'actions',

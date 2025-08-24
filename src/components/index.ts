@@ -10,4 +10,5 @@ export { CustomBreadcrumbs } from './CustomBreadcrumbs';
 export { FieldContainer } from './FieldContainer';
 export { ControlledFieldContainer } from './ControlledFieldContainer';
 export { RadioFieldContainer } from './RadioFieldContainer';
+export { TextAreaFieldContainer } from './TextAreaFieldContainer';
 export { ConfirmationModal } from './ConfirmationModal';
