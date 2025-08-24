@@ -72,16 +72,15 @@ export const Header = ({
       {/* Training Info */}
       <Box
         sx={{
-          display: 'flex',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: 4,
           mb: 4,
-          flexWrap: 'nowrap',
-          justifyContent: 'flex-start',
-          gap: 8,
           px: 2,
         }}
       >
         {/* Training Type */}
-        <Box sx={{ minWidth: 180 }}>
+        <Box>
           <Typography
             variant="body2"
             sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
@@ -97,7 +96,7 @@ export const Header = ({
         </Box>
 
         {/* Desa */}
-        <Box sx={{ minWidth: 220 }}>
+        <Box>
           <Typography
             variant="body2"
             sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
@@ -113,7 +112,7 @@ export const Header = ({
         </Box>
 
         {/* Start Date */}
-        <Box sx={{ minWidth: 180 }}>
+        <Box>
           <Typography
             variant="body2"
             sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
@@ -129,7 +128,7 @@ export const Header = ({
         </Box>
 
         {/* End Date */}
-        <Box sx={{ minWidth: 180 }}>
+        <Box>
           <Typography
             variant="body2"
             sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}

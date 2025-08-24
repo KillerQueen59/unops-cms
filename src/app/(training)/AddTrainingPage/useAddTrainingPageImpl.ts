@@ -6,7 +6,8 @@ import { useState, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
 export const useAddTrainingPageImpl = () => {
-  const { updateBreadcrumbs, setPage, selectedTraining } = useTrainingStore();
+  const { updateBreadcrumbs, setPage, selectedTraining, breadcrumbs } =
+    useTrainingStore();
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
 
@@ -68,7 +69,6 @@ export const useAddTrainingPageImpl = () => {
   }, [updateBreadcrumbs]);
 
   const isEditMode = !!selectedTraining;
-  const { breadcrumbs } = useTrainingStore();
 
   useEffect(() => {
     if (selectedTraining) {

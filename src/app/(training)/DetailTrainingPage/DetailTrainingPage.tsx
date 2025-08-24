@@ -12,8 +12,9 @@ import { useEffect } from 'react';
 import { ParticipantCard } from './components/ParticipantCard';
 import { Header } from './components/Header';
 
-export const TrainingDetailPage = () => {
-  const { updateBreadcrumbs, setPage, selectedTraining } = useTrainingStore();
+export const DetailTrainingPage = () => {
+  const { updateBreadcrumbs, setPage, selectedTraining, breadcrumbs } =
+    useTrainingStore();
 
   useEffect(() => {
     updateBreadcrumbs(TrainingPageEnum.DETAIL);
@@ -44,8 +45,6 @@ export const TrainingDetailPage = () => {
     postTestScoreMale: 123,
     postTestScoreFemale: 123,
   };
-
-  const { breadcrumbs } = useTrainingStore();
 
   const participantCards = [
     {
