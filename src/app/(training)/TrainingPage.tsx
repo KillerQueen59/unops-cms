@@ -20,13 +20,25 @@ import React from 'react';
 import { AddTrainingPage } from './AddTrainingPage/AddTrainingPage';
 import { useTrainingPageImpl } from './useTrainingPageImpl';
 import { DetailTrainingPage } from './DetailTrainingPage/DetailTrainingPage';
+import { FilterModal } from './components/FilterModal';
 
 export const TrainingPage = () => {
   const { state, action } = useTrainingPageImpl();
 
-  const { searchQuery, page, columns, trainings, error, isLoading } = state;
+  const {
+    searchQuery,
+    page,
+    columns,
+    trainings,
+    error,
+    isLoading,
+    isFilterModalOpen,
+    uniqueTrainingTypes,
+    uniqueVillages,
+  } = state;
 
-  const { handleAddNew, setSearchQuery } = action;
+  const { handleAddNew, setSearchQuery, handleOpenFilter, handleCloseFilter } =
+    action;
 
   if (error) {
     return (
@@ -119,9 +131,7 @@ export const TrainingPage = () => {
                     }}
                   />
                 }
-                onClick={() => {
-                  // Handle filter button click
-                }}
+                onClick={handleOpenFilter}
                 sx={{
                   minWidth: 120,
                   height: 54,
@@ -160,18 +170,7 @@ export const TrainingPage = () => {
         </Box>
       ) : (
         <DataTable<TrainingTable>
-          data={trainings.filter((training) => {
-            if (!searchQuery) return true;
-            return (
-              training.trainingName
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase()) ||
-              training.trainingType
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase()) ||
-              training.village.toLowerCase().includes(searchQuery.toLowerCase())
-            );
-          })}
+          data={trainings}
           columns={columns}
           title="Training Data"
           searchable={true}
@@ -184,6 +183,14 @@ export const TrainingPage = () => {
           setExternalGlobalFilter={setSearchQuery}
         />
       )}
+
+      {/* Filter Modal */}
+      <FilterModal
+        open={isFilterModalOpen}
+        onClose={handleCloseFilter}
+        trainingTypes={uniqueTrainingTypes}
+        villages={uniqueVillages}
+      />
     </Paper>
   );
 };

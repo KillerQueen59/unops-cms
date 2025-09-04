@@ -58,14 +58,26 @@ export const Header = ({
         </Box>
 
         <Chip
-          label="In Progress"
+          label={
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Box
+                sx={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: '#D97706',
+                }}
+              />
+              In Progress
+            </Box>
+          }
           sx={{
-            backgroundColor: '#FEF3C7',
+            border: '1px solid #D97706',
             color: '#D97706',
             fontWeight: 500,
-            borderRadius: '8px',
             height: '32px',
           }}
+          variant="outlined"
         />
       </Box>
 

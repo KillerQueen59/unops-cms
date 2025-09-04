@@ -30,6 +30,13 @@ interface TrainingState {
   searchQuery: string;
   currentPage: number;
   itemsPerPage: number;
+  isFilterModalOpen: boolean;
+  filters: {
+    trainingType: string;
+    village: string;
+    startDate: string;
+    endDate: string;
+  };
 
   // Actions
   setPage: (page: TrainingPageEnum) => void;
@@ -46,6 +53,9 @@ interface TrainingState {
   setSearchQuery: (query: string) => void;
   setCurrentPage: (page: number) => void;
   setItemsPerPage: (items: number) => void;
+  setIsFilterModalOpen: (open: boolean) => void;
+  setFilters: (filters: Partial<TrainingState['filters']>) => void;
+  clearFilters: () => void;
 
   // Training CRUD actions
   addTraining: (training: TrainingData) => void;
@@ -71,6 +81,13 @@ const initialState = {
   isDeleteModalOpen: false,
   page: TrainingPageEnum.LIST,
   breadcrumbs: [] as BreadcrumbItem[],
+  isFilterModalOpen: false,
+  filters: {
+    trainingType: '',
+    village: '',
+    startDate: '',
+    endDate: '',
+  },
 };
 
 export const useTrainingStore = create<TrainingState>()(
@@ -81,6 +98,39 @@ export const useTrainingStore = create<TrainingState>()(
       // Filter actions
       setSearchQuery: (query) =>
         set({ searchQuery: query, currentPage: 1 }, false, 'setSearchQuery'),
+
+      setCurrentPage: (page) =>
+        set({ currentPage: page }, false, 'setCurrentPage'),
+
+      setItemsPerPage: (items) =>
+        set({ itemsPerPage: items }, false, 'setItemsPerPage'),
+
+      setIsFilterModalOpen: (open) =>
+        set({ isFilterModalOpen: open }, false, 'setIsFilterModalOpen'),
+
+      setFilters: (newFilters) => {
+        const { filters } = get();
+        set(
+          { filters: { ...filters, ...newFilters }, currentPage: 1 },
+          false,
+          'setFilters'
+        );
+      },
+
+      clearFilters: () =>
+        set(
+          {
+            filters: {
+              trainingType: '',
+              village: '',
+              startDate: '',
+              endDate: '',
+            },
+            currentPage: 1,
+          },
+          false,
+          'clearFilters'
+        ),
 
       setPage: (page) => set({ page }, false, 'setPage'),
 

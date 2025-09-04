@@ -16,10 +16,6 @@ export const DetailTrainingPage = () => {
   const { updateBreadcrumbs, setPage, selectedTraining, breadcrumbs } =
     useTrainingStore();
 
-  useEffect(() => {
-    updateBreadcrumbs(TrainingPageEnum.DETAIL);
-  }, [updateBreadcrumbs]);
-
   const handleBack = () => {
     setPage(TrainingPageEnum.LIST);
     updateBreadcrumbs(TrainingPageEnum.LIST);
@@ -45,6 +41,10 @@ export const DetailTrainingPage = () => {
     postTestScoreMale: 123,
     postTestScoreFemale: 123,
   };
+
+  useEffect(() => {
+    updateBreadcrumbs(TrainingPageEnum.DETAIL, trainingData.trainingName);
+  }, [updateBreadcrumbs]);
 
   const participantCards = [
     {
