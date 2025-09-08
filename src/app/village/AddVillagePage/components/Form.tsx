@@ -1,21 +1,7 @@
-import {
-  ControlledFieldContainer,
-  RadioFieldContainer,
-  TextAreaFieldContainer,
-} from '@/components';
-import { TrainingFormData } from '@/types/trainingForm';
+import { ControlledFieldContainer, TextAreaFieldContainer } from '@/components';
 import { VillageFormData } from '@/types/villageForm';
-import {
-  Box,
-  Typography,
-  FormControl,
-  Select,
-  MenuItem,
-  Divider,
-  Button,
-} from '@mui/material';
-import { GenderMaleIcon, GenderFemaleIcon } from '@phosphor-icons/react';
-import { Control, Controller, FieldErrors } from 'react-hook-form';
+import { Box, Typography, Button } from '@mui/material';
+import { Control, FieldErrors } from 'react-hook-form';
 
 export const Form = ({
   control,

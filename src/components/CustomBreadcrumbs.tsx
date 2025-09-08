@@ -5,13 +5,18 @@ import { BreadcrumbItem } from '@/stores/trainingStore';
 
 interface BreadcrumbsProps {
   sx?: object;
-  breadcrumbs: BreadcrumbItem[];
+  breadcrumbs?: BreadcrumbItem[];
 }
 
 export const CustomBreadcrumbs: React.FC<BreadcrumbsProps> = ({
   sx,
   breadcrumbs,
 }) => {
+  // Safety check for undefined or null breadcrumbs
+  if (!breadcrumbs || !Array.isArray(breadcrumbs)) {
+    return null;
+  }
+
   const renderBreadcrumbItem = (item: BreadcrumbItem, index: number) => {
     if (item.isActive) {
       return (
