@@ -52,7 +52,6 @@ export default function DemositePage() {
     setItemsPerPage,
   } = action;
 
-  // Reset to first page when search changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, setCurrentPage]);
@@ -65,7 +64,6 @@ export default function DemositePage() {
     );
   }
 
-  // Page navigation
   if (page === DemositePageEnum.ADD) {
     return <AddDemositePage />;
   }
@@ -87,7 +85,6 @@ export default function DemositePage() {
     );
   });
 
-  // Pagination calculations
   const totalItems = filteredDemosites.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -96,7 +93,6 @@ export default function DemositePage() {
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden', borderRadius: '16px' }}>
-      {/* Header Section */}
       <Box sx={{ padding: '28px' }}>
         <Box
           sx={{
