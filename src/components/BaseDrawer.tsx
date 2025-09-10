@@ -16,8 +16,12 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import { Avatar } from '@mui/material';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import { PresentationChartIcon, PuzzlePieceIcon } from '@phosphor-icons/react';
+import {
+  DownloadIcon,
+  FarmIcon,
+  PresentationChartIcon,
+  PuzzlePieceIcon,
+} from '@phosphor-icons/react';
 import { usePathname } from 'next/navigation';
 import { SolarRoofIcon } from '@phosphor-icons/react/dist/ssr';
 
@@ -153,6 +157,30 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
             />
           ),
           href: '/activity',
+        },
+        {
+          text: 'Demosite',
+          icon: <FarmIcon size={20} />,
+          activeIcon: (
+            <FarmIcon
+              size={20}
+              color={theme.palette.primary.main}
+              weight="fill"
+            />
+          ),
+          href: '/demosite',
+        },
+        {
+          text: 'Data',
+          icon: <DownloadIcon size={20} />,
+          activeIcon: (
+            <DownloadIcon
+              size={20}
+              color={theme.palette.primary.main}
+              weight="fill"
+            />
+          ),
+          href: '/data',
         },
       ],
     },
