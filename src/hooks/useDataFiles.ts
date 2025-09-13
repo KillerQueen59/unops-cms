@@ -7,6 +7,8 @@ const createMockFile = (
   name: string,
   type: string,
   size: number,
+  category: 'regency' | 'other',
+  regency?: string,
   url?: string
 ): DataFile => ({
   id: Math.random().toString(36).substr(2, 9),
@@ -22,36 +24,63 @@ const createMockFile = (
   fileUrl: url || `/mock-files/${name}`,
   uploadedBy: 'Admin User',
   description: `Document ${name.split('.')[0]}`,
+  category,
+  regency,
 });
 
 // Mock data - simulating file downloads
 const mockDataFiles: DataFile[] = [
-  createMockFile('training-report-2024.pdf', 'application/pdf', 2048000),
+  createMockFile(
+    'training-report-2024.pdf',
+    'application/pdf',
+    2048000,
+    'regency',
+    'Kabupaten Ogan Komering Ulu'
+  ),
   createMockFile(
     'village-survey-data.xlsx',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    512000
+    512000,
+    'regency',
+    'Kabupaten Ogan Komering Ulu'
   ),
-  createMockFile('activity-photos.zip', 'application/zip', 15728640),
+  createMockFile(
+    'activity-photos.zip',
+    'application/zip',
+    15728640,
+    'regency',
+    'Kota Palembang'
+  ),
   createMockFile(
     'monthly-summary.docx',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    256000
+    256000,
+    'regency',
+    'Kota Palembang'
   ),
-  createMockFile('financial-report.pdf', 'application/pdf', 1024000),
+  createMockFile(
+    'financial-report.pdf',
+    'application/pdf',
+    1024000,
+    'regency',
+    'Kabupaten Lahat'
+  ),
   createMockFile(
     'stakeholder-presentation.pptx',
     'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    5242880
+    5242880,
+    'regency',
+    'Kabupaten Lahat'
   ),
   createMockFile(
     'gps-coordinates.kml',
     'application/vnd.google-earth.kml+xml',
-    128000
+    128000,
+    'other'
   ),
-  createMockFile('impact-assessment.pdf', 'application/pdf', 3145728),
-  createMockFile('community-feedback.csv', 'text/csv', 64000),
-  createMockFile('project-timeline.png', 'image/png', 1572864),
+  createMockFile('impact-assessment.pdf', 'application/pdf', 3145728, 'other'),
+  createMockFile('community-feedback.csv', 'text/csv', 64000, 'other'),
+  createMockFile('project-timeline.png', 'image/png', 1572864, 'other'),
 ];
 
 // Simulate API delay
@@ -78,6 +107,8 @@ const dataApi = {
       status: 'active',
       uploadedBy: 'Current User',
       description: data.description,
+      category: data.category,
+      regency: data.regency,
       file: data.file,
       fileUrl: URL.createObjectURL(data.file),
     };

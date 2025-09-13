@@ -21,6 +21,7 @@ import {
   FarmIcon,
   PresentationChartIcon,
   PuzzlePieceIcon,
+  UsersIcon,
 } from '@phosphor-icons/react';
 import { usePathname } from 'next/navigation';
 import { SolarRoofIcon } from '@phosphor-icons/react/dist/ssr';
@@ -181,6 +182,23 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
             />
           ),
           href: '/data',
+        },
+      ],
+    },
+    {
+      section: 'Administration',
+      items: [
+        {
+          text: 'User Management',
+          icon: <UsersIcon size={20} />,
+          activeIcon: (
+            <UsersIcon
+              size={20}
+              color={theme.palette.primary.main}
+              weight="fill"
+            />
+          ),
+          href: '/user',
         },
       ],
     },

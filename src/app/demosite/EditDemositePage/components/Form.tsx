@@ -30,6 +30,8 @@ export const Form = () => {
     locationName: '',
     story: '',
     isTop10: false,
+    headerPhoto: null as File | null,
+    existingHeaderPhoto: '',
     images: [] as File[],
     existingImages: [] as string[],
   });
@@ -43,6 +45,8 @@ export const Form = () => {
         locationName: selectedDemosite.name || '',
         story: selectedDemosite.story || '',
         isTop10: selectedDemosite.isTop10 || false,
+        headerPhoto: null,
+        existingHeaderPhoto: selectedDemosite.photos?.[0] || '',
         images: [],
         existingImages: selectedDemosite.photos || [],
       });
@@ -56,6 +60,16 @@ export const Form = () => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
+    }));
+  };
+
+  const handleHeaderPhotoUpload = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0] || null;
+    setFormData((prev) => ({
+      ...prev,
+      headerPhoto: file,
     }));
   };
 
@@ -128,6 +142,146 @@ export const Form = () => {
             },
           }}
         />
+      </Box>
+
+      {/* Header Photo */}
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'medium' }}>
+          Header Photo
+        </Typography>
+
+        {/* Show existing header photo if available */}
+        {formData.existingHeaderPhoto && !formData.headerPhoto && (
+          <Box
+            sx={{
+              width: '100%',
+              height: '240px',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              mb: 2,
+              position: 'relative',
+              backgroundImage: `url(${formData.existingHeaderPhoto})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          >
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                borderRadius: '50%',
+                p: 0.5,
+              }}
+            >
+              <IconButton
+                size="small"
+                onClick={() =>
+                  setFormData((prev) => ({ ...prev, existingHeaderPhoto: '' }))
+                }
+                sx={{ color: 'white' }}
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </Box>
+          </Box>
+        )}
+
+        {/* Show new header photo preview */}
+        {formData.headerPhoto && (
+          <Box
+            sx={{
+              width: '100%',
+              height: '240px',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              mb: 2,
+              position: 'relative',
+              backgroundImage: `url(${URL.createObjectURL(formData.headerPhoto)})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          >
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                borderRadius: '50%',
+                p: 0.5,
+              }}
+            >
+              <IconButton
+                size="small"
+                onClick={() =>
+                  setFormData((prev) => ({ ...prev, headerPhoto: null }))
+                }
+                sx={{ color: 'white' }}
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </Box>
+          </Box>
+        )}
+
+        {/* Upload button */}
+        {!formData.headerPhoto && !formData.existingHeaderPhoto && (
+          <Box
+            sx={{
+              border: '2px dashed #E5E7EB',
+              borderRadius: '12px',
+              padding: '40px',
+              textAlign: 'center',
+              backgroundColor: '#F9FAFB',
+              cursor: 'pointer',
+              '&:hover': {
+                backgroundColor: '#F3F4F6',
+              },
+            }}
+            onClick={() =>
+              document.getElementById('header-photo-input')?.click()
+            }
+          >
+            <CloudUploadIcon sx={{ fontSize: 48, color: '#9CA3AF', mb: 2 }} />
+            <Typography variant="body1" sx={{ color: '#6B7280', mb: 1 }}>
+              Click to upload header photo
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#9CA3AF' }}>
+              JPG, PNG up to 10MB
+            </Typography>
+          </Box>
+        )}
+
+        <input
+          id="header-photo-input"
+          type="file"
+          accept="image/*"
+          onChange={handleHeaderPhotoUpload}
+          style={{ display: 'none' }}
+        />
+
+        {/* Change photo button if photo exists */}
+        {(formData.headerPhoto || formData.existingHeaderPhoto) && (
+          <Button
+            variant="outlined"
+            startIcon={<CloudUploadIcon />}
+            onClick={() =>
+              document.getElementById('header-photo-input')?.click()
+            }
+            sx={{
+              mt: 2,
+              borderColor: '#0EA5E9',
+              color: '#0EA5E9',
+              '&:hover': {
+                backgroundColor: 'rgba(14, 165, 233, 0.04)',
+              },
+            }}
+          >
+            Change Header Photo
+          </Button>
+        )}
       </Box>
 
       {/* Two Column Layout */}

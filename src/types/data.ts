@@ -10,6 +10,8 @@ export interface DataFile extends Record<string, unknown> {
   status: 'active' | 'archived';
   file?: File;
   fileUrl?: string;
+  regency?: string;
+  category: 'regency' | 'other';
 }
 
 export type DataTable = DataFile;

@@ -99,6 +99,17 @@ export const createDataColumns = ({
     ),
   },
   {
+    accessorKey: 'regency',
+    header: 'Regency',
+    cell: ({ row }) => (
+      <Typography variant="body2" sx={{ color: '#6B7280' }}>
+        {row.original.regency || row.original.category === 'other'
+          ? 'Other'
+          : '-'}
+      </Typography>
+    ),
+  },
+  {
     accessorKey: 'createdDate',
     header: 'Created Date',
     cell: ({ row }) => (

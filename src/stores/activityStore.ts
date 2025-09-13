@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { VillageData } from '@/types/village';
 import { ActivityData } from '@/types/activity';
 
 export enum ActivityPageEnum {
@@ -31,6 +30,7 @@ interface ActivityState {
   searchQuery: string;
   currentPage: number;
   itemsPerPage: number;
+  isFilterModalOpen: boolean;
 
   // Actions
   setPage: (page: ActivityPageEnum) => void;
@@ -47,6 +47,7 @@ interface ActivityState {
   setSearchQuery: (query: string) => void;
   setCurrentPage: (page: number) => void;
   setItemsPerPage: (items: number) => void;
+  setIsFilterModalOpen: (isOpen: boolean) => void;
 
   // Activity CRUD actions
   addActivity: (activity: ActivityData) => void;
@@ -70,6 +71,7 @@ const initialState = {
   isAddModalOpen: false,
   isEditModalOpen: false,
   isDeleteModalOpen: false,
+  isFilterModalOpen: false,
   page: ActivityPageEnum.LIST,
   breadcrumbs: [] as BreadcrumbItem[],
 };
@@ -82,6 +84,9 @@ export const useActivityStore = create<ActivityState>()(
       // Filter actions
       setSearchQuery: (query) =>
         set({ searchQuery: query, currentPage: 1 }, false, 'setSearchQuery'),
+
+      setIsFilterModalOpen: (isOpen) =>
+        set({ isFilterModalOpen: isOpen }, false, 'setIsFilterModalOpen'),
 
       setPage: (page) => set({ page }, false, 'setPage'),
 

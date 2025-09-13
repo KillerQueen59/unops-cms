@@ -1,6 +1,5 @@
 'use client';
 
-import DataTable from '@/components/DataTable/DataTable';
 import {
   Paper,
   Box,
@@ -17,49 +16,41 @@ import {
   TuneOutlined,
 } from '@mui/icons-material';
 import React from 'react';
-import { useActivityPageImpl } from './useActivityPageImpl';
-import { ActivityTable } from '@/types/activity';
-import { ActivityPageEnum } from '@/stores/activityStore';
-import { AddActivityPage } from './AddActivityPage/AddActivityPage';
-import { DetailActivityPage } from './DetailActivityPage/DetailActivityPage';
-import { FilterModal } from './components/FilterModal';
+import DataTable from '@/components/DataTable/DataTable';
+import { useUserPageImpl } from './useUserPageImpl';
+import { UserPageEnum } from '@/stores/userStore';
+import { AddUserPage } from './AddUserPage/AddUserPage';
+import { DetailUserPage } from './DetailUserPage/DetailUserPage';
+import { EditUserPage } from './EditUserPage/EditUserPage';
+import { User as UserType } from '@/types/user';
 
-export default function ActivityPage() {
-  const { state, action } = useActivityPageImpl();
+export default function UserPage() {
+  const { state, action } = useUserPageImpl();
 
-  const {
-    searchQuery,
-    page,
-    columns,
-    activities,
-    error,
-    isLoading,
-    isFilterModalOpen,
-  } = state;
+  const { searchQuery, users, error, isLoading, columns, totalUsers, page } =
+    state;
 
-  const {
-    handleAddNew,
-    setSearchQuery,
-    handleOpenFilter,
-    handleCloseFilter,
-    handleApplyFilter,
-    handleClearFilter,
-  } = action;
+  const { handleAddNew, handleOpenFilter, setSearchQuery } = action;
 
   if (error) {
     return (
       <Alert severity="error" sx={{ m: 2 }}>
-        Failed to load activity data. Please try again.
+        Failed to load users. Please try again.
       </Alert>
     );
   }
 
-  if (page === ActivityPageEnum.DETAIL) {
-    return <DetailActivityPage />;
+  // Route to different pages based on current page state
+  if (page === UserPageEnum.ADD) {
+    return <AddUserPage />;
   }
 
-  if (page === ActivityPageEnum.ADD) {
-    return <AddActivityPage />;
+  if (page === UserPageEnum.DETAIL) {
+    return <DetailUserPage />;
+  }
+
+  if (page === UserPageEnum.EDIT) {
+    return <EditUserPage />;
   }
 
   return (
@@ -82,7 +73,7 @@ export default function ActivityPage() {
                 color: '#374151',
               }}
             >
-              Activity Data
+              User Management
             </Typography>
             <Typography
               variant="subtitle1"
@@ -91,10 +82,9 @@ export default function ActivityPage() {
                 fontSize: '18px',
               }}
             >
-              This page shows a list of activity programs.{' '}
               {isLoading
                 ? 'Loading...'
-                : `${activities.length} activities found`}
+                : `This page shows a list of ${totalUsers} users`}
             </Typography>
           </Box>
         </Box>
@@ -109,7 +99,7 @@ export default function ActivityPage() {
             }}
           >
             <TextField
-              placeholder="Search activities..."
+              placeholder="Search users..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               sx={{
@@ -127,31 +117,27 @@ export default function ActivityPage() {
                 ),
               }}
             />
-
-            <>
-              <Button
-                variant="outlined"
-                color="secondary"
-                startIcon={
-                  <TuneOutlined
-                    sx={{
-                      rotate: '90deg',
-                    }}
-                  />
-                }
-                onClick={handleOpenFilter}
-                sx={{
-                  minWidth: 120,
-                  height: 54,
-                  transform: 'translateY(-2px)',
-                  '&.MuiButton-root': {
-                    borderRadius: '12px',
-                  },
-                }}
-              >
-                Filter
-              </Button>
-            </>
+            <Button
+              variant="outlined"
+              onClick={handleOpenFilter}
+              startIcon={<TuneOutlined />}
+              size="large"
+              sx={{
+                minWidth: 120,
+                height: 54,
+                borderColor: '#D1D5DB',
+                color: '#6B7280',
+                textTransform: 'none',
+                fontWeight: 500,
+                borderRadius: '12px',
+                '&:hover': {
+                  borderColor: '#9CA3AF',
+                  backgroundColor: '#F9FAFB',
+                },
+              }}
+            >
+              Filter
+            </Button>
           </Box>
           <Button
             variant="contained"
@@ -160,11 +146,15 @@ export default function ActivityPage() {
             startIcon={<AddIcon />}
             size="large"
             sx={{
-              minWidth: 120,
+              minWidth: 140,
               height: 54,
               transform: 'translateY(-2px)',
               '&.MuiButton-root': {
                 borderRadius: '12px',
+              },
+              backgroundColor: '#0EA5E9',
+              '&:hover': {
+                backgroundColor: '#0284C7',
               },
             }}
           >
@@ -172,25 +162,16 @@ export default function ActivityPage() {
           </Button>
         </Box>
       </Box>
+
       {isLoading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
           <CircularProgress />
         </Box>
       ) : (
-        <DataTable<ActivityTable>
-          data={activities.filter((activity) => {
-            if (!searchQuery) return true;
-            return (
-              activity.activityName
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase()) ||
-              activity.activityCategory
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase())
-            );
-          })}
+        <DataTable<UserType>
+          data={users}
           columns={columns}
-          title="Activity Data"
+          title="User Management"
           searchable={true}
           filterable={true}
           pageSize={10}
@@ -201,14 +182,6 @@ export default function ActivityPage() {
           setExternalGlobalFilter={setSearchQuery}
         />
       )}
-
-      {/* Filter Modal */}
-      <FilterModal
-        open={isFilterModalOpen}
-        onClose={handleCloseFilter}
-        onApplyFilter={handleApplyFilter}
-        onClearFilter={handleClearFilter}
-      />
     </Paper>
   );
 }

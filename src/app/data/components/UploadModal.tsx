@@ -8,6 +8,11 @@ import {
   IconButton,
   TextField,
   CircularProgress,
+  FormControl,
+  Select,
+  MenuItem,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 import Image from 'next/image';
@@ -30,6 +35,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({ open, onClose }) => {
     control,
     handleSubmit,
     setValue,
+    watch,
     reset,
     formState: { errors },
   } = useForm<DataFormData>({
@@ -37,8 +43,12 @@ export const UploadModal: React.FC<UploadModalProps> = ({ open, onClose }) => {
     defaultValues: {
       documentName: '',
       description: '',
+      category: 'regency',
+      regency: '',
     },
   });
+
+  const categoryValue = watch('category');
 
   const handleFileSelect = useCallback(
     (file: File) => {
@@ -243,6 +253,116 @@ export const UploadModal: React.FC<UploadModalProps> = ({ open, onClose }) => {
                   )}
                 />
               </Box>
+
+              {/* Category */}
+              <Box>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: '#374151',
+                    fontWeight: 500,
+                    mb: 1,
+                  }}
+                >
+                  Category <span style={{ color: '#ef4444' }}>*</span>
+                </Typography>
+                <Controller
+                  name="category"
+                  control={control}
+                  render={({ field }) => (
+                    <ToggleButtonGroup
+                      {...field}
+                      exclusive
+                      onChange={(_, newValue) => {
+                        if (newValue !== null) {
+                          field.onChange(newValue);
+                          if (newValue === 'other') {
+                            setValue('regency', '');
+                          }
+                        }
+                      }}
+                      sx={{
+                        width: '100%',
+                        '& .MuiToggleButton-root': {
+                          flex: 1,
+                          borderRadius: '8px',
+                          textTransform: 'none',
+                          fontWeight: 500,
+                          py: 1.5,
+                          '&.Mui-selected': {
+                            backgroundColor: '#0EA5E9',
+                            color: 'white',
+                            '&:hover': {
+                              backgroundColor: '#0284C7',
+                            },
+                          },
+                        },
+                      }}
+                    >
+                      <ToggleButton value="regency">Regency</ToggleButton>
+                      <ToggleButton value="other">Other</ToggleButton>
+                    </ToggleButtonGroup>
+                  )}
+                />
+              </Box>
+
+              {/* Regency Selection (only show if category is 'regency') */}
+              {categoryValue === 'regency' && (
+                <Box>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: '#374151',
+                      fontWeight: 500,
+                      mb: 1,
+                    }}
+                  >
+                    Regency <span style={{ color: '#ef4444' }}>*</span>
+                  </Typography>
+                  <Controller
+                    name="regency"
+                    control={control}
+                    render={({ field }) => (
+                      <FormControl fullWidth>
+                        <Select
+                          {...field}
+                          displayEmpty
+                          error={!!errors.regency}
+                          sx={{
+                            borderRadius: '8px',
+                          }}
+                        >
+                          <MenuItem value="">Choose regency...</MenuItem>
+                          <MenuItem value="Kabupaten Ogan Komering Ulu">
+                            Kabupaten Ogan Komering Ulu
+                          </MenuItem>
+                          <MenuItem value="Kota Palembang">
+                            Kota Palembang
+                          </MenuItem>
+                          <MenuItem value="Kabupaten Lahat">
+                            Kabupaten Lahat
+                          </MenuItem>
+                          <MenuItem value="Kabupaten Muara Enim">
+                            Kabupaten Muara Enim
+                          </MenuItem>
+                          <MenuItem value="Kabupaten Banyuasin">
+                            Kabupaten Banyuasin
+                          </MenuItem>
+                        </Select>
+                      </FormControl>
+                    )}
+                  />
+                  {errors.regency && (
+                    <Typography
+                      variant="caption"
+                      color="error"
+                      sx={{ mt: 0.5, display: 'block' }}
+                    >
+                      {errors.regency.message}
+                    </Typography>
+                  )}
+                </Box>
+              )}
 
               {/* File Upload */}
               <Box>

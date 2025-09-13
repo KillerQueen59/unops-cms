@@ -64,15 +64,26 @@ export const createActivityColumns = ({
 
       return (
         <Chip
-          label={status}
+          label={
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Box
+                sx={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: colors.backgroundColor,
+                }}
+              />
+              {status}
+            </Box>
+          }
           sx={{
-            backgroundColor: colors.backgroundColor,
+            border: `1px solid ${colors.color}`,
             color: colors.color,
             fontWeight: 500,
-            borderRadius: '8px',
             height: '32px',
-            textTransform: 'capitalize',
           }}
+          variant="outlined"
         />
       );
     },

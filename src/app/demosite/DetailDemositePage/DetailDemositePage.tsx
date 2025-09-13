@@ -7,8 +7,13 @@ import { Content } from './components/Content';
 import { useDemositeStore, DemositePageEnum } from '@/stores/demositeStore';
 
 export const DetailDemositePage = () => {
-  const { selectedDemosite, breadcrumbs, setPage, updateBreadcrumbs } =
-    useDemositeStore();
+  const {
+    selectedDemosite,
+    breadcrumbs,
+    setPage,
+    updateBreadcrumbs,
+    navigateToEdit,
+  } = useDemositeStore();
 
   // Ensure breadcrumbs are set for DETAIL page
   useEffect(() => {
@@ -20,6 +25,12 @@ export const DetailDemositePage = () => {
   const handleBack = () => {
     setPage(DemositePageEnum.LIST);
     updateBreadcrumbs(DemositePageEnum.LIST);
+  };
+
+  const handleEdit = () => {
+    if (selectedDemosite) {
+      navigateToEdit(selectedDemosite);
+    }
   };
 
   if (!selectedDemosite) {
@@ -41,6 +52,7 @@ export const DetailDemositePage = () => {
           breadcrumbs={breadcrumbs || []}
           demositeData={selectedDemosite}
           handleBack={handleBack}
+          handleEdit={handleEdit}
         />
       </Box>
       <Box sx={{ padding: '28px' }}>

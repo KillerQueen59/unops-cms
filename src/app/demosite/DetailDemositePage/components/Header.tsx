@@ -2,17 +2,19 @@ import React from 'react';
 import { CustomBreadcrumbs } from '@/components';
 import { BreadcrumbItem } from '@/stores/demositeStore';
 import { DemositeData } from '@/types/demosite';
-import { Box, Chip, IconButton, Typography } from '@mui/material';
-import { CaretLeftIcon } from '@phosphor-icons/react';
+import { Box, Button, Chip, IconButton, Typography } from '@mui/material';
+import { CaretLeftIcon, PencilIcon, TrashIcon } from '@phosphor-icons/react';
 
 export const Header = ({
   breadcrumbs,
   demositeData,
   handleBack,
+  handleEdit,
 }: {
   breadcrumbs: BreadcrumbItem[];
   demositeData: DemositeData;
   handleBack: () => void;
+  handleEdit: () => void;
 }) => {
   return (
     <Box>
@@ -58,28 +60,71 @@ export const Header = ({
           </Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Chip
-            label={demositeData?.type || 'Unknown'}
-            variant="outlined"
-            size="small"
-            sx={{
-              backgroundColor: '#E1F6FD',
-              color: '#0092D1',
-              border: '1px solid #0092D1',
-            }}
-          />
-          {demositeData?.isTop10 && (
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
             <Chip
-              label="Top 10"
+              label={demositeData?.type || 'Unknown'}
+              variant="outlined"
               size="small"
               sx={{
-                backgroundColor: '#FFF3CD',
-                color: '#856404',
-                border: '1px solid #FFEAA7',
+                backgroundColor: '#E1F6FD',
+                color: '#0092D1',
+                border: '1px solid #0092D1',
               }}
             />
-          )}
+            {demositeData?.isTop10 && (
+              <Chip
+                label="Top 10"
+                size="small"
+                sx={{
+                  backgroundColor: '#FFF3CD',
+                  color: '#856404',
+                  border: '1px solid #FFEAA7',
+                }}
+              />
+            )}
+          </Box>
+
+          {/* Action Buttons */}
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant="outlined"
+              startIcon={<TrashIcon size={16} />}
+              sx={{
+                borderColor: '#EF4444',
+                color: '#EF4444',
+                '&:hover': {
+                  borderColor: '#DC2626',
+                  backgroundColor: 'rgba(239, 68, 68, 0.04)',
+                },
+                borderRadius: '8px',
+                textTransform: 'none',
+                fontWeight: 500,
+                minWidth: 'auto',
+                height: '36px',
+              }}
+            >
+              Delete
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<PencilIcon size={16} />}
+              onClick={handleEdit}
+              sx={{
+                backgroundColor: '#0EA5E9',
+                '&:hover': {
+                  backgroundColor: '#0284C7',
+                },
+                borderRadius: '8px',
+                textTransform: 'none',
+                fontWeight: 500,
+                minWidth: 'auto',
+                height: '36px',
+              }}
+            >
+              Edit
+            </Button>
+          </Box>
         </Box>
       </Box>
     </Box>

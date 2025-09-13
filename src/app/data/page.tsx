@@ -10,10 +10,13 @@ import {
   Button,
   CircularProgress,
   Alert,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material';
 import {
   Search as SearchIcon,
   CloudUpload as CloudUploadIcon,
+  Tune as FilterIcon,
 } from '@mui/icons-material';
 import React from 'react';
 import { useDataPageImpl } from './useDataPageImpl';
@@ -33,10 +36,18 @@ export default function DataPage() {
     isUploadModalOpen,
     isPreviewModalOpen,
     previewFile,
+    groupBy,
+    isGrouped,
   } = state;
 
-  const { handleUpload, setSearchQuery, closeUploadModal, closePreviewModal } =
-    action;
+  const {
+    handleUpload,
+    setSearchQuery,
+    setGroupBy,
+    setIsGrouped,
+    closeUploadModal,
+    closePreviewModal,
+  } = action;
 
   if (error) {
     return (
@@ -76,8 +87,15 @@ export default function DataPage() {
                   fontSize: '18px',
                 }}
               >
-                This page shows a list of{' '}
-                {isLoading ? 'Loading...' : `${dataFiles.length} files found`}
+                {isLoading ? (
+                  'Loading...'
+                ) : (
+                  <>
+                    This page shows {dataFiles.length} files
+                    {isGrouped &&
+                      ` (${groupBy === 'regency' ? 'Regency' : 'Other'} files only)`}
+                  </>
+                )}
               </Typography>
             </Box>
           </Box>
@@ -110,6 +128,68 @@ export default function DataPage() {
                   ),
                 }}
               />
+
+              {/* Category Filter Toggle */}
+              <ToggleButtonGroup
+                value={groupBy}
+                exclusive
+                onChange={(_, newValue) => {
+                  if (newValue !== null) {
+                    setGroupBy(newValue);
+                    setIsGrouped(true);
+                  }
+                }}
+                sx={{
+                  height: 54,
+                  '& .MuiToggleButton-root': {
+                    borderRadius: '8px',
+                    textTransform: 'none',
+                    fontWeight: 500,
+                    px: 3,
+                    '&.Mui-selected': {
+                      backgroundColor: '#0EA5E9',
+                      color: 'white',
+                      '&:hover': {
+                        backgroundColor: '#0284C7',
+                      },
+                    },
+                  },
+                }}
+              >
+                <ToggleButton
+                  value="regency"
+                  sx={{ borderRadius: '8px 0 0 8px !important' }}
+                >
+                  <FilterIcon sx={{ mr: 1 }} />
+                  Regency
+                </ToggleButton>
+                <ToggleButton
+                  value="other"
+                  sx={{ borderRadius: '0 8px 8px 0 !important' }}
+                >
+                  Other
+                </ToggleButton>
+              </ToggleButtonGroup>
+
+              {/* Show All Button */}
+              <Button
+                variant="outlined"
+                onClick={() => setIsGrouped(false)}
+                sx={{
+                  height: 54,
+                  minWidth: 100,
+                  borderColor: '#D1D5DB',
+                  color: '#6B7280',
+                  textTransform: 'none',
+                  fontWeight: 500,
+                  '&:hover': {
+                    borderColor: '#9CA3AF',
+                    backgroundColor: '#F9FAFB',
+                  },
+                }}
+              >
+                Show All
+              </Button>
             </Box>
             <Button
               variant="contained"

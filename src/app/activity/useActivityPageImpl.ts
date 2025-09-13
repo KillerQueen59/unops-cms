@@ -3,17 +3,20 @@ import { createActivityColumns } from './ActivityColumn';
 import { ActivityPageEnum, useActivityStore } from '@/stores/activityStore';
 import { useActivities } from '@/hooks/useActivityData';
 import { ActivityData } from '@/types/activity';
+import { ActivityFilters } from './components/FilterModal';
 
 export const useActivityPageImpl = () => {
   const {
     searchQuery,
     page,
+    isFilterModalOpen,
     setSearchQuery,
     updateBreadcrumbs,
     setPage,
     navigateToDetail,
     navigateToEdit,
     resetActivity,
+    setIsFilterModalOpen,
   } = useActivityStore();
 
   const { data: activities = [], isLoading, error } = useActivities();
@@ -42,6 +45,24 @@ export const useActivityPageImpl = () => {
     console.log('Delete:', data);
   };
 
+  const handleOpenFilter = () => {
+    setIsFilterModalOpen(true);
+  };
+
+  const handleCloseFilter = () => {
+    setIsFilterModalOpen(false);
+  };
+
+  const handleApplyFilter = (filters: ActivityFilters) => {
+    // TODO: Implement filter logic
+    console.log('Apply filters:', filters);
+  };
+
+  const handleClearFilter = () => {
+    // TODO: Implement clear filter logic
+    console.log('Clear filters');
+  };
+
   const columns = createActivityColumns({
     onView: handleView,
     onEdit: handleEdit,
@@ -55,6 +76,7 @@ export const useActivityPageImpl = () => {
     isLoading,
     searchQuery,
     page,
+    isFilterModalOpen,
   };
 
   const action = {
@@ -63,6 +85,10 @@ export const useActivityPageImpl = () => {
     handleEdit,
     handleDelete,
     setSearchQuery,
+    handleOpenFilter,
+    handleCloseFilter,
+    handleApplyFilter,
+    handleClearFilter,
   };
 
   return { state, action };

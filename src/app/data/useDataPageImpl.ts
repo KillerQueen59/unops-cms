@@ -9,11 +9,15 @@ export const useDataPageImpl = () => {
     isUploadModalOpen,
     isPreviewModalOpen,
     previewFile,
+    groupBy,
+    isGrouped,
     setSearchQuery,
     openUploadModal,
     closeUploadModal,
     openPreviewModal,
     closePreviewModal,
+    setGroupBy,
+    setIsGrouped,
   } = useDataStore();
 
   const { data: dataFiles = [], isLoading, error } = useDataFiles();
@@ -68,14 +72,26 @@ export const useDataPageImpl = () => {
     onDelete: handleDelete,
   });
 
-  // Filter data based on search query
+  // Filter data based on search query and selected category
   const filteredData = dataFiles.filter((file) => {
-    if (!searchQuery) return true;
-    return (
+    // First filter by search query
+    const matchesSearch =
+      !searchQuery ||
       file.documentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       file.fileName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      file.description?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+      file.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    // Then filter by category if grouping is enabled
+    if (!isGrouped) return matchesSearch;
+
+    // Filter by selected category
+    if (groupBy === 'regency') {
+      return matchesSearch && file.category === 'regency';
+    } else if (groupBy === 'other') {
+      return matchesSearch && file.category === 'other';
+    }
+
+    return matchesSearch;
   });
 
   const state = {
@@ -87,6 +103,8 @@ export const useDataPageImpl = () => {
     isUploadModalOpen,
     isPreviewModalOpen,
     previewFile,
+    groupBy,
+    isGrouped,
   };
 
   const action = {
@@ -95,6 +113,8 @@ export const useDataPageImpl = () => {
     handleDownload,
     handleDelete,
     setSearchQuery,
+    setGroupBy,
+    setIsGrouped,
     closeUploadModal,
     closePreviewModal,
   };

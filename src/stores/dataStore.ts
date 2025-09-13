@@ -12,6 +12,8 @@ interface DataState {
   isUploadModalOpen: boolean;
   isPreviewModalOpen: boolean;
   previewFile: DataFile | null;
+  groupBy: 'regency' | 'other';
+  isGrouped: boolean;
 }
 
 interface DataActions {
@@ -22,6 +24,8 @@ interface DataActions {
   closeUploadModal: () => void;
   openPreviewModal: (file: DataFile) => void;
   closePreviewModal: () => void;
+  setGroupBy: (groupBy: 'regency' | 'other') => void;
+  setIsGrouped: (isGrouped: boolean) => void;
   resetData: () => void;
 }
 
@@ -33,6 +37,8 @@ export const useDataStore = create<DataState & DataActions>((set) => ({
   isUploadModalOpen: false,
   isPreviewModalOpen: false,
   previewFile: null,
+  groupBy: 'regency',
+  isGrouped: true,
 
   // Actions
   setSearchQuery: (query) => set({ searchQuery: query }),
@@ -44,6 +50,8 @@ export const useDataStore = create<DataState & DataActions>((set) => ({
     set({ isPreviewModalOpen: true, previewFile: file }),
   closePreviewModal: () =>
     set({ isPreviewModalOpen: false, previewFile: null }),
+  setGroupBy: (groupBy) => set({ groupBy }),
+  setIsGrouped: (isGrouped) => set({ isGrouped }),
   resetData: () =>
     set({
       selectedData: null,

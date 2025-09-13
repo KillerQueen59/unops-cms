@@ -7,10 +7,6 @@ import {
   Select,
   MenuItem,
   FormControl,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  FormLabel,
   IconButton,
   List,
   ListItem,
@@ -28,6 +24,7 @@ import { useForm, Controller } from 'react-hook-form';
 export const Form = () => {
   const { setPage, updateBreadcrumbs } = useDemositeStore();
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [headerPhoto, setHeaderPhoto] = useState<File | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
   const {
@@ -53,8 +50,15 @@ export const Form = () => {
       setIsDragOver(false);
 
       const files = Array.from(e.dataTransfer.files);
+      const validTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/jpg',
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      ];
       const validFiles = files.filter((file) => {
-        const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
         const maxSize = 5 * 1024 * 1024; // 5MB
         return validTypes.includes(file.type) && file.size <= maxSize;
       });
@@ -79,17 +83,38 @@ export const Form = () => {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.files) {
         const files = Array.from(e.target.files);
-        const validFiles = files.filter((file) => {
-          const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-          const maxSize = 5 * 1024 * 1024; // 5MB
-          return validTypes.includes(file.type) && file.size <= maxSize;
-        });
+        const inputId = e.target.id;
 
-        setUploadedFiles((prev) => [...prev, ...validFiles]);
-        setValue('images', [...uploadedFiles, ...validFiles]);
+        if (inputId === 'header-photo-input') {
+          const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+          const validFiles = files.filter((file) => {
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            return validTypes.includes(file.type) && file.size <= maxSize;
+          });
+
+          if (validFiles.length > 0) {
+            setHeaderPhoto(validFiles[0]); // Only take the first file for header
+          }
+        } else {
+          const validTypes = [
+            'image/jpeg',
+            'image/png',
+            'image/jpg',
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          ];
+          const validFiles = files.filter((file) => {
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            return validTypes.includes(file.type) && file.size <= maxSize;
+          });
+
+          setUploadedFiles((prev) => [...prev, ...validFiles]);
+          setValue('images', [...uploadedFiles, ...validFiles]);
+        }
       }
     },
-    [setValue, uploadedFiles]
+    [setValue, uploadedFiles, setHeaderPhoto]
   );
 
   const removeFile = useCallback(
@@ -112,6 +137,10 @@ export const Form = () => {
   const getFileIcon = (fileType: string) => {
     if (fileType.includes('image')) {
       return <File size={24} color="#F59E0B" weight="fill" />;
+    } else if (fileType.includes('pdf')) {
+      return <File size={24} color="#EF4444" weight="fill" />;
+    } else if (fileType.includes('word') || fileType.includes('document')) {
+      return <File size={24} color="#3B82F6" weight="fill" />;
     }
     return <File size={24} color="#6B7280" weight="fill" />;
   };
@@ -146,158 +175,216 @@ export const Form = () => {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {/* Detail Demosite Section */}
+        {/* Title Section */}
+        <Box>
+          <ControlledFieldContainer
+            label="Title"
+            name="title"
+            control={control}
+            placeholder="Masukkan title..."
+            required
+            error={errors.title}
+          />
+        </Box>
+
+        {/* Header Photo Section */}
         <Box>
           <Typography
-            variant="h6"
+            variant="body1"
             sx={{
-              fontWeight: 'bold',
+              fontWeight: 'medium',
               color: '#374151',
+              mb: 2,
+            }}
+          >
+            Header Photo
+          </Typography>
+
+          {/* Header Photo Upload Area */}
+          <Box
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onClick={() =>
+              document.getElementById('header-photo-input')?.click()
+            }
+            sx={{
+              border: '2px dashed #0EA5E9',
+              borderRadius: '12px',
+              padding: '40px',
+              textAlign: 'center',
+              backgroundColor: '#F0F9FF',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease-in-out',
+              '&:hover': {
+                borderColor: '#0284C7',
+                backgroundColor: '#E0F2FE',
+              },
               mb: 3,
             }}
           >
-            Detail Demosite
-          </Typography>
-
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            {/* Title */}
-            <Box>
-              <ControlledFieldContainer
-                label="Title"
-                name="title"
-                control={control}
-                placeholder="Masukkan judul..."
-                required
-                error={errors.title}
-              />
-            </Box>
-
-            {/* Description */}
-            <Box>
-              <TextAreaFieldContainer
-                label="Description"
-                name="description"
-                control={control}
-                placeholder="Deskripsi singkat dari..."
-                required
-                rows={3}
-                error={errors.description}
-              />
-            </Box>
-
-            {/* Location Name and Type Row */}
-            <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-              <ControlledFieldContainer
-                label="Location Name"
-                name="locationName"
-                control={control}
-                required
-                error={errors.locationName}
+            <input
+              id="header-photo-input"
+              type="file"
+              accept=".jpg,.jpeg,.png"
+              onChange={handleFileInput}
+              style={{ display: 'none' }}
+            />
+            <Image
+              src="/cloud.svg"
+              alt="Upload"
+              width={64}
+              height={47}
+              style={{ marginBottom: 16 }}
+            />
+            <Typography
+              variant="body1"
+              color={isDragOver ? '#0EA5E9' : '#6B7280'}
+              sx={{ mb: 1 }}
+            >
+              Drag and drop or{' '}
+              <Typography
+                component="span"
+                color="primary"
+                sx={{ textDecoration: 'underline', cursor: 'pointer' }}
               >
-                <Controller
-                  name="locationName"
-                  control={control}
-                  render={({ field }) => (
-                    <FormControl fullWidth error={!!errors.locationName}>
-                      <Select
-                        {...field}
-                        displayEmpty
-                        sx={{
-                          borderRadius: '12px',
-                        }}
-                      >
-                        <MenuItem value="" disabled>
-                          <span style={{ color: '#9CA3AF' }}>
-                            Pilih lokasi nama...
-                          </span>
-                        </MenuItem>
-                        <MenuItem value="Desa Gemilang">Desa Gemilang</MenuItem>
-                        <MenuItem value="Desa Maju">Desa Maju</MenuItem>
-                        <MenuItem value="Desa Sejahtera">
-                          Desa Sejahtera
-                        </MenuItem>
-                      </Select>
-                    </FormControl>
-                  )}
-                />
-              </ControlledFieldContainer>
-
-              <ControlledFieldContainer
-                label="Type"
-                name="type"
-                control={control}
-                required
-                error={errors.type}
-              >
-                <Controller
-                  name="type"
-                  control={control}
-                  render={({ field }) => (
-                    <FormControl fullWidth error={!!errors.type}>
-                      <Select
-                        {...field}
-                        sx={{
-                          borderRadius: '12px',
-                        }}
-                      >
-                        <MenuItem value={DemositeType.LocalHeroes}>
-                          Local Heroes
-                        </MenuItem>
-                        <MenuItem value={DemositeType.StoryOfVillage}>
-                          Story of Village
-                        </MenuItem>
-                      </Select>
-                    </FormControl>
-                  )}
-                />
-              </ControlledFieldContainer>
-            </Box>
-
-            {/* Story */}
-            <Box>
-              <TextAreaFieldContainer
-                label="Story"
-                name="story"
-                control={control}
-                placeholder="Integrated with Digital Marketing..."
-                required
-                rows={4}
-                error={errors.story}
-              />
-            </Box>
-
-            {/* Integrated with Digital Marketing Radio */}
-            <Box>
-              <FormLabel
-                component="legend"
-                sx={{ mb: 1, fontWeight: 'medium' }}
-              >
-                Integrated with Digital Marketing
-              </FormLabel>
-              <Controller
-                name="isTop10"
-                control={control}
-                render={({ field }) => (
-                  <RadioGroup
-                    row
-                    value={field.value}
-                    onChange={(e) => field.onChange(e.target.value === 'true')}
-                  >
-                    <FormControlLabel
-                      value={true}
-                      control={<Radio />}
-                      label="Yes"
-                    />
-                    <FormControlLabel
-                      value={false}
-                      control={<Radio />}
-                      label="No"
-                    />
-                  </RadioGroup>
-                )}
-              />
-            </Box>
+                browse
+              </Typography>{' '}
+              your file here
+            </Typography>
+            <Typography variant="body2" color="#9CA3AF">
+              JPG or PNG 500x300, max 5mb
+            </Typography>
           </Box>
+
+          {/* Header Photo Preview */}
+          {headerPhoto && (
+            <Box sx={{ mt: 2 }}>
+              <Box
+                sx={{
+                  border: '1px solid #E5E7EB',
+                  borderRadius: '8px',
+                  p: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                }}
+              >
+                <File size={24} color="#F59E0B" weight="fill" />
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                    {headerPhoto.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {formatFileSize(headerPhoto.size)} •{' '}
+                    {formatDate(new Date())}
+                  </Typography>
+                </Box>
+                <IconButton
+                  onClick={() => setHeaderPhoto(null)}
+                  size="small"
+                  sx={{ color: '#EF4444' }}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            </Box>
+          )}
+        </Box>
+
+        {/* Description Section */}
+        <Box>
+          <TextAreaFieldContainer
+            label="Description"
+            name="description"
+            control={control}
+            placeholder="Masukkan description..."
+            required
+            rows={4}
+            error={errors.description}
+          />
+        </Box>
+
+        {/* Location Name and Type Row */}
+        <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+          <ControlledFieldContainer
+            label="Location Name"
+            name="locationName"
+            control={control}
+            required
+            error={errors.locationName}
+          >
+            <Controller
+              name="locationName"
+              control={control}
+              render={({ field }) => (
+                <FormControl fullWidth error={!!errors.locationName}>
+                  <Select
+                    {...field}
+                    displayEmpty
+                    sx={{
+                      borderRadius: '12px',
+                    }}
+                  >
+                    <MenuItem value="" disabled>
+                      <span style={{ color: '#9CA3AF' }}>
+                        Pilih location nama...
+                      </span>
+                    </MenuItem>
+                    <MenuItem value="Desa Gemilang">Desa Gemilang</MenuItem>
+                    <MenuItem value="Desa Maju">Desa Maju</MenuItem>
+                    <MenuItem value="Desa Sejahtera">Desa Sejahtera</MenuItem>
+                  </Select>
+                </FormControl>
+              )}
+            />
+          </ControlledFieldContainer>
+
+          <ControlledFieldContainer
+            label="Type"
+            name="type"
+            control={control}
+            required
+            error={errors.type}
+          >
+            <Controller
+              name="type"
+              control={control}
+              render={({ field }) => (
+                <FormControl fullWidth error={!!errors.type}>
+                  <Select
+                    {...field}
+                    displayEmpty
+                    sx={{
+                      borderRadius: '12px',
+                    }}
+                  >
+                    <MenuItem value="" disabled>
+                      <span style={{ color: '#9CA3AF' }}>Pilih type...</span>
+                    </MenuItem>
+                    <MenuItem value={DemositeType.LocalHeroes}>
+                      Local Heroes
+                    </MenuItem>
+                    <MenuItem value={DemositeType.StoryOfVillage}>
+                      Story of Village
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              )}
+            />
+          </ControlledFieldContainer>
+        </Box>
+
+        {/* Links */}
+        <Box>
+          <ControlledFieldContainer
+            label="Links"
+            name="story"
+            control={control}
+            placeholder="Input related link here..."
+            required
+            error={errors.story}
+          />
         </Box>
 
         {/* Documentation Section */}
@@ -358,12 +445,14 @@ export const Form = () => {
             </Box>
           )}
 
-          {/* File upload area */}
+          {/* Documentation Upload Area */}
           <Box
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
-            onClick={() => document.getElementById('file-input')?.click()}
+            onClick={() =>
+              document.getElementById('documentation-input')?.click()
+            }
             sx={{
               border: '2px dashed #0EA5E9',
               borderRadius: '12px',
@@ -373,24 +462,24 @@ export const Form = () => {
               cursor: 'pointer',
               transition: 'all 0.2s ease-in-out',
               '&:hover': {
-                borderColor: '#9CA3AF',
-                backgroundColor: '#F3F4F6',
+                borderColor: '#0284C7',
+                backgroundColor: '#E0F2FE',
               },
             }}
           >
             <input
-              id="file-input"
+              id="documentation-input"
               type="file"
               multiple
-              accept=".jpg,.jpeg,.png"
+              accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
               onChange={handleFileInput}
               style={{ display: 'none' }}
             />
             <Image
               src="/cloud.svg"
               alt="Upload"
-              width={80}
-              height={59}
+              width={64}
+              height={47}
               style={{ marginBottom: 16 }}
             />
             <Typography
@@ -402,14 +491,14 @@ export const Form = () => {
               <Typography
                 component="span"
                 color="primary"
-                sx={{ textDecoration: 'underline' }}
+                sx={{ textDecoration: 'underline', cursor: 'pointer' }}
               >
                 browse
               </Typography>{' '}
               your file here
             </Typography>
             <Typography variant="body2" color="#9CA3AF">
-              JPG, PNG max 5mb
+              JPG or PNG 500x300, max 5mb
             </Typography>
           </Box>
         </Box>

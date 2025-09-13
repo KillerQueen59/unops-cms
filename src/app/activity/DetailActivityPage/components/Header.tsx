@@ -1,8 +1,8 @@
 import { CustomBreadcrumbs } from '@/components';
-import { BreadcrumbItem } from '@/stores/trainingStore';
+import { BreadcrumbItem } from '@/types/common';
 import { ActivityData } from '@/types/activity';
-import { Box, Chip, IconButton, Typography } from '@mui/material';
-import { CaretLeftIcon } from '@phosphor-icons/react';
+import { Box, Button, Chip, IconButton, Typography } from '@mui/material';
+import { CaretLeftIcon, PencilIcon, TrashIcon } from '@phosphor-icons/react';
 
 export const Header = ({
   breadcrumbs,
@@ -57,16 +57,30 @@ export const Header = ({
           </Typography>
         </Box>
 
-        <Chip
-          label="In Progress"
-          sx={{
-            backgroundColor: '#FEF3C7',
-            color: '#D97706',
-            fontWeight: 500,
-            borderRadius: '8px',
-            height: '32px',
-          }}
-        />
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Chip
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Box
+                  sx={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    backgroundColor: '#D97706',
+                  }}
+                />
+                In Progress
+              </Box>
+            }
+            sx={{
+              border: '1px solid #D97706',
+              color: '#D97706',
+              fontWeight: 500,
+              height: '32px',
+            }}
+            variant="outlined"
+          />
+        </Box>
       </Box>
 
       {/* Activity Info */}
@@ -162,6 +176,49 @@ export const Header = ({
             {activityData.description}
           </Typography>
         </Box>
+      </Box>
+
+      {/* Action Buttons */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          gap: 2,
+          px: 2,
+        }}
+      >
+        <Button
+          variant="outlined"
+          startIcon={<TrashIcon size={16} />}
+          sx={{
+            borderColor: '#EF4444',
+            color: '#EF4444',
+            '&:hover': {
+              borderColor: '#DC2626',
+              backgroundColor: 'rgba(239, 68, 68, 0.04)',
+            },
+            borderRadius: '8px',
+            textTransform: 'none',
+            fontWeight: 500,
+          }}
+        >
+          Delete
+        </Button>
+        <Button
+          variant="contained"
+          startIcon={<PencilIcon size={16} />}
+          sx={{
+            backgroundColor: '#0EA5E9',
+            '&:hover': {
+              backgroundColor: '#0284C7',
+            },
+            borderRadius: '8px',
+            textTransform: 'none',
+            fontWeight: 500,
+          }}
+        >
+          Edit
+        </Button>
       </Box>
     </Box>
   );
