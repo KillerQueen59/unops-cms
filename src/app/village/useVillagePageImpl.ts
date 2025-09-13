@@ -1,10 +1,9 @@
-import { TrainingPageEnum } from '@/stores/trainingStore';
-import { useVillageStore, VillagePageEnum } from '@/stores/villageStore';
-import { TrainingData } from '@/types/training';
-import { useEffect } from 'react';
+import { useVillageStore } from '@/stores/villageStore';
+import { useEffect, useState } from 'react';
 import { VillageData } from '@/types/village';
 import { useVillages } from '@/hooks/useVillageData';
 import { createVillageColumns } from './VillageColumn';
+import { PageEnum } from '@/constants/page';
 
 export const useVillagePageImpl = () => {
   const {
@@ -16,13 +15,15 @@ export const useVillagePageImpl = () => {
     navigateToDetail,
     navigateToEdit,
     resetVillage,
+    setSelectedCategory,
   } = useVillageStore();
 
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
   const { data: villages = [], isLoading, error } = useVillages();
 
   useEffect(() => {
-    if (page === VillagePageEnum.LIST) {
-      updateBreadcrumbs(VillagePageEnum.LIST);
+    if (page === PageEnum.LIST) {
+      updateBreadcrumbs(PageEnum.LIST);
     }
   }, [page, updateBreadcrumbs]);
 
@@ -36,8 +37,18 @@ export const useVillagePageImpl = () => {
 
   const handleAddNew = () => {
     resetVillage();
-    setPage(VillagePageEnum.ADD);
-    updateBreadcrumbs(VillagePageEnum.ADD);
+    setShowCategoryModal(true);
+  };
+
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+    setPage(PageEnum.ADD);
+    updateBreadcrumbs(PageEnum.ADD);
+    setShowCategoryModal(false);
+  };
+
+  const handleCloseCategoryModal = () => {
+    setShowCategoryModal(false);
   };
 
   const handleDelete = (data: VillageData) => {
@@ -57,6 +68,7 @@ export const useVillagePageImpl = () => {
     isLoading,
     searchQuery,
     page,
+    showCategoryModal,
   };
 
   const action = {
@@ -65,6 +77,8 @@ export const useVillagePageImpl = () => {
     handleEdit,
     handleDelete,
     setSearchQuery,
+    handleCategorySelect,
+    handleCloseCategoryModal,
   };
 
   return { state, action };

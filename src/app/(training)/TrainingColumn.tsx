@@ -1,7 +1,6 @@
 import { TrainingData } from '@/types/training';
 import { Box, IconButton } from '@mui/material';
 import { ColumnDef } from '@tanstack/react-table';
-import { Edit as EditIcon, Visibility as ViewIcon } from '@mui/icons-material';
 import {
   FileMagnifyingGlassIcon,
   PencilIcon,
@@ -28,8 +27,8 @@ export const createTrainingColumns = ({
     header: 'Training Type',
   },
   {
-    accessorKey: 'startDate',
-    header: 'Start Date',
+    accessorKey: 'date',
+    header: 'Date',
   },
   {
     accessorKey: 'village',

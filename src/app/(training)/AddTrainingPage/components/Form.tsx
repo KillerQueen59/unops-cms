@@ -8,9 +8,10 @@ import {
   MenuItem,
   Divider,
   Button,
+  TextField,
 } from '@mui/material';
-import { GenderMaleIcon, GenderFemaleIcon } from '@phosphor-icons/react';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
+import { trainingTypeOptions } from '../../constants';
 
 export const Form = ({
   control,
@@ -81,9 +82,11 @@ export const Form = ({
                             Choose training type...
                           </span>
                         </MenuItem>
-                        <MenuItem value="Online">Online</MenuItem>
-                        <MenuItem value="In-Person">In-Person</MenuItem>
-                        <MenuItem value="Hybrid">Hybrid</MenuItem>
+                        {trainingTypeOptions.map((option) => (
+                          <MenuItem key={option.value} value={option.value}>
+                            {option.label}
+                          </MenuItem>
+                        ))}
                       </Select>
                     </FormControl>
                   )}
@@ -92,65 +95,8 @@ export const Form = ({
             </Box>
 
             <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-              <RadioFieldContainer
-                label="Mandatory Training"
-                name="mandatoryTraining"
-                control={control}
-                options={[
-                  { value: 'yes', label: 'Yes' },
-                  { value: 'no', label: 'No' },
-                ]}
-                required
-              />
-
-              <RadioFieldContainer
-                label="Therapeutic Training"
-                name="therapeuticTraining"
-                control={control}
-                options={[
-                  { value: 'yes', label: 'Yes' },
-                  { value: 'no', label: 'No' },
-                ]}
-                required
-              />
-            </Box>
-
-            <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
               <ControlledFieldContainer
-                label="Intervention Type"
-                name="interventionType"
-                control={control}
-                required
-                error={errors.interventionType}
-              >
-                <Controller
-                  name="interventionType"
-                  control={control}
-                  render={({ field }) => (
-                    <FormControl fullWidth error={!!errors.interventionType}>
-                      <Select
-                        {...field}
-                        displayEmpty
-                        sx={{
-                          borderRadius: '12px',
-                        }}
-                      >
-                        <MenuItem value="" disabled>
-                          <span style={{ color: '#9CA3AF' }}>
-                            Choose intervention type...
-                          </span>
-                        </MenuItem>
-                        <MenuItem value="Individual">Individual</MenuItem>
-                        <MenuItem value="Group">Group</MenuItem>
-                        <MenuItem value="Community">Community</MenuItem>
-                      </Select>
-                    </FormControl>
-                  )}
-                />
-              </ControlledFieldContainer>
-
-              <ControlledFieldContainer
-                label="Desa"
+                label="Village"
                 name="village"
                 control={control}
                 required
@@ -181,13 +127,22 @@ export const Form = ({
                   )}
                 />
               </ControlledFieldContainer>
+              <ControlledFieldContainer
+                label="Date"
+                name="date"
+                control={control}
+                required
+                error={errors.date}
+                type="date"
+                placeholder="Select date..."
+              />
             </Box>
           </Box>
         </Box>
 
         <Divider />
 
-        {/* Community Participation */}
+        {/* Number of beneficiaries */}
         <Box>
           <Typography
             variant="h6"
@@ -197,39 +152,66 @@ export const Form = ({
               mb: 3,
             }}
           >
-            Community Participation <span style={{ color: '#ef4444' }}>*</span>
+            Number of Beneficiaries
           </Typography>
 
-          <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+          <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', mb: 3 }}>
             <ControlledFieldContainer
-              label=""
-              name="communityParticipationMale"
+              label="Male"
+              name="male"
               control={control}
-              type={'number'}
               placeholder="Input total male participants..."
-              error={errors.communityParticipationMale}
-              InputProps={{
-                startAdornment: <GenderMaleIcon size={20} />,
-              }}
+              error={errors.male}
             />
 
             <ControlledFieldContainer
-              label=""
-              name="communityParticipationFemale"
+              label="Female"
+              name="female"
               control={control}
-              type={'number'}
               placeholder="Input total female participants..."
-              error={errors.communityParticipationFemale}
-              InputProps={{
-                startAdornment: <GenderFemaleIcon size={20} />,
-              }}
+              error={errors.female}
+            />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', mb: 3 }}>
+            <ControlledFieldContainer
+              label="Elderly"
+              name="elderly"
+              control={control}
+              placeholder="Input total elderly participants..."
+              error={errors.elderly}
+            />
+
+            <ControlledFieldContainer
+              label="Youth"
+              name="youth"
+              control={control}
+              placeholder="Input total youth participants..."
+              error={errors.youth}
+            />
+          </Box>
+
+          <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', mb: 3 }}>
+            <ControlledFieldContainer
+              label="Disability"
+              name="disability"
+              control={control}
+              placeholder="Input total disability participants..."
+              error={errors.disability}
+            />
+
+            <ControlledFieldContainer
+              label="Widow"
+              name="widow"
+              control={control}
+              placeholder="Input total widow participants..."
+              error={errors.widow}
             />
           </Box>
         </Box>
 
         <Divider />
 
-        {/* Community Capacity Section */}
+        {/* Training Assessment */}
         <Box>
           <Typography
             variant="h6"
@@ -239,218 +221,98 @@ export const Form = ({
               mb: 3,
             }}
           >
-            Community capacity
-          </Typography>
-
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            {/* Elderly */}
-            <Box>
-              <Typography
-                variant="body1"
-                sx={{
-                  fontWeight: 500,
-                  color: '#374151',
-                  mb: 2,
-                }}
-              >
-                Elderly <span style={{ color: '#ef4444' }}>*</span>
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                <ControlledFieldContainer
-                  name="elderlyMale"
-                  control={control}
-                  type={'number'}
-                  placeholder="Input total male participant...."
-                  error={errors.elderlyMale}
-                  InputProps={{
-                    startAdornment: <GenderMaleIcon size={20} />,
-                  }}
-                />
-                <ControlledFieldContainer
-                  name="elderlyFemale"
-                  control={control}
-                  type={'number'}
-                  placeholder="Input total female participant...."
-                  error={errors.elderlyFemale}
-                  InputProps={{
-                    startAdornment: <GenderFemaleIcon size={20} />,
-                  }}
-                />
-              </Box>
-            </Box>
-
-            {/* Youth */}
-            <Box>
-              <Typography
-                variant="body1"
-                sx={{
-                  fontWeight: 500,
-                  color: '#374151',
-                  mb: 2,
-                }}
-              >
-                Youth <span style={{ color: '#ef4444' }}>*</span>
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                <ControlledFieldContainer
-                  label=""
-                  name="youthMale"
-                  control={control}
-                  type={'number'}
-                  placeholder="Input total male participant...."
-                  error={errors.youthMale}
-                  InputProps={{
-                    startAdornment: <GenderMaleIcon size={20} />,
-                  }}
-                />
-                <ControlledFieldContainer
-                  label=""
-                  name="youthFemale"
-                  control={control}
-                  type={'number'}
-                  placeholder="Input total female participant...."
-                  error={errors.youthFemale}
-                  InputProps={{
-                    startAdornment: <GenderFemaleIcon size={20} />,
-                  }}
-                />
-              </Box>
-            </Box>
-
-            {/* Disability */}
-            <Box>
-              <Typography
-                variant="body1"
-                sx={{
-                  fontWeight: 500,
-                  color: '#374151',
-                  mb: 2,
-                }}
-              >
-                Disability <span style={{ color: '#ef4444' }}>*</span>
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                <ControlledFieldContainer
-                  label=""
-                  name="disabilityMale"
-                  control={control}
-                  type={'number'}
-                  placeholder="Input total male participant...."
-                  required
-                  error={errors.disabilityMale}
-                  InputProps={{
-                    startAdornment: <GenderMaleIcon size={20} />,
-                  }}
-                />
-                <ControlledFieldContainer
-                  label=""
-                  name="disabilityFemale"
-                  control={control}
-                  type={'number'}
-                  placeholder="Input total female participant...."
-                  error={errors.disabilityFemale}
-                  InputProps={{
-                    startAdornment: <GenderFemaleIcon size={20} />,
-                  }}
-                />
-              </Box>
-            </Box>
-          </Box>
-        </Box>
-
-        <Divider />
-
-        {/* Knowledge Improvement Section */}
-        <Box>
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 'bold',
-              color: '#374151',
-              mb: 3,
-            }}
-          >
-            Knowledge Improvement
+            Training Assessment
           </Typography>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {/* Pre-Test Scores */}
             <Box>
-              <Typography
-                variant="body1"
-                sx={{
-                  fontWeight: 500,
-                  color: '#374151',
-                  mb: 2,
-                }}
-              >
-                Nilai Post Test Lebih Dari 70%{' '}
-                <span style={{ color: '#ef4444' }}>*</span>
-              </Typography>
               <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
                 <ControlledFieldContainer
-                  label=""
-                  name="preTestScoreMale"
+                  label="Pre-test"
+                  name="pretest"
                   control={control}
-                  type={'number'}
-                  placeholder="Input total male participant...."
-                  error={errors.preTestScoreMale}
-                  InputProps={{
-                    startAdornment: <GenderMaleIcon size={20} />,
-                  }}
+                  placeholder="Input total pretest participant...."
+                  error={errors.pretest}
                 />
                 <ControlledFieldContainer
-                  label=""
-                  name="preTestScoreFemale"
+                  label="Post-Test"
+                  name="posttest"
                   control={control}
-                  type={'number'}
-                  placeholder="Input total female participant...."
-                  error={errors.preTestScoreFemale}
-                  InputProps={{
-                    startAdornment: <GenderFemaleIcon size={20} />,
-                  }}
+                  placeholder="Input total posttest participant...."
+                  error={errors.posttest}
                 />
               </Box>
             </Box>
+          </Box>
+        </Box>
 
-            {/* Post-Test Scores */}
-            <Box>
-              <Typography
-                variant="body1"
-                sx={{
-                  fontWeight: 500,
-                  color: '#374151',
-                  mb: 2,
-                }}
-              >
-                Nilai Post Test Kurang Dari 70%{' '}
-                <span style={{ color: '#ef4444' }}>*</span>
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                <ControlledFieldContainer
-                  label=""
-                  name="postTestScoreMale"
-                  control={control}
-                  type={'number'}
-                  placeholder="Input total male participant...."
-                  error={errors.postTestScoreMale}
-                  InputProps={{
-                    startAdornment: <GenderMaleIcon size={20} />,
-                  }}
-                />
-                <ControlledFieldContainer
-                  label=""
-                  name="postTestScoreFemale"
-                  control={control}
-                  type={'number'}
-                  placeholder="Input total female participant...."
-                  error={errors.postTestScoreFemale}
-                  InputProps={{
-                    startAdornment: <GenderFemaleIcon size={20} />,
-                  }}
-                />
-              </Box>
-            </Box>
+        <Divider />
+
+        {/* Stakeholders Involved */}
+        <Box>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 'bold',
+              color: '#374151',
+              mb: 3,
+            }}
+          >
+            Stakeholders Involved
+          </Typography>
+
+          <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', mb: 3 }}>
+            <ControlledFieldContainer
+              label="Government"
+              name="government"
+              control={control}
+              placeholder="Input total government participants..."
+              error={errors.government}
+            />
+
+            <ControlledFieldContainer
+              label="Academics"
+              name="academics"
+              control={control}
+              placeholder="Input total academics participants..."
+              error={errors.academics}
+            />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', mb: 3 }}>
+            <ControlledFieldContainer
+              label="Private Sector"
+              name="privateSector"
+              control={control}
+              placeholder="Input total private sector participants..."
+              error={errors.privateSector}
+            />
+
+            <ControlledFieldContainer
+              label="Local Community"
+              name="localCommunity"
+              control={control}
+              placeholder="Input total local community participants..."
+              error={errors.localCommunity}
+            />
+          </Box>
+
+          <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', mb: 3 }}>
+            <ControlledFieldContainer
+              label="NGO"
+              name="ngo"
+              control={control}
+              placeholder="Input total NGO participants..."
+              error={errors.ngo}
+            />
+
+            <ControlledFieldContainer
+              label="Others"
+              name="others"
+              control={control}
+              placeholder="Input total others participants..."
+              error={errors.others}
+            />
           </Box>
         </Box>
 

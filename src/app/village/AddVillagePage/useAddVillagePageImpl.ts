@@ -1,12 +1,18 @@
-import { useVillageStore, VillagePageEnum } from '@/stores/villageStore';
+import { PageEnum } from '@/constants/page';
+import { useVillageStore } from '@/stores/villageStore';
 import { VillageFormData, villageFormSchema } from '@/types/villageForm';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
 export const useAddVillagePageImpl = () => {
-  const { updateBreadcrumbs, setPage, selectedVillage, breadcrumbs } =
-    useVillageStore();
+  const {
+    updateBreadcrumbs,
+    setPage,
+    selectedVillage,
+    selectedCategory,
+    breadcrumbs,
+  } = useVillageStore();
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
 
@@ -16,41 +22,70 @@ export const useAddVillagePageImpl = () => {
     watch,
     reset,
     formState: { errors, isSubmitting },
+    setValue,
   } = useForm<VillageFormData>({
     resolver: zodResolver(villageFormSchema),
     defaultValues: {
       villageName: selectedVillage?.villageName || '',
       villageCode: selectedVillage?.villageCode || '',
+      villageCategory:
+        selectedVillage?.villageCategory || selectedCategory || '',
       totalPopulation: selectedVillage?.totalPopulation || 0,
-      villageAddress: selectedVillage?.villageAddress || '',
       villageLat: selectedVillage?.villageLat || 0,
       villageLng: selectedVillage?.villageLng || 0,
-      totalLandManage: selectedVillage?.totalLandManage || 0,
-      totalCarbonEmissions: selectedVillage?.totalCarbonEmissions || 0,
+      landManageStart: selectedVillage?.landManageStart || 0,
+      landManageEnd: selectedVillage?.landManageEnd || undefined,
+      carbonEmisionStart: selectedVillage?.carbonEmisionStart || 0,
+      carbonEmisionEnd: selectedVillage?.carbonEmisionEnd || undefined,
+      potency: selectedVillage?.potency || '',
+      climateIssue: selectedVillage?.climateIssue || '',
+      mainSourceOfEconomy: selectedVillage?.mainSourceOfEconomy || '',
+      srnStatus: selectedVillage?.srnStatus || '',
+      // Cat 1
+      incomesStart: selectedVillage?.incomesStart || undefined,
+      incomesEnd: selectedVillage?.incomesEnd || undefined,
+      unsustainableLandClearings:
+        selectedVillage?.unsustainableLandClearings || [],
+      // Cat 2
+      incomes: selectedVillage?.incomes || [],
+      seedCapital: selectedVillage?.seedCapital || undefined,
     },
   });
 
   const watchedValues = watch([
     'villageName',
     'villageCode',
+    'villageCategory',
     'totalPopulation',
-    'villageAddress',
     'villageLat',
     'villageLng',
-    'totalLandManage',
-    'totalCarbonEmissions',
+    'landManageStart',
+    'landManageEnd',
+    'carbonEmisionStart',
+    'carbonEmisionEnd',
+    'potency',
+    'climateIssue',
+    'mainSourceOfEconomy',
+    'srnStatus',
+    'incomesStart',
+    'incomesEnd',
+    'seedCapital',
   ]);
 
   const hasUnsavedChanges = useCallback(() => {
-    return watchedValues.some(
-      (value) =>
-        (typeof value === 'string' && value.trim() !== '') ||
-        (typeof value === 'number' && value !== 0)
-    );
+    return watchedValues.some((value) => {
+      if (typeof value === 'string') {
+        return value.trim() !== '';
+      }
+      if (typeof value === 'number') {
+        return value !== 0;
+      }
+      return false;
+    });
   }, [watchedValues]);
 
   useEffect(() => {
-    updateBreadcrumbs(VillagePageEnum.ADD);
+    updateBreadcrumbs(PageEnum.ADD);
   }, [updateBreadcrumbs]);
 
   const isEditMode = !!selectedVillage;
@@ -60,12 +95,26 @@ export const useAddVillagePageImpl = () => {
       reset({
         villageName: selectedVillage.villageName || '',
         villageCode: selectedVillage.villageCode || '',
+        villageCategory: selectedVillage.villageCategory || '',
         totalPopulation: selectedVillage.totalPopulation || 0,
-        villageAddress: selectedVillage.villageAddress || '',
         villageLat: selectedVillage.villageLat || 0,
         villageLng: selectedVillage.villageLng || 0,
-        totalLandManage: selectedVillage.totalLandManage || 0,
-        totalCarbonEmissions: selectedVillage.totalCarbonEmissions || 0,
+        landManageStart: selectedVillage.landManageStart || 0,
+        landManageEnd: selectedVillage.landManageEnd || undefined,
+        carbonEmisionStart: selectedVillage.carbonEmisionStart || 0,
+        carbonEmisionEnd: selectedVillage.carbonEmisionEnd || undefined,
+        potency: selectedVillage.potency || '',
+        climateIssue: selectedVillage.climateIssue || '',
+        mainSourceOfEconomy: selectedVillage.mainSourceOfEconomy || '',
+        srnStatus: selectedVillage.srnStatus || '',
+        // Cat 1
+        incomesStart: selectedVillage.incomesStart || undefined,
+        incomesEnd: selectedVillage.incomesEnd || undefined,
+        unsustainableLandClearings:
+          selectedVillage.unsustainableLandClearings || [],
+        // Cat 2
+        incomes: selectedVillage.incomes || [],
+        seedCapital: selectedVillage.seedCapital || undefined,
       });
     }
   }, [selectedVillage, reset]);
@@ -79,8 +128,8 @@ export const useAddVillagePageImpl = () => {
   };
 
   const navigateBack = () => {
-    setPage(VillagePageEnum.LIST);
-    updateBreadcrumbs(VillagePageEnum.LIST);
+    setPage(PageEnum.LIST);
+    updateBreadcrumbs(PageEnum.LIST);
   };
 
   const handleLeaveConfirm = () => {
@@ -123,6 +172,7 @@ export const useAddVillagePageImpl = () => {
     showLeaveModal,
     isSubmitting,
     errors,
+    selectedCategory,
   };
 
   const action = {
@@ -133,6 +183,8 @@ export const useAddVillagePageImpl = () => {
     handleSubmitConfirm,
     handleSubmitCancel,
     hasUnsavedChanges,
+    setValue,
+    watch,
   };
 
   return {

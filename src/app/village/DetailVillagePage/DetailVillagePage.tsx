@@ -2,8 +2,9 @@ import React from 'react';
 import { Paper, Box } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Header } from './components/Header';
-import { useVillageStore, VillagePageEnum } from '@/stores/villageStore';
+import { useVillageStore } from '@/stores/villageStore';
 import { MonthlyDataPerMonth } from './components/MonthlyDataPerMonth';
+import { PageEnum } from '@/constants/page';
 
 export const DetailVillagePage = () => {
   const { updateBreadcrumbs, setPage, selectedVillage, breadcrumbs } =
@@ -12,12 +13,12 @@ export const DetailVillagePage = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    updateBreadcrumbs(VillagePageEnum.DETAIL);
+    updateBreadcrumbs(PageEnum.DETAIL, selectedVillage?.villageName);
   }, [updateBreadcrumbs]);
 
   const handleBack = () => {
-    setPage(VillagePageEnum.LIST);
-    updateBreadcrumbs(VillagePageEnum.LIST);
+    setPage(PageEnum.LIST);
+    updateBreadcrumbs(PageEnum.LIST);
   };
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -25,23 +26,28 @@ export const DetailVillagePage = () => {
   };
 
   const villageData = selectedVillage || {
-    id: '1',
-    villageName: 'Desa Harapan Baru',
-    villageLat: -6.2,
-    villageLng: 106.816666,
-    villageAddress: 'Jl. Raya Desa Harapan Baru No.1',
-    villageCode: 'DHB001',
-    totalPopulation: 1000,
-    totalCarbonEmissions: 50000,
-    totalArea: '50 km²',
-    totalLandManage: 30,
-    isMitigationIntervention: false,
-    isAdaptationIntervention: false,
-    mitigationIntervention: '',
-    adaptationIntervention: '',
-    fireIncidents: [],
+    id: '',
+    villageName: 'Unknown Village',
+    villageCode: 'N/A',
+    villageCategory: 'N/A',
+    totalPopulation: 0,
+    villageLat: 0,
+    villageLng: 0,
+    landManageStart: 0,
+    landManageEnd: 0,
+    carbonEmisionStart: 0,
+    carbonEmisionEnd: 0,
+    potency: 'N/A',
+    climateIssue: 'N/A',
+    mainSourceOfEconomy: 'N/A',
+    srnStatus: 'N/A',
+    // Cat 1
+    incomesStart: 0,
+    incomesEnd: 0,
+    unsustainableLandClearings: [],
+    // Cat 2
     incomes: [],
-    localInitiatives: [],
+    seedCapital: 0,
   };
 
   // Mock data for monthly reports
@@ -103,6 +109,7 @@ export const DetailVillagePage = () => {
           handleBack={handleBack}
         />
       </Paper>
+      {/* Category 1 Monthly Sustainable Lands Report */}
 
       <MonthlyDataPerMonth
         activeTab={activeTab}

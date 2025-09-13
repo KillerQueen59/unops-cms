@@ -1,9 +1,9 @@
 import { useTrainings } from '@/hooks/useTrainingData';
 import { useTrainingStore } from '@/stores';
-import { TrainingPageEnum } from '@/stores/trainingStore';
 import { TrainingData } from '@/types/training';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { createTrainingColumns } from './TrainingColumn';
+import { PageEnum } from '@/constants/page';
 
 export const useTrainingPageImpl = () => {
   const {
@@ -20,11 +20,25 @@ export const useTrainingPageImpl = () => {
     setIsFilterModalOpen,
   } = useTrainingStore();
 
-  const { data: trainings = [], isLoading, error } = useTrainings();
+  const apiFilters = useMemo(
+    () => ({
+      searchQuery,
+      trainingType: filters.trainingType,
+      village: filters.village,
+      startDate: filters.startDate,
+      endDate: filters.endDate,
+      // Add pagination if needed
+      // page: currentPage,
+      // pageSize: itemsPerPage,
+    }),
+    [searchQuery, filters]
+  );
+
+  const { data: trainings = [], isLoading, error } = useTrainings(apiFilters);
 
   useEffect(() => {
-    if (page === TrainingPageEnum.LIST) {
-      updateBreadcrumbs(TrainingPageEnum.LIST);
+    if (page === PageEnum.LIST) {
+      updateBreadcrumbs(PageEnum.LIST);
     }
   }, [page, updateBreadcrumbs]);
 
@@ -38,8 +52,8 @@ export const useTrainingPageImpl = () => {
 
   const handleAddNew = () => {
     resetTraining();
-    setPage(TrainingPageEnum.ADD);
-    updateBreadcrumbs(TrainingPageEnum.ADD);
+    setPage(PageEnum.ADD);
+    updateBreadcrumbs(PageEnum.ADD);
   };
 
   const handleDelete = (data: TrainingData) => {
@@ -54,48 +68,6 @@ export const useTrainingPageImpl = () => {
     setIsFilterModalOpen(false);
   };
 
-  // Filter trainings based on search query and filters
-  const filteredTrainings = trainings.filter((training) => {
-    // Search query filter
-    const matchesSearch =
-      !searchQuery ||
-      training.trainingName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      training.trainingType.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      training.village.toLowerCase().includes(searchQuery.toLowerCase());
-
-    // Training type filter
-    const matchesTrainingType =
-      !filters.trainingType || training.trainingType === filters.trainingType;
-
-    // Village filter
-    const matchesVillage =
-      !filters.village || training.village === filters.village;
-
-    // Start date filter
-    const matchesStartDate =
-      !filters.startDate ||
-      new Date(training.startDate) >= new Date(filters.startDate);
-
-    // End date filter
-    const matchesEndDate =
-      !filters.endDate ||
-      new Date(training.startDate) <= new Date(filters.endDate);
-
-    return (
-      matchesSearch &&
-      matchesTrainingType &&
-      matchesVillage &&
-      matchesStartDate &&
-      matchesEndDate
-    );
-  });
-
-  // Get unique training types and villages for filter options
-  const uniqueTrainingTypes = Array.from(
-    new Set(trainings.map((t) => t.trainingType))
-  );
-  const uniqueVillages = Array.from(new Set(trainings.map((t) => t.village)));
-
   const columns = createTrainingColumns({
     onView: handleView,
     onEdit: handleEdit,
@@ -104,15 +76,13 @@ export const useTrainingPageImpl = () => {
 
   const state = {
     columns,
-    trainings: filteredTrainings,
+    trainings,
     error,
     isLoading,
     searchQuery,
     page,
     filters,
     isFilterModalOpen,
-    uniqueTrainingTypes,
-    uniqueVillages,
   };
 
   const action = {

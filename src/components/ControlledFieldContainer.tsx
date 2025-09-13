@@ -21,6 +21,8 @@ interface ControlledFieldContainerProps<T extends FieldValues = FieldValues> {
   placeholder?: string;
   type?: string;
   InputProps?: TextFieldProps['InputProps'];
+  helperText?: string | React.ReactNode;
+  disabled?: boolean;
 }
 
 export const ControlledFieldContainer = <T extends FieldValues = FieldValues>(
@@ -37,7 +39,10 @@ export const ControlledFieldContainer = <T extends FieldValues = FieldValues>(
     placeholder,
     type = 'text',
     InputProps,
+    helperText,
+    disabled = false,
   } = props;
+
   return (
     <Box sx={{ flex: '1 1 300px', minWidth: '300px', ...sx }}>
       {label && (
@@ -83,6 +88,10 @@ export const ControlledFieldContainer = <T extends FieldValues = FieldValues>(
                 ),
               };
             }
+
+            // Special handling for date inputs
+            const isDateInput = type === 'date';
+
             return (
               <TextField
                 {...field}
@@ -90,17 +99,76 @@ export const ControlledFieldContainer = <T extends FieldValues = FieldValues>(
                 placeholder={placeholder}
                 type={type}
                 error={!!error}
-                helperText={error?.message}
-                InputProps={inputProps}
+                disabled={disabled} // Pass disabled prop to TextField
+                helperText={error?.message || helperText} // Show error message first, then helper text
+                InputProps={{
+                  ...inputProps,
+                  // Make the entire date input clickable
+                  ...(isDateInput &&
+                    !disabled && {
+                      // Only apply date styles when not disabled
+                      readOnly: false,
+                      style: {
+                        cursor: 'pointer',
+                      },
+                    }),
+                }}
+                InputLabelProps={{
+                  shrink: isDateInput ? true : undefined,
+                }}
                 sx={{
-                  backgroundColor: '#fff',
+                  backgroundColor: disabled ? '#f9fafb' : '#fff', // Different background when disabled
                   '& .MuiOutlinedInput-root': {
                     borderRadius: '12px',
-                    backgroundColor: '#fff',
+                    backgroundColor: disabled ? '#f9fafb' : '#fff',
+                    ...(disabled && {
+                      '& fieldset': {
+                        borderColor: '#e5e7eb', // Lighter border when disabled
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#e5e7eb', // Prevent hover effect when disabled
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#e5e7eb', // Prevent focus effect when disabled
+                      },
+                    }),
+                    ...(!disabled &&
+                      isDateInput && {
+                        cursor: 'pointer',
+                        '&:hover': {
+                          backgroundColor: '#f9fafb',
+                        },
+                        // Make the entire input area clickable for date inputs
+                        '& input[type="date"]': {
+                          cursor: 'pointer',
+                          '&::-webkit-calendar-picker-indicator': {
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            width: 'auto',
+                            height: 'auto',
+                            color: 'transparent',
+                            background: 'transparent',
+                            cursor: 'pointer',
+                          },
+                        },
+                      }),
+                  },
+                  '& .MuiInputBase-input': {
+                    color: disabled ? '#9CA3AF' : 'inherit', // Muted text when disabled
+                    ...(!disabled &&
+                      isDateInput && {
+                        cursor: 'pointer',
+                      }),
                   },
                   '& .MuiInputBase-input::placeholder': {
-                    color: '#9CA3AF',
+                    color: disabled ? '#d1d5db' : '#9CA3AF', // More muted placeholder when disabled
                     opacity: 1,
+                  },
+                  '& .MuiFormHelperText-root': {
+                    color: disabled ? '#9CA3AF' : 'inherit', // Muted helper text when disabled
                   },
                 }}
               />

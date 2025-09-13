@@ -1,27 +1,16 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { TrainingData } from '@/types/training';
+import { PageEnum } from '@/constants/page';
+import { BreadcrumbItem } from '@/types/common';
 
-export enum TrainingPageEnum {
-  ADD,
-  LIST,
-  DETAIL,
-}
-
-export interface BreadcrumbItem {
-  label: string;
-  href?: string;
-  isActive?: boolean;
-  onClick?: () => void;
-}
-
-interface TrainingState {
+export interface TrainingState {
   // Training list state
   trainings: TrainingData[];
   selectedTraining: TrainingData | null;
   isLoading: boolean;
   error: string | null;
-  page: TrainingPageEnum;
+  page: PageEnum;
 
   // Breadcrumb state
   breadcrumbs: BreadcrumbItem[];
@@ -39,7 +28,7 @@ interface TrainingState {
   };
 
   // Actions
-  setPage: (page: TrainingPageEnum) => void;
+  setPage: (page: PageEnum) => void;
 
   // Navigation actions
   navigateToDetail: (training: TrainingData) => void;
@@ -47,7 +36,7 @@ interface TrainingState {
 
   // Breadcrumb actions
   setBreadcrumbs: (breadcrumbs: BreadcrumbItem[]) => void;
-  updateBreadcrumbs: (page: TrainingPageEnum, trainingName?: string) => void;
+  updateBreadcrumbs: (page: PageEnum, trainingName?: string) => void;
 
   // Filter actions
   setSearchQuery: (query: string) => void;
@@ -79,7 +68,7 @@ const initialState = {
   isAddModalOpen: false,
   isEditModalOpen: false,
   isDeleteModalOpen: false,
-  page: TrainingPageEnum.LIST,
+  page: PageEnum.LIST,
   breadcrumbs: [] as BreadcrumbItem[],
   isFilterModalOpen: false,
   filters: {
@@ -145,25 +134,25 @@ export const useTrainingStore = create<TrainingState>()(
             label: 'Training',
             href: '/training',
             onClick: () => {
-              setPage(TrainingPageEnum.LIST);
+              setPage(PageEnum.LIST);
             },
           },
         ];
 
         switch (page) {
-          case TrainingPageEnum.LIST:
+          case PageEnum.LIST:
             newBreadcrumbs.push({
               label: 'Training List',
               isActive: true,
             });
             break;
-          case TrainingPageEnum.ADD:
+          case PageEnum.ADD:
             newBreadcrumbs.push({
               label: 'Add Training',
               isActive: true,
             });
             break;
-          case TrainingPageEnum.DETAIL:
+          case PageEnum.DETAIL:
             newBreadcrumbs.push({
               label: trainingName || 'Training Detail',
               isActive: true,
@@ -173,8 +162,6 @@ export const useTrainingStore = create<TrainingState>()(
 
         set({ breadcrumbs: newBreadcrumbs, page }, false, 'updateBreadcrumbs');
       },
-
-      // Modal actions
 
       // CRUD operations
       addTraining: (training) => {
@@ -202,21 +189,21 @@ export const useTrainingStore = create<TrainingState>()(
       navigateToDetail: (training) => {
         const { updateBreadcrumbs } = get();
         set(
-          { selectedTraining: training, page: TrainingPageEnum.DETAIL },
+          { selectedTraining: training, page: PageEnum.DETAIL },
           false,
           'navigateToDetail'
         );
-        updateBreadcrumbs(TrainingPageEnum.DETAIL, training.trainingName);
+        updateBreadcrumbs(PageEnum.DETAIL, training.trainingName);
       },
 
       navigateToEdit: (training) => {
         const { updateBreadcrumbs } = get();
         set(
-          { selectedTraining: training, page: TrainingPageEnum.ADD },
+          { selectedTraining: training, page: PageEnum.ADD },
           false,
           'navigateToEdit'
         );
-        updateBreadcrumbs(TrainingPageEnum.ADD);
+        updateBreadcrumbs(PageEnum.ADD);
       },
 
       reset: () => set(initialState, false, 'reset'),

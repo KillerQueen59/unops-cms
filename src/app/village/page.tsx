@@ -11,24 +11,34 @@ import {
   CircularProgress,
   Alert,
 } from '@mui/material';
-import {
-  Search as SearchIcon,
-  Add as AddIcon,
-  TuneOutlined,
-} from '@mui/icons-material';
+import { Search as SearchIcon, Add as AddIcon } from '@mui/icons-material';
 import React from 'react';
 import { useVillagePageImpl } from './useVillagePageImpl';
-import { VillagePageEnum } from '@/stores/villageStore';
 import { AddVillagePage } from './AddVillagePage/AddVillagePage';
 import { DetailVillagePage } from './DetailVillagePage/DetailVillagePage';
+import { CategorySelectionModal } from './components/CategorySelectionModal';
 import { VillageTable } from '@/types/village';
+import { PageEnum } from '@/constants/page';
 
 export default function VillagePage() {
   const { state, action } = useVillagePageImpl();
 
-  const { searchQuery, page, columns, villages, error, isLoading } = state;
+  const {
+    searchQuery,
+    page,
+    columns,
+    villages,
+    error,
+    isLoading,
+    showCategoryModal,
+  } = state;
 
-  const { handleAddNew, setSearchQuery } = action;
+  const {
+    handleAddNew,
+    setSearchQuery,
+    handleCategorySelect,
+    handleCloseCategoryModal,
+  } = action;
 
   if (error) {
     return (
@@ -38,11 +48,11 @@ export default function VillagePage() {
     );
   }
 
-  if (page === VillagePageEnum.DETAIL) {
+  if (page === PageEnum.DETAIL) {
     return <DetailVillagePage />;
   }
 
-  if (page === VillagePageEnum.ADD) {
+  if (page === PageEnum.ADD) {
     return <AddVillagePage />;
   }
 
@@ -109,33 +119,6 @@ export default function VillagePage() {
                 ),
               }}
             />
-
-            <>
-              <Button
-                variant="outlined"
-                color="secondary"
-                startIcon={
-                  <TuneOutlined
-                    sx={{
-                      rotate: '90deg',
-                    }}
-                  />
-                }
-                onClick={() => {
-                  // Handle filter button click
-                }}
-                sx={{
-                  minWidth: 120,
-                  height: 54,
-                  transform: 'translateY(-2px)',
-                  '&.MuiButton-root': {
-                    borderRadius: '12px',
-                  },
-                }}
-              >
-                Filter
-              </Button>
-            </>
           </Box>
           <Button
             variant="contained"
@@ -185,6 +168,13 @@ export default function VillagePage() {
           setExternalGlobalFilter={setSearchQuery}
         />
       )}
+
+      {/* Category Selection Modal */}
+      <CategorySelectionModal
+        open={showCategoryModal}
+        onClose={handleCloseCategoryModal}
+        onConfirm={handleCategorySelect}
+      />
     </Paper>
   );
 }

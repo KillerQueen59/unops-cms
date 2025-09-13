@@ -1,5 +1,4 @@
 import { ActivityPageEnum, useActivityStore } from '@/stores/activityStore';
-import { VillagePageEnum } from '@/stores/villageStore';
 import { ActivityFormData, activityFormSchema } from '@/types/activityForm';
 import { VillageFormData } from '@/types/villageForm';
 import { zodResolver } from '@hookform/resolvers/zod';

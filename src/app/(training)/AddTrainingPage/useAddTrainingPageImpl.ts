@@ -1,5 +1,5 @@
+import { PageEnum } from '@/constants/page';
 import { useTrainingStore } from '@/stores';
-import { TrainingPageEnum } from '@/stores/trainingStore';
 import { TrainingFormData, trainingFormSchema } from '@/types/trainingForm';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useCallback, useEffect } from 'react';
@@ -22,42 +22,49 @@ export const useAddTrainingPageImpl = () => {
     defaultValues: {
       trainingName: selectedTraining?.trainingName || '',
       trainingType: selectedTraining?.trainingType || '',
-      mandatoryTraining: 'no',
-      therapeuticTraining: 'no',
-      interventionType: '',
+      date: selectedTraining?.date || '',
       village: selectedTraining?.village || '',
-      communityParticipationMale:
-        selectedTraining?.communityParticipationMale?.toString() || '',
-      communityParticipationFemale:
-        selectedTraining?.communityParticipationFemale?.toString() || '',
-      elderlyMale: selectedTraining?.elderlyMale?.toString() || '',
-      elderlyFemale: selectedTraining?.elderlyFemale?.toString() || '',
-      youthMale: selectedTraining?.youthMale?.toString() || '',
-      youthFemale: selectedTraining?.youthFemale?.toString() || '',
-      disabilityMale: selectedTraining?.disabilityMale?.toString() || '',
-      disabilityFemale: selectedTraining?.disabilityFemale?.toString() || '',
-      preTestScoreMale: selectedTraining?.preTestScoreMale?.toString() || '',
-      preTestScoreFemale:
-        selectedTraining?.preTestScoreFemale?.toString() || '',
-      postTestScoreMale: '',
-      postTestScoreFemale: '',
+      villageId: selectedTraining?.villageId || '',
+      // Number of beneficiaries
+      male: selectedTraining?.male?.toString() || '',
+      female: selectedTraining?.female?.toString() || '',
+      elderly: selectedTraining?.elderly?.toString() || '',
+      youth: selectedTraining?.youth?.toString() || '',
+      disability: selectedTraining?.disability?.toString() || '',
+      widow: selectedTraining?.widow?.toString() || '',
+      // Training Assessment
+      pretest: selectedTraining?.pretest?.toString() || '',
+      posttest: selectedTraining?.posttest?.toString() || '',
+      // Stakeholders Involved
+      ngo: selectedTraining?.ngo?.toString() || '',
+      government: selectedTraining?.government?.toString() || '',
+      privateSector: selectedTraining?.privateSector?.toString() || '',
+      academics: selectedTraining?.academics?.toString() || '',
+      localCommunity: selectedTraining?.localCommunity?.toString() || '',
+      others: selectedTraining?.others?.toString() || '',
     },
   });
 
   const watchedValues = watch([
     'trainingName',
-    'communityParticipationMale',
-    'communityParticipationFemale',
-    'elderlyMale',
-    'elderlyFemale',
-    'youthMale',
-    'youthFemale',
-    'disabilityMale',
-    'disabilityFemale',
-    'preTestScoreMale',
-    'preTestScoreFemale',
-    'postTestScoreMale',
-    'postTestScoreFemale',
+    'trainingType',
+    'date',
+    'village',
+    'villageId',
+    'male',
+    'female',
+    'elderly',
+    'youth',
+    'disability',
+    'widow',
+    'pretest',
+    'posttest',
+    'ngo',
+    'government',
+    'privateSector',
+    'academics',
+    'localCommunity',
+    'others',
   ]);
 
   const hasUnsavedChanges = useCallback(() => {
@@ -65,7 +72,7 @@ export const useAddTrainingPageImpl = () => {
   }, [watchedValues]);
 
   useEffect(() => {
-    updateBreadcrumbs(TrainingPageEnum.ADD);
+    updateBreadcrumbs(PageEnum.ADD);
   }, [updateBreadcrumbs]);
 
   const isEditMode = !!selectedTraining;
@@ -75,26 +82,26 @@ export const useAddTrainingPageImpl = () => {
       reset({
         trainingName: selectedTraining.trainingName || '',
         trainingType: selectedTraining.trainingType || '',
-        mandatoryTraining: 'no',
-        therapeuticTraining: 'no',
-        interventionType: '',
+        date: selectedTraining.date || '',
         village: selectedTraining.village || '',
-        communityParticipationMale:
-          selectedTraining.communityParticipationMale?.toString() || '',
-        communityParticipationFemale:
-          selectedTraining.communityParticipationFemale?.toString() || '',
-        elderlyMale: selectedTraining.elderlyMale?.toString() || '',
-        elderlyFemale: selectedTraining.elderlyFemale?.toString() || '',
-        youthMale: selectedTraining.youthMale?.toString() || '',
-        youthFemale: selectedTraining.youthFemale?.toString() || '',
-        disabilityMale: selectedTraining.disabilityMale?.toString() || '',
-        disabilityFemale: selectedTraining.disabilityFemale?.toString() || '',
-        preTestScoreMale: selectedTraining.preTestScoreMale?.toString() || '',
-        preTestScoreFemale:
-          selectedTraining.preTestScoreFemale?.toString() || '',
-        postTestScoreMale: selectedTraining.postTestScoreMale?.toString() || '',
-        postTestScoreFemale:
-          selectedTraining.postTestScoreFemale?.toString() || '',
+        villageId: selectedTraining.villageId || '',
+        // Number of beneficiaries
+        male: selectedTraining.male?.toString() || '',
+        female: selectedTraining.female?.toString() || '',
+        elderly: selectedTraining.elderly?.toString() || '',
+        youth: selectedTraining.youth?.toString() || '',
+        disability: selectedTraining.disability?.toString() || '',
+        widow: selectedTraining.widow?.toString() || '',
+        // Training Assessment
+        pretest: selectedTraining.pretest?.toString() || '',
+        posttest: selectedTraining.posttest?.toString() || '',
+        // Stakeholders Involved
+        ngo: selectedTraining.ngo?.toString() || '',
+        government: selectedTraining.government?.toString() || '',
+        privateSector: selectedTraining.privateSector?.toString() || '',
+        academics: selectedTraining.academics?.toString() || '',
+        localCommunity: selectedTraining.localCommunity?.toString() || '',
+        others: selectedTraining.others?.toString() || '',
       });
     }
   }, [selectedTraining, reset]);
@@ -108,8 +115,8 @@ export const useAddTrainingPageImpl = () => {
   };
 
   const navigateBack = () => {
-    setPage(TrainingPageEnum.LIST);
-    updateBreadcrumbs(TrainingPageEnum.LIST);
+    setPage(PageEnum.LIST);
+    updateBreadcrumbs(PageEnum.LIST);
   };
 
   const handleLeaveConfirm = () => {

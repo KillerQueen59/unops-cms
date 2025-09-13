@@ -13,120 +13,91 @@ const mockApi = {
         id: '1',
         villageName: 'Desa Harapan Baru',
         villageCode: 'DHB001',
+        villageCategory: 'Category 1',
         totalPopulation: 2500,
-        villageAddress:
-          'Jl. Harapan No. 123, Kecamatan Suka Maju, Kabupaten Sentosa',
         villageLat: -6.2088,
         villageLng: 106.8456,
-        totalLandManage: 850.5,
-        totalCarbonEmissions: 125.3,
-        isMitigationIntervention: true,
-        isAdaptationIntervention: false,
-        fireIncidents: [
+        landManageStart: 850,
+        landManageEnd: 920,
+        carbonEmisionStart: 125,
+        carbonEmisionEnd: 98,
+        potency:
+          'High agricultural potential with sustainable farming practices',
+        climateIssue: 'Occasional flooding during rainy season',
+        mainSourceOfEconomy: 'Agriculture and livestock',
+        srnStatus: 'Active',
+        // Category 1 fields
+        incomesStart: 45000000,
+        incomesEnd: 52000000,
+        unsustainableLandClearings: [
           { month: 'January', year: 2024, data: 2 },
           { month: 'February', year: 2024, data: 1 },
           { month: 'March', year: 2024, data: 0 },
-        ],
-        incomes: [
-          { month: 'January', year: 2024, data: 45000000 },
-          { month: 'February', year: 2024, data: 47500000 },
-          { month: 'March', year: 2024, data: 52000000 },
-        ],
-        localInitiatives: [
-          {
-            month: 'January',
-            year: 2024,
-            stakeholder: {
-              government: 3,
-              localCommunity: 8,
-              privateSector: 2,
-              ngo: 1,
-              academics: 0,
-              other: 1,
-            },
-          },
         ],
       },
       {
         id: '2',
         villageName: 'Desa Maju Sejahtera',
         villageCode: 'DMS002',
+        villageCategory: 'Category 2',
         totalPopulation: 3200,
-        villageAddress:
-          'Jl. Sejahtera Raya No. 456, Kecamatan Maju Jaya, Kabupaten Makmur',
         villageLat: -6.1751,
         villageLng: 106.865,
-        totalLandManage: 1200.8,
-        totalCarbonEmissions: 89.7,
-        isMitigationIntervention: false,
-        isAdaptationIntervention: true,
-        fireIncidents: [
-          { month: 'January', year: 2024, data: 0 },
-          { month: 'February', year: 2024, data: 1 },
-          { month: 'March', year: 2024, data: 1 },
-        ],
+        landManageStart: 1200,
+        landManageEnd: 1350,
+        carbonEmisionStart: 89,
+        carbonEmisionEnd: 65,
+        potency: 'Strong community-based economy with diverse income sources',
+        climateIssue: 'Drought risk during dry season',
+        mainSourceOfEconomy: 'Small business and trade',
+        srnStatus: 'Active',
+        // Category 2 fields
         incomes: [
           { month: 'January', year: 2024, data: 62000000 },
           { month: 'February', year: 2024, data: 65500000 },
           { month: 'March', year: 2024, data: 68000000 },
         ],
-        localInitiatives: [
-          {
-            month: 'February',
-            year: 2024,
-            stakeholder: {
-              government: 5,
-              localCommunity: 12,
-              privateSector: 4,
-              ngo: 2,
-              academics: 1,
-              other: 0,
-            },
-          },
-        ],
+        seedCapital: 25000000,
       },
       {
         id: '3',
         villageName: 'Desa Harmoni Alam',
         villageCode: 'DHA003',
+        villageCategory: 'Category 1',
         totalPopulation: 1800,
-        villageAddress:
-          'Jl. Harmoni Alam No. 789, Kecamatan Damai, Kabupaten Hijau',
         villageLat: -6.2297,
         villageLng: 106.8123,
-        totalLandManage: 650.2,
-        totalCarbonEmissions: 67.1,
-        isMitigationIntervention: true,
-        isAdaptationIntervention: true,
-        fireIncidents: [
+        landManageStart: 650,
+        landManageEnd: 720,
+        carbonEmisionStart: 67,
+        carbonEmisionEnd: 45,
+        potency: 'Eco-tourism potential with natural forest conservation',
+        climateIssue: 'Deforestation pressure from surrounding areas',
+        mainSourceOfEconomy: 'Forestry and eco-tourism',
+        srnStatus: 'Active',
+        // Category 1 fields
+        incomesStart: 38000000,
+        incomesEnd: 43800000,
+        unsustainableLandClearings: [
           { month: 'January', year: 2024, data: 1 },
           { month: 'February', year: 2024, data: 0 },
           { month: 'March', year: 2024, data: 0 },
-        ],
-        incomes: [
-          { month: 'January', year: 2024, data: 38000000 },
-          { month: 'February', year: 2024, data: 41200000 },
-          { month: 'March', year: 2024, data: 43800000 },
-        ],
-        localInitiatives: [
-          {
-            month: 'March',
-            year: 2024,
-            stakeholder: {
-              government: 2,
-              localCommunity: 6,
-              privateSector: 1,
-              ngo: 3,
-              academics: 2,
-              other: 1,
-            },
-          },
         ],
       },
     ];
   },
 
   createVillage: async (
+    village: Omit<VillageData, 'id'>
+  ): Promise<VillageData> => {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    return {
+      id: Date.now().toString(),
+      ...village,
+    };
+  },
+
+  addVillage: async (
     village: Omit<VillageData, 'id'>
   ): Promise<VillageData> => {
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -145,17 +116,23 @@ const mockApi = {
       id,
       villageName: village.villageName || '',
       villageCode: village.villageCode || '',
+      villageCategory: village.villageCategory || '',
       totalPopulation: village.totalPopulation || 0,
-      villageAddress: village.villageAddress || '',
       villageLat: village.villageLat || 0,
       villageLng: village.villageLng || 0,
-      totalLandManage: village.totalLandManage || 0,
-      totalCarbonEmissions: village.totalCarbonEmissions || 0,
-      isMitigationIntervention: village.isMitigationIntervention || false,
-      isAdaptationIntervention: village.isAdaptationIntervention || false,
-      fireIncidents: village.fireIncidents || [],
+      landManageStart: village.landManageStart || 0,
+      landManageEnd: village.landManageEnd,
+      carbonEmisionStart: village.carbonEmisionStart || 0,
+      carbonEmisionEnd: village.carbonEmisionEnd,
+      potency: village.potency || '',
+      climateIssue: village.climateIssue || '',
+      mainSourceOfEconomy: village.mainSourceOfEconomy || '',
+      srnStatus: village.srnStatus || '',
+      incomesStart: village.incomesStart,
+      incomesEnd: village.incomesEnd,
+      unsustainableLandClearings: village.unsustainableLandClearings || [],
       incomes: village.incomes || [],
-      localInitiatives: village.localInitiatives || [],
+      seedCapital: village.seedCapital,
       ...village,
     } as VillageData;
   },

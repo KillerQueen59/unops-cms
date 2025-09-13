@@ -1,27 +1,17 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { VillageData } from '@/types/village';
-
-export enum VillagePageEnum {
-  ADD,
-  LIST,
-  DETAIL,
-}
-
-export interface BreadcrumbItem {
-  label: string;
-  href?: string;
-  isActive?: boolean;
-  onClick?: () => void;
-}
+import { PageEnum } from '@/constants/page';
+import { BreadcrumbItem } from '@/types/common';
 
 interface VillageState {
   // Village list state
   villages: VillageData[];
   selectedVillage: VillageData | null;
+  selectedCategory: string | null;
   isLoading: boolean;
   error: string | null;
-  page: VillagePageEnum;
+  page: PageEnum;
 
   // Breadcrumb state
   breadcrumbs: BreadcrumbItem[];
@@ -32,7 +22,8 @@ interface VillageState {
   itemsPerPage: number;
 
   // Actions
-  setPage: (page: VillagePageEnum) => void;
+  setPage: (page: PageEnum) => void;
+  setSelectedCategory: (category: string) => void;
 
   // Navigation actions
   navigateToDetail: (training: VillageData) => void;
@@ -40,7 +31,7 @@ interface VillageState {
 
   // Breadcrumb actions
   setBreadcrumbs: (breadcrumbs: BreadcrumbItem[]) => void;
-  updateBreadcrumbs: (page: VillagePageEnum, villageName?: string) => void;
+  updateBreadcrumbs: (page: PageEnum, villageName?: string) => void;
 
   // Filter actions
   setSearchQuery: (query: string) => void;
@@ -60,6 +51,7 @@ interface VillageState {
 const initialState = {
   villages: [],
   selectedVillage: null,
+  selectedCategory: null,
   isLoading: false,
   error: null,
   searchQuery: '',
@@ -69,7 +61,7 @@ const initialState = {
   isAddModalOpen: false,
   isEditModalOpen: false,
   isDeleteModalOpen: false,
-  page: VillagePageEnum.LIST,
+  page: PageEnum.LIST,
   breadcrumbs: [] as BreadcrumbItem[],
 };
 
@@ -84,6 +76,9 @@ export const useVillageStore = create<VillageState>()(
 
       setPage: (page) => set({ page }, false, 'setPage'),
 
+      setSelectedCategory: (category) =>
+        set({ selectedCategory: category }, false, 'setSelectedCategory'),
+
       // Breadcrumb actions
       setBreadcrumbs: (breadcrumbs) =>
         set({ breadcrumbs }, false, 'setBreadcrumbs'),
@@ -95,25 +90,25 @@ export const useVillageStore = create<VillageState>()(
             label: 'Village',
             href: '/village',
             onClick: () => {
-              setPage(VillagePageEnum.LIST);
+              setPage(PageEnum.LIST);
             },
           },
         ];
 
         switch (page) {
-          case VillagePageEnum.LIST:
+          case PageEnum.LIST:
             newBreadcrumbs.push({
               label: 'Village List',
               isActive: true,
             });
             break;
-          case VillagePageEnum.ADD:
+          case PageEnum.ADD:
             newBreadcrumbs.push({
               label: 'Add Village',
               isActive: true,
             });
             break;
-          case VillagePageEnum.DETAIL:
+          case PageEnum.DETAIL:
             newBreadcrumbs.push({
               label: villageName || 'Village Detail',
               isActive: true,
@@ -150,25 +145,30 @@ export const useVillageStore = create<VillageState>()(
       navigateToDetail: (village) => {
         const { updateBreadcrumbs } = get();
         set(
-          { selectedVillage: village, page: VillagePageEnum.DETAIL },
+          { selectedVillage: village, page: PageEnum.DETAIL },
           false,
           'navigateToDetail'
         );
-        updateBreadcrumbs(VillagePageEnum.DETAIL, village.villageName);
+        updateBreadcrumbs(PageEnum.DETAIL, village.villageName);
       },
 
       navigateToEdit: (village) => {
         const { updateBreadcrumbs } = get();
         set(
-          { selectedVillage: village, page: VillagePageEnum.ADD },
+          { selectedVillage: village, page: PageEnum.ADD },
           false,
           'navigateToEdit'
         );
-        updateBreadcrumbs(VillagePageEnum.ADD);
+        updateBreadcrumbs(PageEnum.ADD);
       },
 
       reset: () => set(initialState, false, 'reset'),
-      resetVillage: () => set({ selectedVillage: null }, false, 'resetVillage'),
+      resetVillage: () =>
+        set(
+          { selectedVillage: null, selectedCategory: null },
+          false,
+          'resetVillage'
+        ),
     }),
     {
       name: 'village-store',

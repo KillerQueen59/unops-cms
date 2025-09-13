@@ -1,5 +1,5 @@
 import { CustomBreadcrumbs } from '@/components';
-import { BreadcrumbItem } from '@/stores/trainingStore';
+import { BreadcrumbItem } from '@/types/common';
 import { TrainingData } from '@/types/training';
 import { Box, IconButton, Typography, Chip } from '@mui/material';
 import { CaretLeftIcon } from '@phosphor-icons/react';
@@ -123,37 +123,19 @@ export const Header = ({
           </Typography>
         </Box>
 
-        {/* Start Date */}
+        {/* Date */}
         <Box>
           <Typography
             variant="body2"
             sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
           >
-            Start Date
+            Date
           </Typography>
           <Typography
             variant="body1"
             sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
           >
-            {trainingData.startDate}
-          </Typography>
-        </Box>
-
-        {/* End Date */}
-        <Box>
-          <Typography
-            variant="body2"
-            sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
-          >
-            End Date
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
-          >
-            {trainingData.endDate && trainingData.endDate !== '-'
-              ? trainingData.endDate
-              : '-'}
+            {trainingData.date}
           </Typography>
         </Box>
       </Box>

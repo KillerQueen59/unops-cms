@@ -23,6 +23,8 @@ export const AddVillagePage = () => {
     handleLeaveCancel,
     handleSubmitConfirm,
     handleSubmitCancel,
+    setValue,
+    watch,
   } = action;
 
   return (
@@ -40,6 +42,9 @@ export const AddVillagePage = () => {
           isSubmitting={isSubmitting}
           handleFormSubmit={handleFormSubmit}
           handleBack={handleBack}
+          setValue={setValue}
+          selectedCategory={state.selectedCategory ?? ''}
+          watch={watch}
         />
       </Box>
 

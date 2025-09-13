@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { TrainingData } from '@/types/training';
+import { TrainingData, TrainingFilters } from '@/types/training';
 
 // Mock API functions - replace with actual API calls
 const mockApi = {
@@ -13,41 +13,101 @@ const mockApi = {
         id: '1',
         trainingName: 'Advanced Project Management',
         trainingType: 'Online',
-        startDate: '2024-08-25',
+        date: '2024-08-25',
         village: 'Bandung',
-        communityParticipationMale: 100,
-        communityParticipationFemale: 120,
-        elderlyMale: 30,
-        elderlyFemale: 40,
-        youthMale: 50,
-        youthFemale: 60,
-        disabilityMale: 10,
-        disabilityFemale: 15,
-        preTestScoreMale: 80,
-        preTestScoreFemale: 85,
-        postTestScoreMale: 90,
-        postTestScoreFemale: 95,
-        endDate: '2024-08-30',
+        villageId: 'VIL001',
+        // Number of beneficiaries
+        male: 100,
+        female: 120,
+        elderly: 70,
+        youth: 110,
+        disability: 25,
+        widow: 35,
+        // Training Assessment
+        pretest: 75,
+        posttest: 88,
+        // Stakeholders Involved
+        ngo: 3,
+        government: 2,
+        privateSector: 1,
+        academics: 2,
+        localCommunity: 5,
+        others: 1,
       },
       {
         id: '2',
         trainingName: 'Leadership Development',
         trainingType: 'In-Person',
-        startDate: '2024-09-01',
+        date: '2024-09-01',
         village: 'Jakarta',
-        communityParticipationMale: 150,
-        communityParticipationFemale: 170,
-        elderlyMale: 40,
-        elderlyFemale: 50,
-        youthMale: 60,
-        youthFemale: 70,
-        disabilityMale: 15,
-        disabilityFemale: 20,
-        preTestScoreMale: 85,
-        preTestScoreFemale: 90,
-        postTestScoreMale: 95,
-        postTestScoreFemale: 100,
-        endDate: '2024-10-01',
+        villageId: 'VIL002',
+        // Number of beneficiaries
+        male: 150,
+        female: 170,
+        elderly: 90,
+        youth: 130,
+        disability: 35,
+        widow: 45,
+        // Training Assessment
+        pretest: 80,
+        posttest: 92,
+        // Stakeholders Involved
+        ngo: 4,
+        government: 3,
+        privateSector: 2,
+        academics: 1,
+        localCommunity: 6,
+        others: 2,
+      },
+      {
+        id: '3',
+        trainingName: 'Digital Literacy Workshop',
+        trainingType: 'Hybrid',
+        date: '2024-09-15',
+        village: 'Surabaya',
+        villageId: 'VIL003',
+        // Number of beneficiaries
+        male: 80,
+        female: 95,
+        elderly: 40,
+        youth: 135,
+        disability: 20,
+        widow: 25,
+        // Training Assessment
+        pretest: 70,
+        posttest: 85,
+        // Stakeholders Involved
+        ngo: 2,
+        government: 1,
+        privateSector: 3,
+        academics: 3,
+        localCommunity: 4,
+        others: 1,
+      },
+      {
+        id: '4',
+        trainingName: 'Community Health Training',
+        trainingType: 'In-Person',
+        date: '2024-10-01',
+        village: 'Yogyakarta',
+        villageId: 'VIL004',
+        // Number of beneficiaries
+        male: 120,
+        female: 140,
+        elderly: 80,
+        youth: 100,
+        disability: 30,
+        widow: 40,
+        // Training Assessment
+        pretest: 78,
+        posttest: 90,
+        // Stakeholders Involved
+        ngo: 5,
+        government: 4,
+        privateSector: 1,
+        academics: 2,
+        localCommunity: 7,
+        others: 0,
       },
     ];
   },
@@ -58,24 +118,7 @@ const mockApi = {
     await new Promise((resolve) => setTimeout(resolve, 500));
     return {
       id: Date.now().toString(),
-      trainingName: training.trainingName as string,
-      trainingType: training.trainingType as string,
-      startDate: training.startDate as string,
-      endDate: training.endDate as string,
-      village: training.village as string,
-      communityParticipationMale: training.communityParticipationMale as number,
-      communityParticipationFemale:
-        training.communityParticipationFemale as number,
-      elderlyMale: training.elderlyMale as number,
-      elderlyFemale: training.elderlyFemale as number,
-      youthMale: training.youthMale as number,
-      youthFemale: training.youthFemale as number,
-      disabilityMale: training.disabilityMale as number,
-      disabilityFemale: training.disabilityFemale as number,
-      preTestScoreMale: training.preTestScoreMale as number,
-      preTestScoreFemale: training.preTestScoreFemale as number,
-      postTestScoreMale: training.postTestScoreMale as number,
-      postTestScoreFemale: training.postTestScoreFemale as number,
+      ...training,
     };
   },
 
@@ -84,33 +127,40 @@ const mockApi = {
     training: Partial<TrainingData>
   ): Promise<TrainingData> => {
     await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // For mock purposes, return a complete TrainingData object
+    // In a real API, you'd merge with existing data from the database
     return {
       id,
-      trainingName: (training.trainingName as string) || '',
-      trainingType: (training.trainingType as string) || '',
-      startDate: (training.startDate as string) || '',
-      endDate: (training.endDate as string) || '',
-      village: (training.village as string) || '',
-      communityParticipationMale:
-        (training.communityParticipationMale as number) || 0,
-      communityParticipationFemale:
-        (training.communityParticipationFemale as number) || 0,
-      elderlyMale: (training.elderlyMale as number) || 0,
-      elderlyFemale: (training.elderlyFemale as number) || 0,
-      youthMale: (training.youthMale as number) || 0,
-      youthFemale: (training.youthFemale as number) || 0,
-      disabilityMale: (training.disabilityMale as number) || 0,
-      disabilityFemale: (training.disabilityFemale as number) || 0,
-      preTestScoreMale: (training.preTestScoreMale as number) || 0,
-      preTestScoreFemale: (training.preTestScoreFemale as number) || 0,
-      postTestScoreMale: (training.postTestScoreMale as number) || 0,
-      postTestScoreFemale: (training.postTestScoreFemale as number) || 0,
+      trainingName: training.trainingName || '',
+      trainingType: training.trainingType || '',
+      date: training.date || '',
+      village: training.village || '',
+      villageId: training.villageId || '',
+      // Number of beneficiaries
+      male: training.male || 0,
+      female: training.female || 0,
+      elderly: training.elderly || 0,
+      youth: training.youth || 0,
+      disability: training.disability || 0,
+      widow: training.widow || 0,
+      // Training Assessment
+      pretest: training.pretest || 0,
+      posttest: training.posttest || 0,
+      // Stakeholders Involved
+      ngo: training.ngo || 0,
+      government: training.government || 0,
+      privateSector: training.privateSector || 0,
+      academics: training.academics || 0,
+      localCommunity: training.localCommunity || 0,
+      others: training.others || 0,
       ...training,
     } as TrainingData;
   },
 
-  deleteTraining: async (): Promise<void> => {
+  deleteTraining: async (id: string): Promise<void> => {
     await new Promise((resolve) => setTimeout(resolve, 500));
+    console.log(`Training with id ${id} deleted`);
   },
 };
 
@@ -124,11 +174,11 @@ export const trainingKeys = {
 };
 
 // Custom hooks
-export function useTrainings(filters?: string) {
+export function useTrainings(filters?: TrainingFilters) {
   return useQuery({
-    queryKey: trainingKeys.list(filters || ''),
+    queryKey: trainingKeys.list(JSON.stringify(filters)),
     queryFn: () => mockApi.getTrainings(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 }
 

@@ -1,6 +1,5 @@
 import DataTable from '@/components/DataTable/DataTable';
 import { TrainingTable } from '@/types/training';
-import { TrainingPageEnum } from '@/stores/trainingStore';
 import {
   Paper,
   Box,
@@ -21,6 +20,8 @@ import { AddTrainingPage } from './AddTrainingPage/AddTrainingPage';
 import { useTrainingPageImpl } from './useTrainingPageImpl';
 import { DetailTrainingPage } from './DetailTrainingPage/DetailTrainingPage';
 import { FilterModal } from './components/FilterModal';
+import { PageEnum } from '@/constants/page';
+import { trainingTypeOptions } from './constants';
 
 export const TrainingPage = () => {
   const { state, action } = useTrainingPageImpl();
@@ -33,8 +34,6 @@ export const TrainingPage = () => {
     error,
     isLoading,
     isFilterModalOpen,
-    uniqueTrainingTypes,
-    uniqueVillages,
   } = state;
 
   const { handleAddNew, setSearchQuery, handleOpenFilter, handleCloseFilter } =
@@ -48,11 +47,11 @@ export const TrainingPage = () => {
     );
   }
 
-  if (page === TrainingPageEnum.DETAIL) {
+  if (page === PageEnum.DETAIL) {
     return <DetailTrainingPage />;
   }
 
-  if (page === TrainingPageEnum.ADD) {
+  if (page === PageEnum.ADD) {
     return <AddTrainingPage />;
   }
 
@@ -188,8 +187,8 @@ export const TrainingPage = () => {
       <FilterModal
         open={isFilterModalOpen}
         onClose={handleCloseFilter}
-        trainingTypes={uniqueTrainingTypes}
-        villages={uniqueVillages}
+        trainingTypes={trainingTypeOptions.map((option) => option.label)}
+        villages={[]}
       />
     </Paper>
   );

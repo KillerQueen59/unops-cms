@@ -1,35 +1,37 @@
 import { z } from 'zod';
+import { numericString, scoreString } from './commonForm';
 
 export const trainingFormSchema = z.object({
   // Detail Training
-  trainingName: z.string().min(1, 'Nama training wajib diisi'),
-  trainingType: z.string().min(1, 'Tipe training wajib diisi'),
-  mandatoryTraining: z.enum(['yes', 'no']),
-  therapeuticTraining: z.enum(['yes', 'no']),
-  interventionType: z.string().min(1, 'Tipe intervensi wajib diisi'),
-  village: z.string().min(1, 'Desa wajib diisi'),
+  trainingName: z.string().min(1, 'Training name is required'),
+  trainingType: z.string().min(1, 'Training type is required'),
+  date: z.string().min(1, 'Training date is required'),
+  village: z.string().min(1, 'Village is required'),
+  villageId: z.string().min(1, 'Village ID is required'),
 
-  // Community Participation
-  communityParticipationMale: z
-    .string()
-    .min(1, 'Jumlah populasi pria wajib diisi'),
-  communityParticipationFemale: z
-    .string()
-    .min(1, 'Jumlah populasi wanita wajib diisi'),
+  // Number of beneficiaries
+  male: numericString('Number of male beneficiaries is required'),
+  female: numericString('Number of female beneficiaries is required'),
+  elderly: numericString('Number of elderly is required'),
+  youth: numericString('Number of youth is required'),
+  disability: numericString('Number of people with disabilities is required'),
+  widow: numericString('Number of widows is required'),
 
-  // Community Capacity
-  elderlyMale: z.string().min(1, 'Jumlah lansia pria wajib diisi'),
-  elderlyFemale: z.string().min(1, 'Jumlah lansia wanita wajib diisi'),
-  youthMale: z.string().min(1, 'Jumlah pemuda pria wajib diisi'),
-  youthFemale: z.string().min(1, 'Jumlah pemuda wanita wajib diisi'),
-  disabilityMale: z.string().min(1, 'Jumlah disabilitas pria wajib diisi'),
-  disabilityFemale: z.string().min(1, 'Jumlah disabilitas wanita wajib diisi'),
+  // Training Assessment (scores should be 0-100)
+  pretest: scoreString('Pre-test score is required'),
+  posttest: scoreString('Post-test score is required'),
 
-  // Knowledge Improvement
-  preTestScoreMale: z.string().min(1, 'Nilai pre-test pria wajib diisi'),
-  preTestScoreFemale: z.string().min(1, 'Nilai pre-test wanita wajib diisi'),
-  postTestScoreMale: z.string().min(1, 'Nilai post-test pria wajib diisi'),
-  postTestScoreFemale: z.string().min(1, 'Nilai post-test wanita wajib diisi'),
+  // Stakeholders Involved
+  ngo: numericString('Number of NGOs is required'),
+  government: numericString('Number of government stakeholders is required'),
+  privateSector: numericString(
+    'Number of private sector stakeholders is required'
+  ),
+  academics: numericString('Number of academics is required'),
+  localCommunity: numericString(
+    'Number of local community stakeholders is required'
+  ),
+  others: numericString('Number of other stakeholders is required'),
 });
 
 export type TrainingFormData = z.infer<typeof trainingFormSchema>;

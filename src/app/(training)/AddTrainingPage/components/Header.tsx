@@ -1,5 +1,5 @@
 import { CustomBreadcrumbs } from '@/components';
-import { BreadcrumbItem } from '@/stores/trainingStore';
+import { BreadcrumbItem } from '@/types/common';
 import { Box, IconButton, Typography } from '@mui/material';
 import { CaretLeftIcon } from '@phosphor-icons/react';
 

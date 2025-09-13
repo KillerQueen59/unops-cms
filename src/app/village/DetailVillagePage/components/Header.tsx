@@ -1,8 +1,10 @@
 import { CustomBreadcrumbs } from '@/components';
-import { BreadcrumbItem } from '@/stores/trainingStore';
+import { BreadcrumbItem } from '@/types/common';
 import { VillageData } from '@/types/village';
 import { Box, IconButton, Typography } from '@mui/material';
 import { CaretLeftIcon } from '@phosphor-icons/react';
+import { getRegencyName } from '../../helper';
+import { PROVINCE_NAME } from '../../constants';
 
 export const Header = ({
   breadcrumbs,
@@ -55,6 +57,19 @@ export const Header = ({
           >
             {villageData.villageName}
           </Typography>
+          <Box
+            sx={{
+              backgroundColor: '#E0F2FE',
+              color: 'primary.main',
+              px: 2,
+              py: 0.5,
+              borderRadius: '16px',
+              fontSize: '14px',
+              fontWeight: 500,
+            }}
+          >
+            {villageData.villageCategory}
+          </Box>
         </Box>
       </Box>
 
@@ -68,13 +83,12 @@ export const Header = ({
           px: 2,
         }}
       >
-        {/* Village Code */}
         <Box>
           <Typography
             variant="body2"
             sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
           >
-            Village Code
+            Area ID
           </Typography>
           <Typography
             variant="body1"
@@ -84,35 +98,35 @@ export const Header = ({
           </Typography>
         </Box>
 
-        {/* Total Population */}
         <Box>
           <Typography
             variant="body2"
             sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
           >
-            Total Population
+            Province
           </Typography>
           <Typography
             variant="body1"
             sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
           >
-            {villageData.totalPopulation.toLocaleString()}
+            {PROVINCE_NAME}
           </Typography>
         </Box>
 
-        {/* Total Land Manage */}
         <Box>
           <Typography
             variant="body2"
             sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
           >
-            Total Land Manage (Ha)
+            Regency
           </Typography>
           <Typography
             variant="body1"
             sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
           >
-            {villageData.totalLandManage}
+            {getRegencyName(
+              villageData.villageCode.split('.').slice(0, 2).join('.')
+            )}
           </Typography>
         </Box>
 
@@ -122,13 +136,13 @@ export const Header = ({
             variant="body2"
             sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
           >
-            Carbon Emissions (Ton)
+            Coordinate
           </Typography>
           <Typography
             variant="body1"
             sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
           >
-            {villageData.totalCarbonEmissions}
+            {villageData.villageLat}, {villageData.villageLng}
           </Typography>
         </Box>
       </Box>
@@ -141,67 +155,63 @@ export const Header = ({
           px: 2,
         }}
       >
-        {/* Village Code */}
         <Box>
           <Typography
             variant="body2"
             sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
           >
-            Village Code
+            Land Managed Start
           </Typography>
           <Typography
             variant="body1"
             sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
           >
-            {villageData.villageCode}
+            {villageData.landManageStart} Ha
           </Typography>
         </Box>
 
-        {/* Total Population */}
         <Box>
           <Typography
             variant="body2"
             sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
           >
-            Total Population
+            Land Managed End
           </Typography>
           <Typography
             variant="body1"
             sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
           >
-            {villageData.totalPopulation.toLocaleString()}
+            {villageData.landManageEnd} Ha
           </Typography>
         </Box>
 
-        {/* Total Land Manage */}
         <Box>
           <Typography
             variant="body2"
             sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
           >
-            Total Land Manage (Ha)
+            Carbon Emissions Start (Ton)
           </Typography>
           <Typography
             variant="body1"
             sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
           >
-            {villageData.totalLandManage}
+            {villageData.carbonEmisionStart}
           </Typography>
         </Box>
 
-        {/* Carbon Emissions */}
         <Box>
           <Typography
             variant="body2"
             sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
           >
-            Carbon Emissions (Ton)
+            Carbon Emissions End (Ton)
           </Typography>
           <Typography
             variant="body1"
             sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
           >
-            {villageData.totalCarbonEmissions}
+            {villageData.carbonEmisionEnd}
           </Typography>
         </Box>
       </Box>

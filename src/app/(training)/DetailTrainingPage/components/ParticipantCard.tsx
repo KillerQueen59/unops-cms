@@ -3,16 +3,14 @@ import { Card, CardContent, Box, Typography } from '@mui/material';
 
 interface ParticipantCardProps {
   title: string;
-  maleCount: number;
-  femaleCount: number;
+  count: number;
   icon: React.ReactNode;
   color: string;
 }
 
 export const ParticipantCard: React.FC<ParticipantCardProps> = ({
   title,
-  maleCount,
-  femaleCount,
+  count,
   icon,
   color,
 }) => {
@@ -25,8 +23,8 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
         height: '100%',
       }}
     >
-      <CardContent sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+      <CardContent sx={{ p: 3, display: 'flex' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
           <Box
             sx={{
               width: 40,
@@ -55,30 +53,15 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
 
         <Box sx={{ display: 'flex', gap: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Male sx={{ color: '#3B82F6', fontSize: 20 }} />
             <Typography
               variant="h5"
               sx={{
                 fontWeight: 700,
-                color: '#1F2937',
-                fontSize: '24px',
+                color: 'secondary.main',
+                fontSize: '32px',
               }}
             >
-              {maleCount}
-            </Typography>
-          </Box>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Female sx={{ color: '#EC4899', fontSize: 20 }} />
-            <Typography
-              variant="h5"
-              sx={{
-                fontWeight: 700,
-                color: '#1F2937',
-                fontSize: '24px',
-              }}
-            >
-              {femaleCount}
+              {count}
             </Typography>
           </Box>
         </Box>
