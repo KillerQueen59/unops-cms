@@ -27,9 +27,6 @@ export const useTrainingPageImpl = () => {
       village: filters.village,
       startDate: filters.startDate,
       endDate: filters.endDate,
-      // Add pagination if needed
-      // page: currentPage,
-      // pageSize: itemsPerPage,
     }),
     [searchQuery, filters]
   );
