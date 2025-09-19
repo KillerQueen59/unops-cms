@@ -1,35 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
-import {
-  Box,
-  Paper,
-  TextField,
-  Button,
-  Typography,
-  Alert,
-  Container,
-} from '@mui/material';
-import { useAuth } from '@/providers';
+import React from 'react';
+import { Box, Paper, Typography, Button, Container } from '@mui/material';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const { login, isLoading } = useAuth();
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    try {
-      await login(email, password);
-      router.push('/'); // Redirect to main page after login
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
-    }
+  const handleGoHome = () => {
+    router.push('/');
   };
 
   return (
@@ -42,51 +21,34 @@ export default function LoginPage() {
           justifyContent: 'center',
         }}
       >
-        <Paper sx={{ p: 4, width: '100%' }}>
-          <Typography
-            variant="h4"
-            component="h1"
-            gutterBottom
-            textAlign="center"
-          >
-            UNOPS CMS Login
+        <Paper sx={{ p: 4, width: '100%', textAlign: 'center' }}>
+          <Typography variant="h4" component="h1" gutterBottom color="primary">
+            Authentication Disabled
           </Typography>
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
+          <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
+            The application is currently using static authentication with a
+            Bearer token. Login functionality has been temporarily disabled.
+          </Typography>
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-            <TextField
-              fullWidth
-              label="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              margin="normal"
-              required
-            />
-            <TextField
-              fullWidth
-              label="Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              margin="normal"
-              required
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={isLoading}
-            >
-              {isLoading ? 'Logging in...' : 'Login'}
-            </Button>
-          </Box>
+          <Typography variant="body2" sx={{ mb: 4, color: 'text.secondary' }}>
+            You are automatically authenticated as: <strong>Admin User</strong>
+          </Typography>
+
+          <Button
+            variant="contained"
+            size="large"
+            onClick={handleGoHome}
+            sx={{
+              mt: 2,
+              backgroundColor: '#0EA5E9',
+              '&:hover': {
+                backgroundColor: '#0284C7',
+              },
+            }}
+          >
+            Go to Dashboard
+          </Button>
         </Paper>
       </Box>
     </Container>

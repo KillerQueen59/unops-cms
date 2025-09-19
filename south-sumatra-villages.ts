@@ -1,116 +1,13 @@
-export enum VillageCategory {
-  Category1 = 'Category 1',
-  Category2 = 'Category 2',
-}
+/**
+ * South Sumatra Villages Data Constants
+ * Generated on: 2025-09-18T18:30:37.709Z
+ * Data source: https://wilayah.id/
+ * 
+ * Total Regencies: 17
+ * Total Districts: 241
+ * Total Villages: 3259
+ */
 
-export const villageCategoryOptions = [
-  { value: VillageCategory.Category1, label: 'Category 1' },
-  { value: VillageCategory.Category2, label: 'Category 2' },
-];
-
-// Complete South Sumatra Location Constants based on kodewilayah.id
-export const PROVINCE_CODE = '16';
-export const PROVINCE_NAME = 'Sumatera Selatan';
-
-export const southSumatraRegencies = [
-  {
-    code: '16.01',
-    name: 'Kabupaten Ogan Komering Ulu',
-    capital: 'Baturaja',
-    type: 'regency',
-  },
-  {
-    code: '16.02',
-    name: 'Kabupaten Ogan Komering Ilir',
-    capital: 'Kayu Agung',
-    type: 'regency',
-  },
-  {
-    code: '16.03',
-    name: 'Kabupaten Muara Enim',
-    capital: 'Muara Enim',
-    type: 'regency',
-  },
-  { code: '16.04', name: 'Kabupaten Lahat', capital: 'Lahat', type: 'regency' },
-  {
-    code: '16.05',
-    name: 'Kabupaten Musi Rawas',
-    capital: 'Muara Beliti',
-    type: 'regency',
-  },
-  {
-    code: '16.06',
-    name: 'Kabupaten Musi Banyuasin',
-    capital: 'Sekayu',
-    type: 'regency',
-  },
-  {
-    code: '16.07',
-    name: 'Kabupaten Banyuasin',
-    capital: 'Pangkalan Balai',
-    type: 'regency',
-  },
-  {
-    code: '16.08',
-    name: 'Kabupaten Ogan Komering Ulu Selatan',
-    capital: 'Muara Dua',
-    type: 'regency',
-  },
-  {
-    code: '16.09',
-    name: 'Kabupaten Ogan Komering Ulu Timur',
-    capital: 'Martapura',
-    type: 'regency',
-  },
-  {
-    code: '16.10',
-    name: 'Kabupaten Ogan Ilir',
-    capital: 'Indralaya',
-    type: 'regency',
-  },
-  {
-    code: '16.11',
-    name: 'Kabupaten Empat Lawang',
-    capital: 'Tebing Tinggi',
-    type: 'regency',
-  },
-  {
-    code: '16.12',
-    name: 'Kabupaten Penukal Abab Lematang Ilir',
-    capital: 'Talang Ubi',
-    type: 'regency',
-  },
-  {
-    code: '16.13',
-    name: 'Kabupaten Musi Rawas Utara',
-    capital: 'Rupit',
-    type: 'regency',
-  },
-
-  // Cities (Kota)
-  { code: '16.71', name: 'Kota Palembang', capital: 'Palembang', type: 'city' },
-  {
-    code: '16.72',
-    name: 'Kota Prabumulih',
-    capital: 'Prabumulih',
-    type: 'city',
-  },
-  {
-    code: '16.73',
-    name: 'Kota Pagar Alam',
-    capital: 'Pagar Alam',
-    type: 'city',
-  },
-  {
-    code: '16.74',
-    name: 'Kota Lubuklinggau',
-    capital: 'Lubuklinggau',
-    type: 'city',
-  },
-];
-
-// Comprehensive village data for each regency/city
-// This includes major villages and districts (skip kecamatan level as requested)
 export const villagesByRegency: Record<
   string,
   Array<{ code: string; name: string; type: 'desa' | 'kelurahan' }>
@@ -173,11 +70,7 @@ export const villagesByRegency: Record<
     { code: '16.01.14.1004', name: 'Kemalaraja', type: 'kelurahan' },
     { code: '16.01.14.1005', name: 'Sukaraya', type: 'kelurahan' },
     { code: '16.01.14.1006', name: 'Sukajadi', type: 'kelurahan' },
-    {
-      code: '16.01.14.1011',
-      name: 'Kemelak Bindung Langit',
-      type: 'kelurahan',
-    },
+    { code: '16.01.14.1011', name: 'Kemelak Bindung Langit', type: 'kelurahan' },
     { code: '16.01.14.1012', name: 'Sepancar Lawang Kulon', type: 'kelurahan' },
     { code: '16.01.14.1013', name: 'Baturaja Permai', type: 'kelurahan' },
     { code: '16.01.14.1014', name: 'Sekar Jaya', type: 'kelurahan' },
@@ -277,7 +170,7 @@ export const villagesByRegency: Record<
     { code: '16.01.32.2005', name: 'Kedaton Timur', type: 'kelurahan' },
     { code: '16.01.32.2006', name: 'Suka Pindah', type: 'desa' },
     { code: '16.01.32.2007', name: 'Sinar Kedaton', type: 'desa' },
-    { code: '16.01.32.2008', name: 'Lubuk Kemiling', type: 'desa' },
+    { code: '16.01.32.2008', name: 'Lubuk Kemiling', type: 'desa' }
   ],
 
   // Kabupaten Ogan Komering (16.02)
@@ -608,7 +501,7 @@ export const villagesByRegency: Record<
     { code: '16.02.24.2004', name: 'Maribaya', type: 'kelurahan' },
     { code: '16.02.24.2005', name: 'Pancawarna', type: 'kelurahan' },
     { code: '16.02.24.2006', name: 'Tanjung Makmur', type: 'kelurahan' },
-    { code: '16.02.24.2007', name: 'Kayu Labu', type: 'kelurahan' },
+    { code: '16.02.24.2007', name: 'Kayu Labu', type: 'kelurahan' }
   ],
 
   // Kabupaten Muara Enim (16.03)
@@ -868,7 +761,7 @@ export const villagesByRegency: Record<
     { code: '16.03.27.2009', name: 'Indramayu', type: 'desa' },
     { code: '16.03.27.2010', name: 'Bedegung', type: 'desa' },
     { code: '16.03.27.2011', name: 'Padang Bindu', type: 'desa' },
-    { code: '16.03.27.2012', name: 'Lubuk Nipis', type: 'desa' },
+    { code: '16.03.27.2012', name: 'Lubuk Nipis', type: 'desa' }
   ],
 
   // Kabupaten Lahat (16.04)
@@ -1004,7 +897,7 @@ export const villagesByRegency: Record<
     { code: '16.04.12.2019', name: 'Aceh', type: 'desa' },
     { code: '16.04.12.2020', name: 'Pajar Tinggi', type: 'desa' },
     { code: '16.04.12.2025', name: 'Kota Raya Darat', type: 'kelurahan' },
-    { code: '16.04.12.2026', name: 'Jentian', type: 'desa' },
+    { code: '16.04.12.2026', name: 'Jenti'an', type: 'desa' },
     { code: '16.04.12.2027', name: 'Tongkok', type: 'desa' },
     { code: '16.04.12.2028', name: 'Benua Raja', type: 'desa' },
     { code: '16.04.12.2029', name: 'Talang Mengkenang', type: 'desa' },
@@ -1190,11 +1083,7 @@ export const villagesByRegency: Record<
     { code: '16.04.25.2007', name: 'Lubuk Selo', type: 'kelurahan' },
     { code: '16.04.25.2008', name: 'Rindu Hati', type: 'kelurahan' },
     { code: '16.04.25.2009', name: 'Sumber Karya', type: 'kelurahan' },
-    {
-      code: '16.04.25.2010',
-      name: 'Trans SP II Padang Muara Dua',
-      type: 'kelurahan',
-    },
+    { code: '16.04.25.2010', name: 'Trans SP II Padang Muara Dua', type: 'kelurahan' },
     { code: '16.04.26.2001', name: 'Padang', type: 'kelurahan' },
     { code: '16.04.26.2002', name: 'Tanjung Menang', type: 'kelurahan' },
     { code: '16.04.26.2003', name: 'Lubuk Pedaro', type: 'kelurahan' },
@@ -1254,7 +1143,7 @@ export const villagesByRegency: Record<
     { code: '16.04.31.2007', name: 'Kerung', type: 'kelurahan' },
     { code: '16.04.31.2008', name: 'Muara Cawang', type: 'kelurahan' },
     { code: '16.04.31.2009', name: 'Talang Sawah', type: 'kelurahan' },
-    { code: '16.04.31.2010', name: 'Talang Sejemput', type: 'kelurahan' },
+    { code: '16.04.31.2010', name: 'Talang Sejemput', type: 'kelurahan' }
   ],
 
   // Kabupaten Musi Rawas (16.05)
@@ -1457,7 +1346,7 @@ export const villagesByRegency: Record<
     { code: '16.05.21.2005', name: 'Sukarena', type: 'desa' },
     { code: '16.05.21.2006', name: 'Yudha Karya Bakti', type: 'desa' },
     { code: '16.05.21.2007', name: 'Rantau Alih', type: 'desa' },
-    { code: '16.05.21.2008', name: 'Ciptodadi II', type: 'desa' },
+    { code: '16.05.21.2008', name: 'Ciptodadi II', type: 'desa' }
   ],
 
   // Kabupaten Musi Banyuasin (16.06)
@@ -1703,7 +1592,7 @@ export const villagesByRegency: Record<
     { code: '16.06.15.2009', name: 'Sinar Jaya', type: 'kelurahan' },
     { code: '16.06.15.2010', name: 'Setia Jaya', type: 'kelurahan' },
     { code: '16.06.15.2011', name: 'Mekar Jaya', type: 'kelurahan' },
-    { code: '16.06.15.2012', name: 'Layan', type: 'kelurahan' },
+    { code: '16.06.15.2012', name: 'Layan', type: 'kelurahan' }
   ],
 
   // Kabupaten Banyuasin (16.07)
@@ -2020,7 +1909,7 @@ export const villagesByRegency: Record<
     { code: '16.07.21.2009', name: 'Purwodadi', type: 'desa' },
     { code: '16.07.21.2010', name: 'Ringin Harjo', type: 'desa' },
     { code: '16.07.21.2011', name: 'Bumi Rejo', type: 'desa' },
-    { code: '16.07.21.2012', name: 'Kelapa Dua', type: 'desa' },
+    { code: '16.07.21.2012', name: 'Kelapa Dua', type: 'desa' }
   ],
 
   // Kabupaten Ogan Komering Ulu Timur (16.08)
@@ -2336,7 +2225,7 @@ export const villagesByRegency: Record<
     { code: '16.08.20.2004', name: 'Rawasari', type: 'desa' },
     { code: '16.08.20.2005', name: 'Surya Menang', type: 'desa' },
     { code: '16.08.20.2006', name: 'Muncak Kabau', type: 'desa' },
-    { code: '16.08.20.2007', name: 'Sri Bulan', type: 'desa' },
+    { code: '16.08.20.2007', name: 'Sri Bulan', type: 'desa' }
   ],
 
   // Kabupaten Ogan Komering Ulu Selatan (16.09)
@@ -2456,14 +2345,10 @@ export const villagesByRegency: Record<
     { code: '16.09.08.2009', name: 'Sri Menanti', type: 'kelurahan' },
     { code: '16.09.08.2010', name: 'Kepayang', type: 'kelurahan' },
     { code: '16.09.08.2011', name: 'Kemang Bandung', type: 'kelurahan' },
-    {
-      code: '16.09.08.2012',
-      name: 'Selabung Belimbing Jaya',
-      type: 'kelurahan',
-    },
+    { code: '16.09.08.2012', name: 'Selabung Belimbing Jaya', type: 'kelurahan' },
     { code: '16.09.08.2013', name: 'Bunut', type: 'kelurahan' },
     { code: '16.09.08.2014', name: 'Air Baru', type: 'kelurahan' },
-    { code: '16.09.08.2015', name: 'Perean', type: 'kelurahan' },
+    { code: '16.09.08.2015', name: 'Pere'an', type: 'kelurahan' },
     { code: '16.09.09.2001', name: 'Tanjung Durian', type: 'desa' },
     { code: '16.09.09.2002', name: 'Sipin', type: 'desa' },
     { code: '16.09.09.2003', name: 'Kota Way', type: 'kelurahan' },
@@ -2529,11 +2414,7 @@ export const villagesByRegency: Record<
     { code: '16.09.12.2012', name: 'Sumber Mulia', type: 'kelurahan' },
     { code: '16.09.12.2014', name: 'Way Relai', type: 'kelurahan' },
     { code: '16.09.12.2015', name: 'Tanjung Baru Ranau', type: 'kelurahan' },
-    {
-      code: '16.09.12.2016',
-      name: 'Simpang Sender Selatan',
-      type: 'kelurahan',
-    },
+    { code: '16.09.12.2016', name: 'Simpang Sender Selatan', type: 'kelurahan' },
     { code: '16.09.12.2017', name: 'Simpang Sender Utara', type: 'kelurahan' },
     { code: '16.09.12.2018', name: 'Simpang Sender Timur', type: 'kelurahan' },
     { code: '16.09.12.2019', name: 'Simpang Sender Tengah', type: 'kelurahan' },
@@ -2607,7 +2488,7 @@ export const villagesByRegency: Record<
     { code: '16.09.19.2008', name: 'Pekuolan', type: 'desa' },
     { code: '16.09.19.2009', name: 'Pelawi', type: 'desa' },
     { code: '16.09.19.2011', name: 'Majar', type: 'desa' },
-    { code: '16.09.19.2012', name: 'Bumi Agung Jaya', type: 'kelurahan' },
+    { code: '16.09.19.2012', name: 'Bumi Agung Jaya', type: 'kelurahan' }
   ],
 
   // Kabupaten Ogan Ilir (16.10)
@@ -2742,28 +2623,16 @@ export const villagesByRegency: Record<
     { code: '16.10.07.2015', name: 'Palem Raya', type: 'kelurahan' },
     { code: '16.10.08.2001', name: 'Mandi Angin', type: 'kelurahan' },
     { code: '16.10.08.2002', name: 'Tanjung Lubuk', type: 'kelurahan' },
-    {
-      code: '16.10.08.2003',
-      name: 'Tebing Gerinting Selatan',
-      type: 'kelurahan',
-    },
+    { code: '16.10.08.2003', name: 'Tebing Gerinting Selatan', type: 'kelurahan' },
     { code: '16.10.08.2004', name: 'Arisan Gading', type: 'kelurahan' },
-    {
-      code: '16.10.08.2005',
-      name: 'Tanjung Dayang Selatan',
-      type: 'kelurahan',
-    },
+    { code: '16.10.08.2005', name: 'Tanjung Dayang Selatan', type: 'kelurahan' },
     { code: '16.10.08.2006', name: 'Beti', type: 'kelurahan' },
     { code: '16.10.08.2007', name: 'Meranjat I', type: 'kelurahan' },
     { code: '16.10.08.2008', name: 'Meranjat Ilir', type: 'kelurahan' },
     { code: '16.10.08.2009', name: 'Meranjat II', type: 'kelurahan' },
     { code: '16.10.08.2010', name: 'Sukaraja Lama', type: 'kelurahan' },
     { code: '16.10.08.2011', name: 'Sukaraja Baru', type: 'kelurahan' },
-    {
-      code: '16.10.08.2012',
-      name: 'Tebing Gerinting Utara',
-      type: 'kelurahan',
-    },
+    { code: '16.10.08.2012', name: 'Tebing Gerinting Utara', type: 'kelurahan' },
     { code: '16.10.08.2013', name: 'Tanjung Dayang Utara', type: 'kelurahan' },
     { code: '16.10.08.2014', name: 'Meranjat III', type: 'kelurahan' },
     { code: '16.10.09.2001', name: 'Pematang Bangsal', type: 'kelurahan' },
@@ -2864,7 +2733,7 @@ export const villagesByRegency: Record<
     { code: '16.10.16.2008', name: 'Paya Besar', type: 'desa' },
     { code: '16.10.16.2009', name: 'Rengas II', type: 'desa' },
     { code: '16.10.16.2010', name: 'Seri Kembang II', type: 'desa' },
-    { code: '16.10.16.2011', name: 'Seri Kembang III', type: 'desa' },
+    { code: '16.10.16.2011', name: 'Seri Kembang III', type: 'desa' }
   ],
 
   // Kabupaten Empat Lawang (16.11)
@@ -3024,7 +2893,7 @@ export const villagesByRegency: Record<
     { code: '16.11.10.2007', name: 'Air Kandis', type: 'kelurahan' },
     { code: '16.11.10.2008', name: 'Lingge', type: 'kelurahan' },
     { code: '16.11.10.2009', name: 'Rantau Dodor', type: 'kelurahan' },
-    { code: '16.11.10.2010', name: 'Kungkilan', type: 'kelurahan' },
+    { code: '16.11.10.2010', name: 'Kungkilan', type: 'kelurahan' }
   ],
 
   // Kabupaten Penukal Abab Lematang Ilir (16.12)
@@ -3099,7 +2968,7 @@ export const villagesByRegency: Record<
     { code: '16.12.05.2014', name: 'Raja Barat', type: 'kelurahan' },
     { code: '16.12.05.2015', name: 'Tanah Abang Jaya', type: 'kelurahan' },
     { code: '16.12.05.2016', name: 'Muara Dua', type: 'desa' },
-    { code: '16.12.05.2017', name: 'Sukamanis', type: 'desa' },
+    { code: '16.12.05.2017', name: 'Sukamanis', type: 'desa' }
   ],
 
   // Kabupaten Musi Rawas Utara (16.13)
@@ -3192,7 +3061,7 @@ export const villagesByRegency: Record<
     { code: '16.13.07.2003', name: 'Sosokan', type: 'kelurahan' },
     { code: '16.13.07.2004', name: 'Kuto Tanjung', type: 'kelurahan' },
     { code: '16.13.07.2005', name: 'Muara Kuis', type: 'kelurahan' },
-    { code: '16.13.07.2006', name: 'Pulau Kidak', type: 'kelurahan' },
+    { code: '16.13.07.2006', name: 'Pulau Kidak', type: 'kelurahan' }
   ],
 
   // Kota Palembang (16.71)
@@ -3200,16 +3069,8 @@ export const villagesByRegency: Record<
     { code: '16.71.01.1001', name: 'Tiga-puluh-lima Ilir', type: 'kelurahan' },
     { code: '16.71.01.1002', name: 'Tiga-puluh-dua Ilir', type: 'kelurahan' },
     { code: '16.71.01.1003', name: 'Tiga-puluh Ilir', type: 'kelurahan' },
-    {
-      code: '16.71.01.1004',
-      name: 'Dua-puluh-sembilan Ilir',
-      type: 'kelurahan',
-    },
-    {
-      code: '16.71.01.1005',
-      name: 'Dua-puluh-delapan Ilir',
-      type: 'kelurahan',
-    },
+    { code: '16.71.01.1004', name: 'Dua-puluh-sembilan Ilir', type: 'kelurahan' },
+    { code: '16.71.01.1005', name: 'Dua-puluh-delapan Ilir', type: 'kelurahan' },
     { code: '16.71.01.1006', name: 'Dua-puluh-tujuh Ilir', type: 'kelurahan' },
     { code: '16.71.01.1007', name: 'Kemangmanis', type: 'kelurahan' },
     { code: '16.71.02.1002', name: 'Satu Ulu', type: 'kelurahan' },
@@ -3226,11 +3087,7 @@ export const villagesByRegency: Record<
     { code: '16.71.03.1007', name: 'Sentosa', type: 'kelurahan' },
     { code: '16.71.04.1001', name: 'Bukitlama', type: 'kelurahan' },
     { code: '16.71.04.1002', name: 'Lorokpakjo', type: 'kelurahan' },
-    {
-      code: '16.71.04.1003',
-      name: 'Dua-puluh-enam Ilir Satu',
-      type: 'kelurahan',
-    },
+    { code: '16.71.04.1003', name: 'Dua-puluh-enam Ilir Satu', type: 'kelurahan' },
     { code: '16.71.04.1004', name: 'Siringagung', type: 'kelurahan' },
     { code: '16.71.04.1005', name: 'Demang-Lebardaun', type: 'kelurahan' },
     { code: '16.71.04.1006', name: 'Bukitbaru', type: 'kelurahan' },
@@ -3315,7 +3172,7 @@ export const villagesByRegency: Record<
     { code: '16.71.18.1003', name: 'Sepuluh Ilir', type: 'kelurahan' },
     { code: '16.71.18.1004', name: 'Sebelas Ilir', type: 'kelurahan' },
     { code: '16.71.18.1005', name: 'Kutobatu', type: 'kelurahan' },
-    { code: '16.71.18.1006', name: 'Duku', type: 'kelurahan' },
+    { code: '16.71.18.1006', name: 'Duku', type: 'kelurahan' }
   ],
 
   // Kota Pagar Alam (16.72)
@@ -3325,11 +3182,7 @@ export const villagesByRegency: Record<
     { code: '16.72.01.1005', name: 'Pagar Alam', type: 'kelurahan' },
     { code: '16.72.01.1007', name: 'Alun Dua', type: 'kelurahan' },
     { code: '16.72.01.1014', name: 'Selibar Kemuning', type: 'kelurahan' },
-    {
-      code: '16.72.01.1016',
-      name: 'Beringin Jaya Bangun Sari',
-      type: 'kelurahan',
-    },
+    { code: '16.72.01.1016', name: 'Beringin Jaya Bangun Sari', type: 'kelurahan' },
     { code: '16.72.01.1018', name: 'Dempo Makmur', type: 'kelurahan' },
     { code: '16.72.01.1019', name: 'Kuripan Babas', type: 'kelurahan' },
     { code: '16.72.01.1020', name: 'Bangun Jaya', type: 'kelurahan' },
@@ -3358,7 +3211,7 @@ export const villagesByRegency: Record<
     { code: '16.72.05.1003', name: 'Pelang Kenidai', type: 'kelurahan' },
     { code: '16.72.05.1008', name: 'Jokoh', type: 'kelurahan' },
     { code: '16.72.05.1011', name: 'Padang Temu', type: 'kelurahan' },
-    { code: '16.72.05.1012', name: 'Candi Jaya', type: 'kelurahan' },
+    { code: '16.72.05.1012', name: 'Candi Jaya', type: 'kelurahan' }
   ],
 
   // Kota Lubuk Linggau (16.73)
@@ -3434,7 +3287,7 @@ export const villagesByRegency: Record<
     { code: '16.73.08.1007', name: 'Jogoboyo', type: 'kelurahan' },
     { code: '16.73.08.1008', name: 'Puncak Kemuning', type: 'kelurahan' },
     { code: '16.73.08.1009', name: 'Ponorogo', type: 'kelurahan' },
-    { code: '16.73.08.1010', name: 'Kali Serayu', type: 'kelurahan' },
+    { code: '16.73.08.1010', name: 'Kali Serayu', type: 'kelurahan' }
   ],
 
   // Kota Prabumulih (16.74)
@@ -3483,6 +3336,92 @@ export const villagesByRegency: Record<
     { code: '16.74.06.1001', name: 'Majasari', type: 'kelurahan' },
     { code: '16.74.06.1002', name: 'Tanjung Raman', type: 'kelurahan' },
     { code: '16.74.06.1003', name: 'Sukaraja', type: 'kelurahan' },
-    { code: '16.74.06.2004', name: 'Tanjung Menang', type: 'kelurahan' },
-  ],
+    { code: '16.74.06.2004', name: 'Tanjung Menang', type: 'kelurahan' }
+  ]
+
+};
+
+// Helper functions for working with the village data
+export const villageHelpers = {
+  // Find village by code
+  findVillageByCode: (code: string) => {
+    for (const regencyCode in villagesByRegency) {
+      const village = villagesByRegency[regencyCode].find(v => v.code === code);
+      if (village) return { ...village, regencyCode };
+    }
+    return null;
+  },
+  
+  // Get all villages in a regency
+  getVillagesByRegency: (regencyCode: string) => {
+    return villagesByRegency[regencyCode] || [];
+  },
+  
+  // Get all villages by type
+  getVillagesByType: (type: 'desa' | 'kelurahan') => {
+    const result: Array<{ code: string; name: string; type: 'desa' | 'kelurahan'; regencyCode: string }> = [];
+    for (const regencyCode in villagesByRegency) {
+      const villages = villagesByRegency[regencyCode]
+        .filter(v => v.type === type)
+        .map(v => ({ ...v, regencyCode }));
+      result.push(...villages);
+    }
+    return result;
+  },
+  
+  // Search villages by name (case insensitive)
+  searchVillagesByName: (searchTerm: string) => {
+    const term = searchTerm.toLowerCase();
+    const result: Array<{ code: string; name: string; type: 'desa' | 'kelurahan'; regencyCode: string }> = [];
+    
+    for (const regencyCode in villagesByRegency) {
+      const villages = villagesByRegency[regencyCode]
+        .filter(v => v.name.toLowerCase().includes(term))
+        .map(v => ({ ...v, regencyCode }));
+      result.push(...villages);
+    }
+    return result;
+  },
+  
+  // Get statistics
+  getStatistics: () => {
+    let totalVillages = 0;
+    let totalDesa = 0;
+    let totalKelurahan = 0;
+    
+    for (const regencyCode in villagesByRegency) {
+      const villages = villagesByRegency[regencyCode];
+      totalVillages += villages.length;
+      totalDesa += villages.filter(v => v.type === 'desa').length;
+      totalKelurahan += villages.filter(v => v.type === 'kelurahan').length;
+    }
+    
+    return {
+      totalVillages,
+      totalDesa,
+      totalKelurahan,
+      totalRegencies: Object.keys(villagesByRegency).length
+    };
+  }
+};
+
+// Export regency codes and names for reference
+export const southSumatraRegencies = {
+  '16.01': 'Kabupaten Ogan Komering Ulu',
+  '16.02': 'Kabupaten Ogan Komering',
+  '16.03': 'Kabupaten Muara Enim',
+  '16.04': 'Kabupaten Lahat',
+  '16.05': 'Kabupaten Musi Rawas',
+  '16.06': 'Kabupaten Musi Banyuasin',
+  '16.07': 'Kabupaten Banyuasin',
+  '16.08': 'Kabupaten Ogan Komering Ulu Timur',
+  '16.09': 'Kabupaten Ogan Komering Ulu Selatan',
+  '16.10': 'Kabupaten Ogan Ilir',
+  '16.11': 'Kabupaten Empat Lawang',
+  '16.12': 'Kabupaten Penukal Abab Lematang Ilir',
+  '16.13': 'Kabupaten Musi Rawas Utara',
+  '16.71': 'Kota Palembang',
+  '16.72': 'Kota Pagar Alam',
+  '16.73': 'Kota Lubuk Linggau',
+  '16.74': 'Kota Prabumulih'
 };

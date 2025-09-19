@@ -1,7 +1,7 @@
 import { useDataStore } from '@/stores/dataStore';
 import { DataFile } from '@/types/data';
-import { useDataFiles, useDeleteFile } from '@/hooks/useDataFiles';
 import { createDataColumns } from './DataColumn';
+import { useDataFiles, useDeleteFile } from '@/hooks/useDocumentData';
 
 export const useDataPageImpl = () => {
   const {

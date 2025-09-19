@@ -1,6 +1,8 @@
 import { PageEnum } from '@/constants/page';
 import { useTrainingStore } from '@/stores';
 import { TrainingFormData, trainingFormSchema } from '@/types/trainingForm';
+import { useCreateTraining, useUpdateTraining } from '@/hooks/useTrainingData';
+import { TrainingData } from '@/types/training';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -10,13 +12,18 @@ export const useAddTrainingPageImpl = () => {
     useTrainingStore();
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // API hooks
+  const createTrainingMutation = useCreateTraining();
+  const updateTrainingMutation = useUpdateTraining();
 
   const {
     control,
     handleSubmit,
     watch,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<TrainingFormData>({
     resolver: zodResolver(trainingFormSchema),
     defaultValues: {
@@ -129,6 +136,8 @@ export const useAddTrainingPageImpl = () => {
   };
 
   const handleFormSubmit = handleSubmit(() => {
+    console.log('handleFormSubmit');
+
     setShowSubmitModal(true);
   });
 
@@ -143,11 +152,55 @@ export const useAddTrainingPageImpl = () => {
 
   const onSubmit = async (data: TrainingFormData) => {
     try {
-      console.log('Saving training:', data);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setSubmitError(null); // Clear any previous errors
+
+      // Transform form data to API format
+      const trainingData: Partial<TrainingData> = {
+        trainingName: data.trainingName,
+        trainingType: data.trainingType,
+        date: data.date,
+        village: data.village,
+        villageId: data.villageId,
+        // Number of beneficiaries
+        male: parseInt(data.male || '0'),
+        female: parseInt(data.female || '0'),
+        elderly: parseInt(data.elderly || '0'),
+        youth: parseInt(data.youth || '0'),
+        disability: parseInt(data.disability || '0'),
+        widow: parseInt(data.widow || '0'),
+        // Training Assessment
+        pretest: parseInt(data.pretest || '0'),
+        posttest: parseInt(data.posttest || '0'),
+        // Stakeholders Involved
+        ngo: parseInt(data.ngo || '0'),
+        government: parseInt(data.government || '0'),
+        privateSector: parseInt(data.privateSector || '0'),
+        academics: parseInt(data.academics || '0'),
+        localCommunity: parseInt(data.localCommunity || '0'),
+        others: parseInt(data.others || '0'),
+      };
+
+      if (isEditMode && selectedTraining?.id) {
+        // Update existing training
+        await updateTrainingMutation.mutateAsync({
+          trainingId: selectedTraining.id,
+          trainingData,
+        });
+        console.log('Training updated successfully');
+      } else {
+        // Create new training
+        await createTrainingMutation.mutateAsync({
+          trainingData,
+        });
+        console.log('Training created successfully');
+      }
+
       navigateBack();
     } catch (error) {
       console.error('Failed to save training:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to save training';
+      setSubmitError(errorMessage);
     }
   };
 
@@ -157,9 +210,13 @@ export const useAddTrainingPageImpl = () => {
     breadcrumbs,
     showSubmitModal,
     showLeaveModal,
-    isSubmitting,
+    isSubmitting:
+      createTrainingMutation.isPending || updateTrainingMutation.isPending,
     errors,
+    submitError,
   };
+
+  console.log('errors', errors);
 
   const action = {
     handleBack,

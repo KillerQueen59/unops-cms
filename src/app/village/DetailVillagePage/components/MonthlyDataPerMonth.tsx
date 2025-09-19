@@ -622,6 +622,8 @@ export const MonthlyDataPerMonth = ({
   // Determine which component to render based on village category
   const villageCategory = selectedVillage?.villageCategory;
 
+  console.log('Selected Village Category:', villageCategory);
+
   return (
     <Paper
       sx={{
@@ -631,119 +633,14 @@ export const MonthlyDataPerMonth = ({
         padding: '28px',
       }}
     >
-      {villageCategory === VillageCategory.Category1 ? (
+      {villageCategory === '68c687806fe5698b8689b060' ? (
         <SustainableLandsReport
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
         />
-      ) : villageCategory === VillageCategory.Category2 ? (
+      ) : villageCategory === '68c687806fe5698b8689b061' ? (
         <IncomeReport searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-      ) : (
-        // Default fallback - show the original tabs interface
-        <>
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 600,
-              color: '#1F2937',
-              mb: 3,
-              fontSize: '18px',
-            }}
-          >
-            Monthly Data Report
-          </Typography>
-
-          {/* Tabs */}
-          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-            <Tabs value={activeTab} onChange={handleTabChange}>
-              <Tab label="Fire Incidents" />
-              <Tab label="Mitigation Performance" />
-              <Tab label="Adaptation Performance" />
-            </Tabs>
-          </Box>
-
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              mb: 3,
-            }}
-          >
-            <TextField
-              placeholder="Search..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              sx={{
-                width: 300,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: '12px',
-                },
-              }}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <SearchIcon sx={{ color: '#9CA3AF' }} />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              sx={{
-                backgroundColor: '#0EA5E9',
-                '&:hover': {
-                  backgroundColor: '#0284C7',
-                },
-                minWidth: 120,
-                height: 54,
-              }}
-            >
-              Add Data for This Month
-            </Button>
-          </Box>
-
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {filteredReports.map((report) => (
-              <Box
-                key={report.id}
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  p: 2,
-                  border: '1px solid #E5E7EB',
-                  borderRadius: '12px',
-                  backgroundColor: '#FAFAFA',
-                }}
-              >
-                <Box>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      fontWeight: 600,
-                      color: '#1F2937',
-                      mb: 0.5,
-                    }}
-                  >
-                    {report.title}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: '#6B7280',
-                      fontSize: '14px',
-                    }}
-                  >
-                    {report.type} • {report.date}
-                  </Typography>
-                </Box>
-              </Box>
-            ))}
-          </Box>
-        </>
-      )}
+      ) : null}
     </Paper>
   );
 };

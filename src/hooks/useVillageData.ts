@@ -13,7 +13,7 @@ export const villageKeys = {
   lists: () => [...villageKeys.all, 'list'] as const,
   list: (filters: string) => [...villageKeys.lists(), { filters }] as const,
   details: () => [...villageKeys.all, 'detail'] as const,
-  detail: (id: string) => [...villageKeys.details(), id] as const,
+  detail: (id: string | null) => [...villageKeys.details(), id] as const,
   // Category-specific data
   unsustainableLand: (villageId: string) =>
     [...villageKeys.all, 'unsustainable-land', villageId] as const,
@@ -25,14 +25,28 @@ export const villageKeys = {
 export const useVillages = () => {
   return useQuery({
     queryKey: villageKeys.lists(),
-    queryFn: villageService.getVillages,
+    queryFn: async () => {
+      try {
+        const result = await villageService.getVillages();
+        // Ensure we always return an array
+        return Array.isArray(result) ? result : [];
+      } catch (error) {
+        console.error('Failed to fetch villages:', error);
+        // Return empty array on error to prevent crashes
+        return [];
+      }
+    },
   });
 };
 
-export const useVillage = (id: string, enabled: boolean = true) => {
+export const useVillage = (
+  id: string | null,
+  options?: { enabled?: boolean }
+) => {
+  const enabled = options?.enabled ?? true;
   return useQuery({
     queryKey: villageKeys.detail(id),
-    queryFn: () => villageService.getVillageById(id),
+    queryFn: () => villageService.getVillageById(id!),
     enabled: enabled && !!id,
   });
 };
@@ -41,13 +55,8 @@ export const useCreateVillage = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      villageData,
-      files,
-    }: {
-      villageData: CreateVillageData;
-      files?: File[];
-    }) => villageService.createVillage(villageData, files),
+    mutationFn: ({ villageData }: { villageData: CreateVillageData }) =>
+      villageService.createVillage(villageData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: villageKeys.lists() });
     },

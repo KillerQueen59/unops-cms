@@ -9,18 +9,13 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 5 * 60 * 1000,
       gcTime: 10 * 60 * 1000,
-      retry: (failureCount, error: unknown) => {
-        if (typeof error === 'object' && error !== null && 'status' in error) {
-          const statusCode = (error as { status: number }).status;
-          if (statusCode >= 400 && statusCode < 500) {
-            return false;
-          }
-        }
-        return failureCount < 3;
-      },
+      retry: false, // Disable all retries on query failures
+      refetchOnWindowFocus: false, // Disable refetch on window focus
+      refetchOnReconnect: false, // Disable refetch on network reconnect
+      refetchOnMount: true, // Still refetch on component mount (initial load)
     },
     mutations: {
-      retry: 1,
+      retry: false, // Also disable retries for mutations
     },
   },
 });

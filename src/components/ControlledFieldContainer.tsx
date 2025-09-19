@@ -121,6 +121,27 @@ export const ControlledFieldContainer = <T extends FieldValues = FieldValues>(
                   '& .MuiOutlinedInput-root': {
                     borderRadius: '12px',
                     backgroundColor: disabled ? '#f9fafb' : '#fff',
+                    // Override browser autofill styles
+                    '& input:-webkit-autofill': {
+                      WebkitBoxShadow: '0 0 0 1000px #fff inset !important',
+                      WebkitTextFillColor: '#000 !important',
+                      backgroundColor: '#fff !important',
+                    },
+                    '& input:-webkit-autofill:hover': {
+                      WebkitBoxShadow: '0 0 0 1000px #fff inset !important',
+                      WebkitTextFillColor: '#000 !important',
+                      backgroundColor: '#fff !important',
+                    },
+                    '& input:-webkit-autofill:focus': {
+                      WebkitBoxShadow: '0 0 0 1000px #fff inset !important',
+                      WebkitTextFillColor: '#000 !important',
+                      backgroundColor: '#fff !important',
+                    },
+                    '& input:-webkit-autofill:active': {
+                      WebkitBoxShadow: '0 0 0 1000px #fff inset !important',
+                      WebkitTextFillColor: '#000 !important',
+                      backgroundColor: '#fff !important',
+                    },
                     ...(disabled && {
                       '& fieldset': {
                         borderColor: '#e5e7eb', // Lighter border when disabled
@@ -130,6 +151,31 @@ export const ControlledFieldContainer = <T extends FieldValues = FieldValues>(
                       },
                       '&.Mui-focused fieldset': {
                         borderColor: '#e5e7eb', // Prevent focus effect when disabled
+                      },
+                      // Override autofill for disabled state
+                      '& input:-webkit-autofill': {
+                        WebkitBoxShadow:
+                          '0 0 0 1000px #f9fafb inset !important',
+                        WebkitTextFillColor: '#9CA3AF !important',
+                        backgroundColor: '#f9fafb !important',
+                      },
+                      '& input:-webkit-autofill:hover': {
+                        WebkitBoxShadow:
+                          '0 0 0 1000px #f9fafb inset !important',
+                        WebkitTextFillColor: '#9CA3AF !important',
+                        backgroundColor: '#f9fafb !important',
+                      },
+                      '& input:-webkit-autofill:focus': {
+                        WebkitBoxShadow:
+                          '0 0 0 1000px #f9fafb inset !important',
+                        WebkitTextFillColor: '#9CA3AF !important',
+                        backgroundColor: '#f9fafb !important',
+                      },
+                      '& input:-webkit-autofill:active': {
+                        WebkitBoxShadow:
+                          '0 0 0 1000px #f9fafb inset !important',
+                        WebkitTextFillColor: '#9CA3AF !important',
+                        backgroundColor: '#f9fafb !important',
                       },
                     }),
                     ...(!disabled &&
@@ -158,10 +204,20 @@ export const ControlledFieldContainer = <T extends FieldValues = FieldValues>(
                   },
                   '& .MuiInputBase-input': {
                     color: disabled ? '#9CA3AF' : 'inherit', // Muted text when disabled
+                    backgroundColor: 'transparent !important', // Ensure background stays transparent
                     ...(!disabled &&
                       isDateInput && {
                         cursor: 'pointer',
                       }),
+                    // Additional autofill overrides at input level
+                    '&:-webkit-autofill': {
+                      WebkitBoxShadow: disabled
+                        ? '0 0 0 1000px #f9fafb inset !important'
+                        : '0 0 0 1000px #fff inset !important',
+                      WebkitTextFillColor: disabled
+                        ? '#9CA3AF !important'
+                        : '#000 !important',
+                    },
                   },
                   '& .MuiInputBase-input::placeholder': {
                     color: disabled ? '#d1d5db' : '#9CA3AF', // More muted placeholder when disabled

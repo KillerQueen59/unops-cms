@@ -11,6 +11,7 @@ import {
   CircularProgress,
   Alert,
 } from '@mui/material';
+import { ConfirmationModal } from '@/components';
 import { Search as SearchIcon, Add as AddIcon } from '@mui/icons-material';
 import React from 'react';
 import { useVillagePageImpl } from './useVillagePageImpl';
@@ -31,6 +32,9 @@ export default function VillagePage() {
     error,
     isLoading,
     showCategoryModal,
+    showDeleteModal,
+    villageToDelete,
+    isDeleting,
   } = state;
 
   const {
@@ -38,6 +42,8 @@ export default function VillagePage() {
     setSearchQuery,
     handleCategorySelect,
     handleCloseCategoryModal,
+    handleDeleteConfirm,
+    handleDeleteCancel,
   } = action;
 
   if (error) {
@@ -145,7 +151,7 @@ export default function VillagePage() {
         </Box>
       ) : (
         <DataTable<VillageTable>
-          data={villages.filter((village) => {
+          data={(villages || []).filter((village) => {
             if (!searchQuery) return true;
             return (
               village.villageName
@@ -174,6 +180,18 @@ export default function VillagePage() {
         open={showCategoryModal}
         onClose={handleCloseCategoryModal}
         onConfirm={handleCategorySelect}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        open={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onSecondaryButtonClick={handleDeleteCancel}
+        onPrimaryButtonClick={handleDeleteConfirm}
+        title="Delete Village?"
+        message={`Are you sure you want to delete "${villageToDelete?.villageName}"? This action cannot be undone.`}
+        primaryButtonText={isDeleting ? 'Deleting...' : 'Delete'}
+        secondaryButtonText="Cancel"
       />
     </Paper>
   );

@@ -9,6 +9,7 @@ import {
   Divider,
   Button,
   TextField,
+  Alert,
 } from '@mui/material';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
 import { trainingTypeOptions } from '../../constants';
@@ -17,15 +18,19 @@ export const Form = ({
   control,
   errors,
   isSubmitting,
+  submitError,
   handleFormSubmit,
   handleBack,
 }: {
   control: Control<TrainingFormData>;
   errors: FieldErrors<TrainingFormData>;
   isSubmitting: boolean;
+  submitError?: string | null;
   handleFormSubmit: () => void;
   handleBack: () => void;
 }) => {
+  console.log('submitError', submitError);
+
   return (
     <form
       onSubmit={(e) => {
@@ -315,6 +320,13 @@ export const Form = ({
             />
           </Box>
         </Box>
+
+        {/* Error Display */}
+        {submitError && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {submitError}
+          </Alert>
+        )}
 
         {/* Submit Button */}
         <Box

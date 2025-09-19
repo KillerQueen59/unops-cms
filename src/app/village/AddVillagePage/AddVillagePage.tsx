@@ -12,7 +12,9 @@ export const AddVillagePage = () => {
     breadcrumbs,
     showSubmitModal,
     showLeaveModal,
+    showDeleteModal,
     isSubmitting,
+    isDeleting,
     errors,
   } = state;
 
@@ -23,6 +25,9 @@ export const AddVillagePage = () => {
     handleLeaveCancel,
     handleSubmitConfirm,
     handleSubmitCancel,
+    handleDelete,
+    handleDeleteConfirm,
+    handleDeleteCancel,
     setValue,
     watch,
   } = action;
@@ -34,6 +39,7 @@ export const AddVillagePage = () => {
           breadcrumbs={breadcrumbs}
           isEditMode={isEditMode}
           handleBack={handleBack}
+          handleDelete={handleDelete}
         />
 
         <Form
@@ -71,6 +77,17 @@ export const AddVillagePage = () => {
         primaryButtonText="Stay on Page"
         secondaryButtonText="Go Back"
         type="leave"
+      />
+
+      <ConfirmationModal
+        open={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onSecondaryButtonClick={handleDeleteCancel}
+        onPrimaryButtonClick={handleDeleteConfirm}
+        title="Delete Village?"
+        message="Are you sure you want to delete this village? This action cannot be undone."
+        primaryButtonText={isDeleting ? 'Deleting...' : 'Delete'}
+        secondaryButtonText="Cancel"
       />
     </Paper>
   );

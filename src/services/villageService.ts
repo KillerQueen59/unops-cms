@@ -3,25 +3,26 @@ import { VillageData } from '@/types/village';
 
 // Village API interfaces
 export interface CreateVillageData {
-  villageName: string;
-  villageCode: string;
-  villageCategory: string;
-  totalPopulation: number;
-  villageLat: number;
-  villageLng: number;
-  landManageStart: number;
-  landManageEnd?: number;
-  carbonEmisionStart: number;
-  carbonEmisionEnd?: number;
-  potency: string;
-  climateIssue: string;
-  mainSourceOfEconomy: string;
-  srnStatus: string;
+  name: string;
+  id: string;
+  category?: string;
+  // totalPopulation: number;
+  latitude: string;
+  longitude: string;
+  startLandManaged: number;
+  endLandManaged?: number;
+  startCarbonEmission: number;
+  endCarbonEmission?: number;
+  potency?: string;
+  climateIssue?: string;
+  sourceEconomy?: string;
+  srnStatus?: string;
   // Category 1 fields
   incomesStart?: number;
   incomesEnd?: number;
   // Category 2 fields
   seedCapital?: number;
+  categoryId: string;
 }
 
 export interface UpdateVillageData extends CreateVillageData {
@@ -45,24 +46,99 @@ export interface IncomeTrackingData {
   income: number;
 }
 
+// API Response interfaces
+interface VillageApiResponse {
+  status: boolean;
+  message: string;
+  data: {
+    villages: Array<{
+      _id: string;
+      id: string;
+      longitude: number;
+      latitude: number;
+      name: string;
+      category?: string;
+      startLandManaged?: number;
+      endLandManaged?: number;
+      startCarbonEmission?: number;
+      endCarbonEmission?: number;
+      potency?: string;
+      climateIssue?: string;
+      sourceEconomy?: string;
+      srnStatus?: string;
+      startIncome?: number;
+      endIncome?: number;
+      seedCapital?: number;
+    }>;
+    totalData: number;
+  };
+}
+
+// Transform API response to our internal format
+const transformVillageFromAPI = (
+  apiVillage: VillageApiResponse['data']['villages'][0]
+): VillageData => {
+  return {
+    id: apiVillage._id,
+    villageName: apiVillage.name || '',
+    villageCode: apiVillage.id || '',
+    villageCategory: apiVillage.category || '',
+    totalPopulation: 0, // Default value since not in API response yet
+    villageLat: apiVillage.latitude || 0,
+    villageLng: apiVillage.longitude || 0,
+    landManageStart: apiVillage.startLandManaged || 0,
+    landManageEnd: apiVillage.endLandManaged,
+    carbonEmisionStart: apiVillage.startCarbonEmission || 0,
+    carbonEmisionEnd: apiVillage.endCarbonEmission,
+    potency: apiVillage.potency || '',
+    climateIssue: apiVillage.climateIssue || '',
+    mainSourceOfEconomy: apiVillage.sourceEconomy || '',
+    srnStatus: apiVillage.srnStatus || '',
+    incomesStart: apiVillage.startIncome,
+    incomesEnd: apiVillage.endIncome,
+    seedCapital: apiVillage.seedCapital,
+    unsustainableLandClearings: [],
+    incomes: [],
+  };
+};
+
 // Village API Service
 export const villageService = {
   // Basic Village CRUD operations using "🏘️ Villages" collection
 
   async getVillages(): Promise<VillageData[]> {
-    return await apiClient.get<VillageData[]>('/village');
+    try {
+      const response = await apiClient.get<VillageApiResponse>('/village/all');
+      if (response.status && response.data?.villages) {
+        return response.data.villages.map(transformVillageFromAPI);
+      }
+      return [];
+    } catch (error) {
+      console.error('Failed to fetch villages:', error);
+      return [];
+    }
   },
 
   async getVillageById(id: string): Promise<VillageData> {
-    return await apiClient.get<VillageData>(`/village/${id}`);
+    try {
+      const response = await apiClient.get<{
+        status: boolean;
+        message: string;
+        data: VillageApiResponse['data']['villages'][0];
+      }>(`/village/${id}`);
+
+      if (response.status && response.data) {
+        return transformVillageFromAPI(response.data);
+      }
+      throw new Error('Village not found');
+    } catch (error) {
+      console.error('Failed to fetch village by ID:', error);
+      throw error;
+    }
   },
 
-  async createVillage(
-    villageData: CreateVillageData,
-    files?: File[]
-  ): Promise<VillageData> {
-    const formData = createVillageFormData(villageData, files);
-    return await apiClient.post<VillageData>('/village', formData);
+  async createVillage(villageData: CreateVillageData): Promise<VillageData> {
+    return await apiClient.post<VillageData>('/village', villageData);
   },
 
   async updateVillage(
@@ -153,24 +229,25 @@ export const transformUIVillageForAPI = (
 ): UpdateVillageData => {
   return {
     id: village.id || '',
-    villageName: village.villageName || '',
-    villageCode: village.villageCode || '',
-    villageCategory: village.villageCategory || '',
-    totalPopulation: village.totalPopulation || 0,
-    villageLat: village.villageLat || 0,
-    villageLng: village.villageLng || 0,
-    landManageStart: village.landManageStart || 0,
-    landManageEnd: village.landManageEnd,
-    carbonEmisionStart: village.carbonEmisionStart || 0,
-    carbonEmisionEnd: village.carbonEmisionEnd,
+    name: village.villageName || '',
+    areaId: village.villageCode || '',
+    category: village.villageCategory || '',
+    latitude: village.villageLat?.toString() || '0',
+    longitude: village.villageLng?.toString() || '0',
+    startLandManaged: village.landManageStart || 0,
+    endLandManaged: village.landManageEnd,
+    startCarbonEmission: village.carbonEmisionStart || 0,
+    endCarbonEmission: village.carbonEmisionEnd,
     potency: village.potency || '',
     climateIssue: village.climateIssue || '',
-    mainSourceOfEconomy: village.mainSourceOfEconomy || '',
+    sourceEconomy: village.mainSourceOfEconomy || '',
     srnStatus: village.srnStatus || '',
     // Category specific fields
     incomesStart: village.incomesStart,
     incomesEnd: village.incomesEnd,
     seedCapital: village.seedCapital,
+
+    categoryId: '68c687806fe5698b8689b060',
   };
 };
 
@@ -182,25 +259,22 @@ export const createVillageFormData = (
   const formData = new FormData();
 
   // Basic fields
-  if (data.villageName) formData.append('villageName', data.villageName);
-  if (data.villageCode) formData.append('villageCode', data.villageCode);
-  if (data.villageCategory)
-    formData.append('villageCategory', data.villageCategory);
-  formData.append('totalPopulation', data.totalPopulation.toString());
-  formData.append('villageLat', data.villageLat.toString());
-  formData.append('villageLng', data.villageLng.toString());
-  formData.append('landManageStart', data.landManageStart.toString());
-  if (data.landManageEnd !== undefined) {
-    formData.append('landManageEnd', data.landManageEnd.toString());
+  if (data.name) formData.append('name', data.name);
+  if (data.areaId) formData.append('areaId', data.areaId);
+  if (data.category) formData.append('category', data.category);
+  if (data.latitude) formData.append('latitude', data.latitude);
+  if (data.longitude) formData.append('longitude', data.longitude);
+  formData.append('startLandManaged', data.startLandManaged.toString());
+  if (data.endLandManaged !== undefined) {
+    formData.append('endLandManaged', data.endLandManaged.toString());
   }
-  formData.append('carbonEmisionStart', data.carbonEmisionStart.toString());
-  if (data.carbonEmisionEnd !== undefined) {
-    formData.append('carbonEmisionEnd', data.carbonEmisionEnd.toString());
+  formData.append('startCarbonEmission', data.startCarbonEmission.toString());
+  if (data.endCarbonEmission !== undefined) {
+    formData.append('endCarbonEmission', data.endCarbonEmission.toString());
   }
   if (data.potency) formData.append('potency', data.potency);
   if (data.climateIssue) formData.append('climateIssue', data.climateIssue);
-  if (data.mainSourceOfEconomy)
-    formData.append('mainSourceOfEconomy', data.mainSourceOfEconomy);
+  if (data.sourceEconomy) formData.append('sourceEconomy', data.sourceEconomy);
   if (data.srnStatus) formData.append('srnStatus', data.srnStatus);
 
   // Category specific fields
@@ -213,6 +287,7 @@ export const createVillageFormData = (
   if (data.seedCapital !== undefined) {
     formData.append('seedCapital', data.seedCapital.toString());
   }
+  if (data.categoryId) formData.append('categoryId', data.categoryId);
 
   // File handling
   if (files) {

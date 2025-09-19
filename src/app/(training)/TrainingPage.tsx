@@ -39,7 +39,8 @@ export const TrainingPage = () => {
   const { handleAddNew, setSearchQuery, handleOpenFilter, handleCloseFilter } =
     action;
 
-  if (error) {
+  // Only show error if there's an actual error and we're not loading
+  if (error && !isLoading) {
     return (
       <Alert severity="error" sx={{ m: 2 }}>
         Failed to load training data. Please try again.

@@ -21,7 +21,22 @@ export const trainingApi = {
         .map(([key, value]) => [key, value.toString()])
     );
 
-    return apiClient.get<TrainingListResponse>('/village/training/all');
+    const response = await apiClient.get<{
+      status: boolean;
+      message: string;
+      data: {
+        trainings: Training[];
+        totalData: number;
+      };
+    }>('/village/training/all');
+
+    // Transform the response to match our interface
+    return {
+      data: response.data?.trainings || [],
+      total: response.data?.totalData || 0,
+      page: 1,
+      pageSize: response.data?.trainings?.length || 0,
+    };
   },
 
   getTrainingById: async (trainingId: string): Promise<TrainingResponse> => {

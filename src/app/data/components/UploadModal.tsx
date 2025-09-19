@@ -19,7 +19,6 @@ import Image from 'next/image';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DataFormData, dataFormSchema } from '@/types/dataForm';
-import { useUploadFile } from '@/hooks/useDataFiles';
 
 interface UploadModalProps {
   open: boolean;
@@ -29,7 +28,7 @@ interface UploadModalProps {
 export const UploadModal: React.FC<UploadModalProps> = ({ open, onClose }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
-  const uploadMutation = useUploadFile();
+  // const uploadMutation = useUploadFile();
 
   const {
     control,
@@ -133,7 +132,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({ open, onClose }) => {
 
   const onSubmit = async (data: DataFormData) => {
     try {
-      await uploadMutation.mutateAsync(data);
+      // await uploadMutation.mutateAsync(data);
       handleClose();
     } catch (error) {
       console.error('Upload failed:', error);

@@ -1,7 +1,8 @@
 'use client';
 
 import React, { createContext, useContext } from 'react';
-import { useAuthStatus, useLogin, useLogout } from '@/hooks/useAuth';
+import { useAuthStatus } from '@/hooks/useAuth';
+import { STATIC_USER } from '@/lib/api';
 
 interface User {
   _id: string;
@@ -15,9 +16,7 @@ interface User {
 }
 
 interface AuthContextType {
-  user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
+  user: User;
   isLoading: boolean;
   isAuthenticated: boolean;
   hasToken: boolean;
@@ -27,32 +26,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user, isLoading, hasToken } = useAuthStatus();
-  const loginMutation = useLogin();
-  const logoutMutation = useLogout();
-
-  const login = async (email: string, password: string): Promise<void> => {
-    try {
-      await loginMutation.mutateAsync({ email, password });
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    }
-  };
-
-  const logout = async (): Promise<void> => {
-    try {
-      await logoutMutation.mutateAsync();
-    } catch (error) {
-      console.error('Logout error:', error);
-      throw error;
-    }
-  };
 
   const value: AuthContextType = {
-    user: user as User | null,
-    login,
-    logout,
-    isLoading: isLoading || loginMutation.isPending || logoutMutation.isPending,
+    user: user || STATIC_USER,
+    isLoading,
     isAuthenticated,
     hasToken,
   };

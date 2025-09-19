@@ -37,6 +37,10 @@ export function useTrainings(filters?: TrainingFilters) {
     queryKey: TRAINING_QUERY_KEYS.list(params),
     queryFn: async () => {
       const response = await trainingApi.getTrainings(params);
+      // Handle empty data gracefully - don't treat it as an error
+      if (!response.data || response.data.length === 0) {
+        return []; // Return empty array instead of throwing error
+      }
       return response.data.map(transformTrainingForUI);
     },
     staleTime: 1000 * 60 * 5,

@@ -1,22 +1,12 @@
 // API Configuration
 const API_BASE_URL = 'http://unops-api-dudw4t-af60f1-31-97-222-225.traefik.me';
 
-// Token management
-const getAuthToken = (): string | null => {
-  if (typeof window === 'undefined') return null;
-  return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGM2ODc4ZWUxMzExNDExZmU2NDk2YjgiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzU3OTA3MzIxLCJleHAiOjE3NTc5OTM3MjF9.8Gpg2vQTaguP18W1WkP6xFudMbtr9bA80SA1cicczTI';
-};
-
-const setAuthToken = (token: string): void => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('jwtToken', token);
-  }
-};
-
-const removeAuthToken = (): void => {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('jwtToken');
-  }
+// Static Bearer Token - Replace this with your actual token
+const STATIC_BEARER_TOKEN =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGM2ODc4ZWUxMzExNDExZmU2NDk2YjgiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzU4MjE2NzA3LCJleHAiOjE3NTgzMDMxMDd9.6fEZgPNSpQ5Y68sP8BF_NtgJ9MzmyBM_kHRkSeewaCo';
+// Simplified token management - always returns the static token
+const getAuthToken = (): string => {
+  return STATIC_BEARER_TOKEN;
 };
 
 // HTTP Client optimized for TanStack Query
@@ -56,12 +46,7 @@ class ApiClient {
 
       // Handle authentication errors
       if (response.status === 401) {
-        removeAuthToken();
-        // Redirect to login page or emit auth error event
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login';
-        }
-        throw new Error('Authentication failed. Please login again.');
+        throw new Error('Authentication failed. Please check your token.');
       }
 
       if (response.status === 403) {
@@ -135,59 +120,28 @@ class ApiClient {
 
 export const apiClient = new ApiClient();
 
-// Auth API - Base functions for TanStack Query
-export const authApi = {
-  // Login function for mutation
-  login: async (credentials: { email: string; password: string }) => {
-    const response = await apiClient.post<{
-      status: boolean;
-      message: string;
-      data: {
-        token: string;
-        user: {
-          _id: string;
-          name: string;
-          email: string;
-          role: {
-            _id: string;
-            name: string;
-            permissions: string[];
-          };
-        };
-      };
-    }>('/login', credentials);
-
-    if (response.data?.token) {
-      setAuthToken(response.data.token);
-    }
-
-    return response;
-  },
-
-  // Logout function
-  logout: () => {
-    removeAuthToken();
-  },
-
-  // Register function for mutation
-  register: async (userData: {
-    email: string;
-    password: string;
-    name: string;
-    roleId: string;
-  }) => {
-    return apiClient.post('/register', userData);
-  },
-
-  // Validate user function for query
-  validateUser: async (encryptedUserId: string) => {
-    return apiClient.get(`/validate/${encryptedUserId}`);
-  },
-
-  // Get current user function for query
-  getCurrentUser: async () => {
-    return apiClient.get('/user/profile');
+// Static user data - since we're using static auth
+export const STATIC_USER = {
+  _id: '68c6878ee1311411fe6496b8',
+  name: 'Admin User',
+  email: 'admin@example.com',
+  role: {
+    _id: 'admin-role-id',
+    name: 'Admin',
+    permissions: ['read', 'write', 'delete', 'admin'],
   },
 };
 
-export { getAuthToken, setAuthToken, removeAuthToken };
+// Simplified Auth API - returns static data
+export const authApi = {
+  // Get current user function for query
+  getCurrentUser: async () => {
+    return {
+      status: true,
+      message: 'User retrieved successfully',
+      data: STATIC_USER,
+    };
+  },
+};
+
+export { getAuthToken };

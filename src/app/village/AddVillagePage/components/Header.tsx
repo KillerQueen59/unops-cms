@@ -1,16 +1,18 @@
 import { CustomBreadcrumbs } from '@/components';
 import { BreadcrumbItem } from '@/types/common';
-import { Box, IconButton, Typography } from '@mui/material';
-import { CaretLeftIcon } from '@phosphor-icons/react';
+import { Box, IconButton, Typography, Button } from '@mui/material';
+import { CaretLeftIcon, TrashIcon } from '@phosphor-icons/react';
 
 export const Header = ({
   breadcrumbs,
   isEditMode,
   handleBack,
+  handleDelete,
 }: {
   breadcrumbs: BreadcrumbItem[];
   isEditMode: boolean;
   handleBack: () => void;
+  handleDelete?: () => void;
 }) => {
   return (
     <Box>
@@ -21,39 +23,61 @@ export const Header = ({
         sx={{
           display: 'flex',
           alignItems: 'center',
-          justifyItems: 'center',
-          gap: '12px',
+          justifyContent: 'space-between',
           mb: 3,
         }}
       >
-        <IconButton
-          onClick={handleBack}
-          sx={{
-            border: '1px solid #0092D1',
-            borderRadius: '12px',
-            width: 48,
-            height: 48,
-            color: '#0092D1',
-          }}
-        >
-          <CaretLeftIcon />
-        </IconButton>
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
+            gap: '12px',
           }}
         >
-          <Typography
-            variant="h5"
+          <IconButton
+            onClick={handleBack}
             sx={{
-              fontWeight: 'bold',
-              color: '#374151',
+              border: '1px solid #0092D1',
+              borderRadius: '12px',
+              width: 48,
+              height: 48,
+              color: '#0092D1',
             }}
           >
-            {isEditMode ? 'Edit Village' : 'Add New Village'}
-          </Typography>
+            <CaretLeftIcon />
+          </IconButton>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 'bold',
+                color: '#374151',
+              }}
+            >
+              {isEditMode ? 'Edit Village' : 'Add New Village'}
+            </Typography>
+          </Box>
         </Box>
+
+        {isEditMode && handleDelete && (
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<TrashIcon />}
+            onClick={handleDelete}
+            sx={{
+              borderRadius: '12px',
+              px: 3,
+            }}
+          >
+            Delete Village
+          </Button>
+        )}
       </Box>
     </Box>
   );

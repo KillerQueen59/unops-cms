@@ -14,6 +14,7 @@ export const AddTrainingPage = () => {
     showLeaveModal,
     isSubmitting,
     errors,
+    submitError,
   } = state;
 
   const {
@@ -38,6 +39,7 @@ export const AddTrainingPage = () => {
           control={control}
           errors={errors}
           isSubmitting={isSubmitting}
+          submitError={submitError}
           handleFormSubmit={handleFormSubmit}
           handleBack={handleBack}
         />
