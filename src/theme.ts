@@ -66,6 +66,25 @@ const theme = createTheme({
         },
       },
     },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiInputBase-input': {
+            '&:-webkit-autofill': {
+              WebkitBoxShadow: '0 0 0 100px #ffffff inset !important',
+              WebkitTextFillColor: '#374151 !important',
+              caretColor: '#374151 !important',
+            },
+            '&:-webkit-autofill:hover': {
+              WebkitBoxShadow: '0 0 0 100px #ffffff inset !important',
+            },
+            '&:-webkit-autofill:focus': {
+              WebkitBoxShadow: '0 0 0 100px #ffffff inset !important',
+            },
+          },
+        },
+      },
+    },
     MuiAlert: {
       styleOverrides: {
         root: {

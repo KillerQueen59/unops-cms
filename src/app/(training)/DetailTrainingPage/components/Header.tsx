@@ -1,17 +1,22 @@
 import { CustomBreadcrumbs } from '@/components';
 import { BreadcrumbItem } from '@/types/common';
 import { TrainingData } from '@/types/training';
-import { Box, IconButton, Typography, Chip } from '@mui/material';
+import { Box, IconButton, Typography, Chip, Button } from '@mui/material';
 import { CaretLeftIcon } from '@phosphor-icons/react';
-
+import { TrashIcon } from '@phosphor-icons/react/dist/ssr';
+import { EditIcon } from 'lucide-react';
 export const Header = ({
   breadcrumbs,
   trainingData,
   handleBack,
+  handleDelete,
+  handleEdit,
 }: {
   breadcrumbs: BreadcrumbItem[];
   trainingData: TrainingData;
   handleBack: () => void;
+  handleDelete: () => void;
+  handleEdit: () => void;
 }) => {
   return (
     <Box>
@@ -138,6 +143,44 @@ export const Header = ({
             {trainingData.date}
           </Typography>
         </Box>
+      </Box>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          gap: 2,
+          mb: 4,
+          px: 2,
+        }}
+      >
+        <Button
+          variant="outlined"
+          color="error"
+          startIcon={<TrashIcon />}
+          onClick={handleDelete}
+          sx={{
+            borderRadius: '12px',
+            width: '180px',
+            minHeight: '50px',
+            px: 3,
+          }}
+        >
+          Delete Village
+        </Button>
+        <Button
+          variant="outlined"
+          color="primary"
+          startIcon={<EditIcon />}
+          onClick={handleEdit}
+          sx={{
+            borderRadius: '12px',
+            width: '180px',
+            minHeight: '50px',
+            px: 3,
+          }}
+        >
+          Edit Village
+        </Button>
       </Box>
     </Box>
   );

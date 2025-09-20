@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTrainingStore } from '@/stores/trainingStore';
 import { Paper, Box, Typography, Alert } from '@mui/material';
 import {
@@ -19,10 +19,17 @@ import { useEffect } from 'react';
 import { ParticipantCard } from './components/ParticipantCard';
 import { Header } from './components/Header';
 import { PageEnum } from '@/constants/page';
+import { ConfirmationModal } from '@/components';
+import { useDeleteTraining } from '@/hooks/useTrainingData';
 
 export const DetailTrainingPage = () => {
-  const { updateBreadcrumbs, setPage, selectedTraining, breadcrumbs } =
-    useTrainingStore();
+  const {
+    updateBreadcrumbs,
+    setPage,
+    navigateToEdit,
+    selectedTraining,
+    breadcrumbs,
+  } = useTrainingStore();
 
   const handleBack = () => {
     setPage(PageEnum.LIST);
@@ -30,11 +37,32 @@ export const DetailTrainingPage = () => {
   };
 
   const trainingData = selectedTraining;
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const deleteTrainingMutation = useDeleteTraining();
 
   useEffect(() => {
     if (!trainingData) return;
     updateBreadcrumbs(PageEnum.DETAIL, trainingData.trainingName);
   }, [trainingData, updateBreadcrumbs]);
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      if (trainingData?.id) {
+        await deleteTrainingMutation.mutateAsync(trainingData.id);
+        setShowDeleteModal(false);
+        handleBack();
+      } else {
+        throw new Error('Training ID is missing.');
+      }
+    } catch (error) {
+      console.error('Failed to delete training:', error);
+    }
+  };
 
   const numberOfBeneficiaries = [
     {
@@ -157,6 +185,10 @@ export const DetailTrainingPage = () => {
           breadcrumbs={breadcrumbs}
           trainingData={trainingData}
           handleBack={handleBack}
+          handleDelete={() => {
+            setShowDeleteModal(true);
+          }}
+          handleEdit={() => navigateToEdit(trainingData)}
         />
       </Paper>
 
@@ -294,6 +326,19 @@ export const DetailTrainingPage = () => {
           </Box>
         </Box>
       </Paper>
+      <ConfirmationModal
+        open={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onSecondaryButtonClick={handleDeleteCancel}
+        onPrimaryButtonClick={() => {
+          handleDeleteConfirm();
+          handleBack();
+        }}
+        title="Delete Training?"
+        message={`Are you sure you want to delete "${trainingData?.trainingName}"? This action cannot be undone.`}
+        primaryButtonText={'Delete'}
+        secondaryButtonText="Cancel"
+      />
     </Box>
   );
 };

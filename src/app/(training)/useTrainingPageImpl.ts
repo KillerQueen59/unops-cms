@@ -1,7 +1,11 @@
-import { useTrainings } from '@/hooks/useTrainingData';
-import { useTrainingStore } from '@/stores';
+import { useTrainingStore } from '@/stores/trainingStore';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { TrainingData } from '@/types/training';
-import { useEffect, useMemo } from 'react';
+import {
+  useTrainings,
+  useDeleteTraining,
+  useTraining,
+} from '@/hooks/useTrainingData';
 import { createTrainingColumns } from './TrainingColumn';
 import { PageEnum } from '@/constants/page';
 
@@ -20,6 +24,20 @@ export const useTrainingPageImpl = () => {
     setIsFilterModalOpen,
   } = useTrainingStore();
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [trainingToDelete, setTrainingToDelete] = useState<TrainingData | null>(
+    null
+  );
+  const [selectedTrainingId, setSelectedTrainingId] = useState<string | null>(
+    null
+  );
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const [isEdit, setIsEdit] = useState(false);
+
   const apiFilters = useMemo(
     () => ({
       searchQuery,
@@ -31,7 +49,45 @@ export const useTrainingPageImpl = () => {
     [searchQuery, filters]
   );
 
-  const { data: trainings = [], isLoading, error } = useTrainings(apiFilters);
+  // Use pagination parameters
+  const {
+    data: trainingsResponse,
+    isLoading,
+    error,
+  } = useTrainings(apiFilters);
+
+  // Extract trainings and pagination info from response
+  const trainings = trainingsResponse?.data || [];
+  const totalItems = trainingsResponse?.totalData || 0;
+  const totalPages = trainingsResponse?.totalPages || 0;
+
+  // Only fetch training detail when a training is selected
+  const { data: trainingDetail, isLoading: isLoadingTraining } = useTraining(
+    selectedTrainingId,
+    {
+      enabled: !!selectedTrainingId,
+    }
+  );
+
+  const deleteTrainingMutation = useDeleteTraining();
+
+  // Ensure trainings is always an array
+  const safeTrainings = Array.isArray(trainings) ? trainings : [];
+
+  // Reset page when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  // Pagination handlers
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1); // Reset to first page when changing page size
+  };
 
   useEffect(() => {
     if (page === PageEnum.LIST) {
@@ -39,12 +95,33 @@ export const useTrainingPageImpl = () => {
     }
   }, [page, updateBreadcrumbs]);
 
+  useEffect(() => {
+    if (trainingDetail && selectedTrainingId && !isLoadingTraining) {
+      if (isEdit) {
+        navigateToEdit(trainingDetail);
+      } else {
+        navigateToDetail(trainingDetail);
+      }
+
+      setSelectedTrainingId(null);
+      setIsEdit(false);
+    }
+  }, [
+    trainingDetail,
+    selectedTrainingId,
+    isLoadingTraining,
+    navigateToDetail,
+    isEdit,
+    navigateToEdit,
+  ]);
+
   const handleView = (data: TrainingData) => {
-    navigateToDetail(data);
+    setSelectedTrainingId(data.id);
   };
 
   const handleEdit = (data: TrainingData) => {
-    navigateToEdit(data);
+    setIsEdit(true);
+    setSelectedTrainingId(data.id);
   };
 
   const handleAddNew = () => {
@@ -54,7 +131,26 @@ export const useTrainingPageImpl = () => {
   };
 
   const handleDelete = (data: TrainingData) => {
-    console.log('Delete:', data);
+    setTrainingToDelete(data);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (trainingToDelete) {
+      try {
+        await deleteTrainingMutation.mutateAsync(trainingToDelete.id);
+        setShowDeleteModal(false);
+        setTrainingToDelete(null);
+      } catch (error) {
+        console.error('Failed to delete training:', error);
+        // Handle error (could show toast or alert)
+      }
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setTrainingToDelete(null);
   };
 
   const handleOpenFilter = () => {
@@ -73,12 +169,20 @@ export const useTrainingPageImpl = () => {
 
   const state = {
     columns,
-    trainings,
+    trainings: safeTrainings,
     error,
     isLoading,
     searchQuery,
     page,
-    filters,
+    showDeleteModal,
+    trainingToDelete,
+    isDeleting: deleteTrainingMutation.isPending,
+    isLoadingTraining, // Add this to show loading state during detail fetch
+    // Pagination state
+    totalItems,
+    totalPages,
+    currentPage,
+    pageSize,
     isFilterModalOpen,
   };
 
@@ -87,7 +191,12 @@ export const useTrainingPageImpl = () => {
     handleView,
     handleEdit,
     handleDelete,
+    handleDeleteConfirm,
+    handleDeleteCancel,
     setSearchQuery,
+    // Pagination actions
+    handlePageChange,
+    handlePageSizeChange,
     handleOpenFilter,
     handleCloseFilter,
   };

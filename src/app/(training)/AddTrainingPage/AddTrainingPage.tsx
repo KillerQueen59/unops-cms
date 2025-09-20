@@ -15,6 +15,8 @@ export const AddTrainingPage = () => {
     isSubmitting,
     errors,
     submitError,
+    isLoadingVillages: isLoading,
+    villageOptions,
   } = state;
 
   const {
@@ -24,6 +26,8 @@ export const AddTrainingPage = () => {
     handleLeaveCancel,
     handleSubmitConfirm,
     handleSubmitCancel,
+    setValue,
+    watch,
   } = action;
 
   return (
@@ -40,8 +44,12 @@ export const AddTrainingPage = () => {
           errors={errors}
           isSubmitting={isSubmitting}
           submitError={submitError}
+          isLoading={isLoading}
           handleFormSubmit={handleFormSubmit}
           handleBack={handleBack}
+          villageOptions={villageOptions}
+          setValue={setValue}
+          watch={watch}
         />
       </Box>
 

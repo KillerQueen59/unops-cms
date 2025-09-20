@@ -9,6 +9,7 @@ import {
   PaginatedResponse,
 } from '@/services/villageService';
 import { VillageData } from '@/types/village';
+import toast from 'react-hot-toast';
 
 // Query Keys
 export const villageKeys = {
@@ -17,25 +18,21 @@ export const villageKeys = {
   list: (filters: string) => [...villageKeys.lists(), { filters }] as const,
   details: () => [...villageKeys.all, 'detail'] as const,
   detail: (id: string | null) => [...villageKeys.details(), id] as const,
-  // Category-specific data
   unsustainableLand: (villageId: string) =>
     [...villageKeys.all, 'unsustainable-land', villageId] as const,
   incomeTracking: (villageId: string) =>
     [...villageKeys.all, 'income-tracking', villageId] as const,
 } as const;
 
-// Village CRUD Hooks
 export const useVillages = (params?: PaginationParams) => {
   return useQuery({
     queryKey: villageKeys.list(JSON.stringify(params || {})),
     queryFn: async (): Promise<PaginatedResponse<VillageData>> => {
       try {
         const result = await villageService.getVillages(params);
-        console.log('Fetched villages:', result);
         return result;
       } catch (error) {
-        console.error('Failed to fetch villages:', error);
-        // Return empty paginated response on error to prevent crashes
+        toast.error('Failed to fetch villages');
         return {
           data: [],
           totalData: 0,
@@ -45,7 +42,8 @@ export const useVillages = (params?: PaginationParams) => {
         };
       }
     },
-    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    staleTime: 5 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
   });
 };
 
@@ -77,13 +75,8 @@ export const useUpdateVillage = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      villageData,
-      files,
-    }: {
-      villageData: UpdateVillageData;
-      files?: File[];
-    }) => villageService.updateVillage(villageData, files),
+    mutationFn: ({ villageData }: { villageData: UpdateVillageData }) =>
+      villageService.updateVillage(villageData),
     onSuccess: (updatedVillage) => {
       queryClient.invalidateQueries({ queryKey: villageKeys.lists() });
       queryClient.setQueryData(

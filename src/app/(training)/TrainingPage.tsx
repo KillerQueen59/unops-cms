@@ -22,6 +22,7 @@ import { DetailTrainingPage } from './DetailTrainingPage/DetailTrainingPage';
 import { FilterModal } from './components/FilterModal';
 import { PageEnum } from '@/constants/page';
 import { trainingTypeOptions } from './constants';
+import { ConfirmationModal } from '@/components';
 
 export const TrainingPage = () => {
   const { state, action } = useTrainingPageImpl();
@@ -34,10 +35,19 @@ export const TrainingPage = () => {
     error,
     isLoading,
     isFilterModalOpen,
+    showDeleteModal,
+    trainingToDelete,
+    isDeleting,
   } = state;
 
-  const { handleAddNew, setSearchQuery, handleOpenFilter, handleCloseFilter } =
-    action;
+  const {
+    handleAddNew,
+    setSearchQuery,
+    handleOpenFilter,
+    handleCloseFilter,
+    handleDeleteCancel,
+    handleDeleteConfirm,
+  } = action;
 
   // Only show error if there's an actual error and we're not loading
   if (error && !isLoading) {
@@ -190,6 +200,18 @@ export const TrainingPage = () => {
         onClose={handleCloseFilter}
         trainingTypes={trainingTypeOptions.map((option) => option.label)}
         villages={[]}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        open={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onSecondaryButtonClick={handleDeleteCancel}
+        onPrimaryButtonClick={handleDeleteConfirm}
+        title="Delete Training?"
+        message={`Are you sure you want to delete "${trainingToDelete?.trainingName}"? This action cannot be undone.`}
+        primaryButtonText={isDeleting ? 'Deleting...' : 'Delete'}
+        secondaryButtonText="Cancel"
       />
     </Paper>
   );

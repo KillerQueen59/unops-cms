@@ -1,182 +1,272 @@
 import { apiClient } from '@/lib/api';
-import {
-  TrainingListParams,
-  TrainingListResponse,
-  TrainingResponse,
-  TrainingCategoriesResponse,
-  CreateTrainingData,
-  UpdateTrainingData,
-  Training,
-} from '@/types/training';
+import { TrainingData } from '@/types/training';
 
-export const trainingApi = {
-  getTrainings: async (
-    params: TrainingListParams = {}
-  ): Promise<TrainingListResponse> => {
-    const cleanParams = Object.fromEntries(
-      Object.entries(params)
-        .filter(
-          ([, value]) => value !== undefined && value !== null && value !== ''
-        )
-        .map(([key, value]) => [key, value.toString()])
-    );
-
-    const response = await apiClient.get<{
-      status: boolean;
-      message: string;
-      data: {
-        trainings: Training[];
-        totalData: number;
-      };
-    }>('/village/training/all');
-
-    // Transform the response to match our interface
-    return {
-      data: response.data?.trainings || [],
-      total: response.data?.totalData || 0,
-      page: 1,
-      pageSize: response.data?.trainings?.length || 0,
+// Training API interfaces
+export interface CreateTrainingData {
+  villageId: string;
+  name: string;
+  type: string;
+  date: string;
+  assessment: {
+    pre: number;
+    post: number;
+  };
+  beneficiaries: {
+    gender: {
+      men: number;
+      women: number;
     };
-  },
+    gedsi: {
+      elderly: string;
+      youth: string;
+      widow: string;
+      disabled: string;
+    };
+  };
+  stakeholders: {
+    ngo: number;
+    government: number;
+    academation: number;
+    privateSector: number;
+    localCommunity: number;
+    others: number;
+  };
+}
 
-  getTrainingById: async (trainingId: string): Promise<TrainingResponse> => {
-    return apiClient.get<TrainingResponse>(`/village/training/${trainingId}`);
-  },
+export interface UpdateTrainingData extends CreateTrainingData {
+  _id: string;
+}
 
-  createTraining: async (
-    trainingData: CreateTrainingData,
-    files?: File[]
-  ): Promise<TrainingResponse> => {
-    if (files && files.length > 0) {
-      const formData = createTrainingFormData(trainingData, files);
-      return apiClient.post<TrainingResponse>('/village/training', formData);
-    }
+// Pagination interfaces
+export interface PaginationParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  sortBy?: string;
+  trainingType?: string;
+  village?: string;
+  startDate?: string;
+  endDate?: string;
+}
 
-    return apiClient.post<TrainingResponse>('/village/training', trainingData);
-  },
+export interface PaginatedResponse<T> {
+  data: T[];
+  totalData: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
 
-  updateTraining: async (
-    trainingId: string,
-    trainingData: UpdateTrainingData,
-    files?: File[]
-  ): Promise<TrainingResponse> => {
-    if (files && files.length > 0) {
-      const formData = createTrainingFormData(trainingData, files);
-      return apiClient.put<TrainingResponse>(
-        `/village/training/${trainingId}`,
-        formData
-      );
-    }
+// API Response interfaces
+interface TrainingApiResponse {
+  status: boolean;
+  message: string;
+  data: {
+    trainings: Array<{
+      _id: string;
+      villageId: string;
+      name: string;
+      type: string;
+      date: string;
+      assessment: {
+        pre: number;
+        post: number;
+      };
+      beneficiaries: {
+        gender: {
+          men: number;
+          women: number;
+        };
+        gedsi: {
+          elderly: string;
+          youth: string;
+          widow: string;
+          disabled: string;
+        };
+      };
+      stakeholders: {
+        ngo: number;
+        government: number;
+        academation: number;
+        privateSector: number;
+        localCommunity: number;
+        others: number;
+      };
+    }>;
+    totalData: number;
+  };
+}
 
-    return apiClient.put<TrainingResponse>(
-      `/village/training/${trainingId}`,
-      trainingData
-    );
-  },
-
-  deleteTraining: async (
-    trainingId: string
-  ): Promise<{ status: boolean; message: string }> => {
-    return apiClient.delete(`/village/training/${trainingId}`);
-  },
-};
-
-// Helper functions for data transformation
-export const transformTrainingForUI = (
-  training: Training
-): import('@/types/training').TrainingData => {
+// Transform API response to our internal format
+const transformTrainingFromAPI = (
+  apiTraining: TrainingApiResponse['data']['trainings'][0]
+): TrainingData => {
   return {
-    id: training._id,
-    trainingName: training.name,
-    trainingType: training.trainingType,
-    date: training.startDate,
-    village: training.villageId,
-    villageId: training.villageId,
+    id: apiTraining._id,
+    trainingName: apiTraining.name || '',
+    trainingType: apiTraining.type || '',
+    date: apiTraining.date || '',
+    village: apiTraining.villageId || '',
+    villageId: apiTraining.villageId || '',
     // Number of beneficiaries
-    male: training.beneficiaries?.male || 0,
-    female: training.beneficiaries?.female || 0,
-    elderly: training.beneficiaries?.elderly || 0,
-    youth: training.beneficiaries?.youth || 0,
-    disability: training.beneficiaries?.disability || 0,
-    widow: training.beneficiaries?.widow || 0,
+    male: apiTraining.beneficiaries?.gender?.men || 0,
+    female: apiTraining.beneficiaries?.gender?.women || 0,
+    elderly: parseInt(apiTraining.beneficiaries?.gedsi?.elderly || '0'),
+    youth: parseInt(apiTraining.beneficiaries?.gedsi?.youth || '0'),
+    disability: parseInt(apiTraining.beneficiaries?.gedsi?.disabled || '0'),
+    widow: parseInt(apiTraining.beneficiaries?.gedsi?.widow || '0'),
     // Training Assessment
-    pretest: training.assessment?.pretest || 0,
-    posttest: training.assessment?.posttest || 0,
+    pretest: apiTraining.assessment?.pre || 0,
+    posttest: apiTraining.assessment?.post || 0,
     // Stakeholders Involved
-    ngo: training.stakeholders?.ngo || 0,
-    government: training.stakeholders?.government || 0,
-    privateSector: training.stakeholders?.privateSector || 0,
-    academics: training.stakeholders?.academics || 0,
-    localCommunity: training.stakeholders?.localCommunity || 0,
-    others: training.stakeholders?.others || 0,
+    ngo: apiTraining.stakeholders?.ngo || 0,
+    government: apiTraining.stakeholders?.government || 0,
+    privateSector: apiTraining.stakeholders?.privateSector || 0,
+    academics: apiTraining.stakeholders?.academation || 0,
+    localCommunity: apiTraining.stakeholders?.localCommunity || 0,
+    others: apiTraining.stakeholders?.others || 0,
   };
 };
 
+// Training API Service
+export const trainingService = {
+  async getTrainings(
+    params?: PaginationParams
+  ): Promise<PaginatedResponse<TrainingData>> {
+    try {
+      const queryParams = new URLSearchParams();
+
+      if (params?.page) queryParams.append('page', params.page.toString());
+      if (params?.pageSize)
+        queryParams.append('pageSize', params.pageSize.toString());
+      if (params?.search) queryParams.append('search', params.search);
+      if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+
+      const url = `/village/training/all${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const response = await apiClient.get<TrainingApiResponse>(url);
+
+      if (response.status && response.data?.trainings) {
+        const trainings = response.data.trainings.map(transformTrainingFromAPI);
+        const totalData = response.data.totalData || trainings.length;
+        const page = params?.page || 1;
+        const pageSize = params?.pageSize || 10;
+
+        return {
+          data: trainings,
+          totalData,
+          page,
+          limit: pageSize,
+          totalPages: Math.ceil(totalData / pageSize),
+        };
+      }
+
+      return {
+        data: [],
+        totalData: 0,
+        page: params?.page || 1,
+        limit: params?.pageSize || 10,
+        totalPages: 0,
+      };
+    } catch (error) {
+      console.error('Failed to fetch trainings:', error);
+      return {
+        data: [],
+        totalData: 0,
+        page: params?.page || 1,
+        limit: params?.pageSize || 10,
+        totalPages: 0,
+      };
+    }
+  },
+
+  async getTrainingById(id: string): Promise<TrainingData> {
+    try {
+      const response = await apiClient.get<{
+        status: boolean;
+        message: string;
+        data: TrainingApiResponse['data']['trainings'][0];
+      }>(`/village/training/${id}`);
+
+      if (response.status && response.data) {
+        return transformTrainingFromAPI(response.data);
+      }
+      throw new Error('Training not found');
+    } catch (error) {
+      console.error('Failed to fetch training by ID:', error);
+      throw error;
+    }
+  },
+
+  async createTraining(trainingData: CreateTrainingData): Promise<{
+    status: boolean;
+    message: string;
+  }> {
+    const response = await apiClient.post<{
+      status: boolean;
+      message: string;
+      data: TrainingApiResponse['data']['trainings'][0];
+    }>('/village/training', trainingData);
+    return {
+      status: response.status,
+      message: response.message,
+    };
+  },
+
+  async updateTraining(
+    trainingData: CreateTrainingData,
+    id: string
+  ): Promise<{
+    status: boolean;
+    message: string;
+  }> {
+    const response = await apiClient.put<{
+      status: boolean;
+      message: string;
+      data: TrainingApiResponse['data']['trainings'][0];
+    }>(`/village/training/${id}`, trainingData);
+    return {
+      status: response.status,
+      message: response.message,
+    };
+  },
+
+  async deleteTraining(id: string): Promise<void> {
+    await apiClient.delete(`/village/training/${id}`);
+  },
+};
+
+// Helper function to transform UI data to API format
 export const transformUITrainingForAPI = (
-  training: Partial<import('@/types/training').TrainingData>
-): UpdateTrainingData => {
-  // Map UI data to API format
+  training: Partial<TrainingData>
+): CreateTrainingData => {
   return {
-    name: training.trainingName,
-    startDate: training.date,
-    endDate: training.date, // UI only has one date field
-    description: '', // No description in UI, could add later
-    status: 'ongoing', // Default status
-    trainingType: training.trainingType || 'In-Person', // Default training type
-    beneficiaries: {
-      male: training.male || 0,
-      female: training.female || 0,
-      elderly: training.elderly || 0,
-      youth: training.youth || 0,
-      disability: training.disability || 0,
-      widow: training.widow || 0,
-    },
+    villageId: training.villageId || '',
+    name: training.trainingName || '',
+    type: training.trainingType || '',
+    date: training.date || '',
     assessment: {
-      pretest: training.pretest || 0,
-      posttest: training.posttest || 0,
+      pre: training.pretest || 0,
+      post: training.posttest || 0,
+    },
+    beneficiaries: {
+      gender: {
+        men: training.male || 0,
+        women: training.female || 0,
+      },
+      gedsi: {
+        elderly: (training.elderly || 0).toString(),
+        youth: (training.youth || 0).toString(),
+        widow: (training.widow || 0).toString(),
+        disabled: (training.disability || 0).toString(),
+      },
     },
     stakeholders: {
       ngo: training.ngo || 0,
       government: training.government || 0,
+      academation: training.academics || 0,
       privateSector: training.privateSector || 0,
-      academics: training.academics || 0,
       localCommunity: training.localCommunity || 0,
       others: training.others || 0,
     },
   };
-};
-
-export const createTrainingFormData = (
-  data: CreateTrainingData | UpdateTrainingData,
-  files?: File[]
-): FormData => {
-  const formData = new FormData();
-
-  // Add training data fields
-  if (data.name) formData.append('name', data.name);
-  if (data.description) formData.append('description', data.description);
-  if (data.startDate) formData.append('startDate', data.startDate);
-  if (data.endDate) formData.append('endDate', data.endDate);
-  if (data.status) formData.append('status', data.status);
-  if (data.trainingType) formData.append('trainingType', data.trainingType);
-
-  // Add nested objects as JSON strings or individual fields
-  if (data.beneficiaries) {
-    formData.append('beneficiaries', JSON.stringify(data.beneficiaries));
-  }
-  if (data.assessment) {
-    formData.append('assessment', JSON.stringify(data.assessment));
-  }
-  if (data.stakeholders) {
-    formData.append('stakeholders', JSON.stringify(data.stakeholders));
-  }
-
-  // Add files if provided
-  if (files) {
-    files.forEach((file) => {
-      formData.append('files', file);
-    });
-  }
-
-  return formData;
 };

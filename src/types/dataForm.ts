@@ -3,9 +3,9 @@ import { z } from 'zod';
 export const dataFormSchema = z
   .object({
     documentName: z.string().min(1, 'Document name is required'),
-    description: z.string().optional(),
     category: z.enum(['regency', 'other']),
     regency: z.string().optional(),
+    link: z.string().optional(),
     file: z
       .instanceof(File)
       .refine(

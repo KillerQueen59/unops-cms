@@ -1,59 +1,61 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   documentService,
-  DocumentFilters,
   CreateDocumentData,
   UpdateDocumentData,
-  mapDocumentToDataFile,
+  PaginationParams,
+  PaginatedResponse,
 } from '@/services/documentService';
 import { DataFile } from '@/types/data';
+import toast from 'react-hot-toast';
 
 // Query Keys
 export const documentKeys = {
   all: ['documents'] as const,
   lists: () => [...documentKeys.all, 'list'] as const,
-  list: (filters: DocumentFilters) =>
-    [...documentKeys.lists(), filters] as const,
+  list: (filters: string) => [...documentKeys.lists(), { filters }] as const,
   details: () => [...documentKeys.all, 'detail'] as const,
-  detail: (id: string) => [...documentKeys.details(), id] as const,
+  detail: (id: string | null) => [...documentKeys.details(), id] as const,
 } as const;
 
 /**
  * Hook to fetch all documents with filtering
  */
-export const useDocuments = (filters: DocumentFilters = {}) => {
+export const useDocuments = (params?: PaginationParams) => {
   return useQuery({
-    queryKey: documentKeys.list(filters),
-    queryFn: async () => {
-      const response = await documentService.getDocuments(filters);
-      // Transform documents to DataFile format for UI compatibility
-      const dataFiles: DataFile[] = response.data.map(mapDocumentToDataFile);
-      return {
-        ...response,
-        data: dataFiles,
-      };
+    queryKey: documentKeys.list(JSON.stringify(params || {})),
+    queryFn: async (): Promise<PaginatedResponse<DataFile>> => {
+      try {
+        const result = await documentService.getDocuments(params);
+        return result;
+      } catch (error) {
+        toast.error('Failed to fetch documents');
+        return {
+          data: [],
+          totalData: 0,
+          page: params?.page || 1,
+          limit: params?.pageSize || 10,
+          totalPages: 0,
+        };
+      }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
   });
 };
 
 /**
  * Hook to fetch a single document by ID
  */
-export const useDocument = (documentId: string) => {
+export const useDocument = (
+  id: string | null,
+  options?: { enabled?: boolean }
+) => {
+  const enabled = options?.enabled ?? true;
   return useQuery({
-    queryKey: documentKeys.detail(documentId),
-    queryFn: async () => {
-      const response = await documentService.getDocument(documentId);
-      return {
-        ...response,
-        data: mapDocumentToDataFile(response.data),
-      };
-    },
-    enabled: !!documentId,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    queryKey: documentKeys.detail(id),
+    queryFn: () => documentService.getDocument(id!),
+    enabled: enabled && !!id,
   });
 };
 
@@ -64,22 +66,10 @@ export const useCreateDocument = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (documentData: CreateDocumentData) => {
-      return await documentService.createDocument(documentData);
-    },
-    onSuccess: (data) => {
-      // Invalidate and refetch documents list
+    mutationFn: ({ documentData }: { documentData: CreateDocumentData }) =>
+      documentService.createDocument(documentData),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: documentKeys.lists() });
-
-      // Add the new document to cache
-      const newDataFile = mapDocumentToDataFile(data.data);
-      queryClient.setQueryData(documentKeys.detail(data.data._id), {
-        success: true,
-        data: newDataFile,
-      });
-    },
-    onError: (error) => {
-      console.error('Failed to create document:', error);
     },
   });
 };
@@ -91,28 +81,19 @@ export const useUpdateDocument = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
+    mutationFn: ({
       documentId,
       documentData,
     }: {
       documentId: string;
       documentData: UpdateDocumentData;
-    }) => {
-      return await documentService.updateDocument(documentId, documentData);
-    },
-    onSuccess: (data, variables) => {
-      // Update the specific document in cache
-      const updatedDataFile = mapDocumentToDataFile(data.data);
-      queryClient.setQueryData(documentKeys.detail(variables.documentId), {
-        success: true,
-        data: updatedDataFile,
-      });
-
-      // Invalidate lists to ensure consistency
+    }) => documentService.updateDocument(documentId, documentData),
+    onSuccess: (updatedDocument, variables) => {
       queryClient.invalidateQueries({ queryKey: documentKeys.lists() });
-    },
-    onError: (error) => {
-      console.error('Failed to update document:', error);
+      queryClient.setQueryData(
+        documentKeys.detail(variables.documentId),
+        updatedDocument
+      );
     },
   });
 };
@@ -124,32 +105,22 @@ export const useDeleteDocument = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (documentId: string) => {
-      return await documentService.deleteDocument(documentId);
-    },
-    onSuccess: (_, documentId) => {
-      // Remove from cache
-      queryClient.removeQueries({ queryKey: documentKeys.detail(documentId) });
-
-      // Invalidate lists
+    mutationFn: (documentId: string) =>
+      documentService.deleteDocument(documentId),
+    onSuccess: (_, deletedId) => {
       queryClient.invalidateQueries({ queryKey: documentKeys.lists() });
-    },
-    onError: (error) => {
-      console.error('Failed to delete document:', error);
+      queryClient.removeQueries({ queryKey: documentKeys.detail(deletedId) });
     },
   });
 };
 
 /**
- * Legacy hook name for backward compatibility
+ * Legacy hook names for backward compatibility
  */
-export const useDataFiles = (filters: DocumentFilters = {}) => {
-  return useDocuments(filters);
+export const useDataFiles = (params?: PaginationParams) => {
+  return useDocuments(params);
 };
 
-/**
- * Legacy hook name for backward compatibility
- */
 export const useDeleteFile = () => {
   return useDeleteDocument();
 };
@@ -163,7 +134,7 @@ export const useUploadDocument = () => {
 
   return useMutation({
     mutationFn: async (uploadData: {
-      areaId: string;
+      areaId?: string;
       title: string;
       link?: string;
       file: File;
@@ -175,19 +146,12 @@ export const useUploadDocument = () => {
         file: uploadData.file,
       });
     },
-    onSuccess: (data) => {
-      // Invalidate and refetch documents list
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: documentKeys.lists() });
-
-      // Add the new document to cache
-      const newDataFile = mapDocumentToDataFile(data.data);
-      queryClient.setQueryData(documentKeys.detail(data.data._id), {
-        success: true,
-        data: newDataFile,
-      });
     },
     onError: (error) => {
       console.error('Failed to upload document:', error);
+      toast.error('Failed to upload document');
     },
   });
 };
@@ -223,6 +187,37 @@ export const useBulkDeleteDocuments = () => {
     },
     onError: (error) => {
       console.error('Failed to delete documents:', error);
+      toast.error('Failed to delete documents');
+    },
+  });
+};
+
+/**
+ * Hook to download a document file
+ */
+export const useDownloadFile = () => {
+  return useMutation({
+    mutationFn: async (file: DataFile) => {
+      if (file.file) {
+        // For files that are File objects (newly uploaded), create download link
+        const url = URL.createObjectURL(file.file);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = file.fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } else if (file.fileUrl) {
+        // For files with URLs (from server), use the download service
+        await documentService.downloadDocument(file.id, file.fileName);
+      } else {
+        throw new Error('No downloadable file or URL available');
+      }
+    },
+    onError: (error) => {
+      console.error('Failed to download file:', error);
+      toast.error('Failed to download file');
     },
   });
 };

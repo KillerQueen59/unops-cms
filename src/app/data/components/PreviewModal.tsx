@@ -14,7 +14,7 @@ import {
 } from '@mui/icons-material';
 import Image from 'next/image';
 import { DataFile } from '@/types/data';
-import { useDownloadFile } from '@/hooks/useDataFiles';
+import { useDownloadFile } from '@/hooks/useDocumentData';
 
 interface PreviewModalProps {
   open: boolean;

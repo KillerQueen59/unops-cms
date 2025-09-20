@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
 import { PROVINCE_NAME, southSumatraRegencies } from '../../constants';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getVillageOptions } from '../../helper';
 import { MapPicker } from '@/components/MapPicker';
 import southSumatraOnly from '@/hooks/sumatra-only';

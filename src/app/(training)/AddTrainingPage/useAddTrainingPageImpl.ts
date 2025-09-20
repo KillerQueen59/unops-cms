@@ -6,6 +6,8 @@ import { TrainingData } from '@/types/training';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useVillages } from '@/hooks/useVillageData';
+import toast from 'react-hot-toast';
 
 export const useAddTrainingPageImpl = () => {
   const { updateBreadcrumbs, setPage, selectedTraining, breadcrumbs } =
@@ -18,12 +20,24 @@ export const useAddTrainingPageImpl = () => {
   const createTrainingMutation = useCreateTraining();
   const updateTrainingMutation = useUpdateTraining();
 
+  // fetch village
+  const { data: villagesResponse, isLoading, error } = useVillages();
+  const villages = villagesResponse?.data || [];
+
+  const villageOptions = villages.map((village) => ({
+    label: village.villageName,
+    value: village.villageCode,
+  }));
+
+  console.log('selectedTraining:', selectedTraining);
+
   const {
     control,
     handleSubmit,
     watch,
     reset,
     formState: { errors },
+    setValue,
   } = useForm<TrainingFormData>({
     resolver: zodResolver(trainingFormSchema),
     defaultValues: {
@@ -136,8 +150,6 @@ export const useAddTrainingPageImpl = () => {
   };
 
   const handleFormSubmit = handleSubmit(() => {
-    console.log('handleFormSubmit');
-
     setShowSubmitModal(true);
   });
 
@@ -156,6 +168,7 @@ export const useAddTrainingPageImpl = () => {
 
       // Transform form data to API format
       const trainingData: Partial<TrainingData> = {
+        id: selectedTraining?.id,
         trainingName: data.trainingName,
         trainingType: data.trainingType,
         date: data.date,
@@ -183,7 +196,6 @@ export const useAddTrainingPageImpl = () => {
       if (isEditMode && selectedTraining?.id) {
         // Update existing training
         await updateTrainingMutation.mutateAsync({
-          trainingId: selectedTraining.id,
           trainingData,
         });
         console.log('Training updated successfully');
@@ -204,6 +216,14 @@ export const useAddTrainingPageImpl = () => {
     }
   };
 
+  useEffect(() => {
+    if (errors && Object.keys(errors).length > 0) {
+      toast.error(
+        'Please fix the errors in the form: ' + JSON.stringify(errors)
+      );
+    }
+  }, [errors]);
+
   const state = {
     control,
     isEditMode,
@@ -214,9 +234,9 @@ export const useAddTrainingPageImpl = () => {
       createTrainingMutation.isPending || updateTrainingMutation.isPending,
     errors,
     submitError,
+    villageOptions,
+    isLoadingVillages: isLoading,
   };
-
-  console.log('errors', errors);
 
   const action = {
     handleBack,
@@ -226,6 +246,8 @@ export const useAddTrainingPageImpl = () => {
     handleSubmitConfirm,
     handleSubmitCancel,
     hasUnsavedChanges,
+    setValue,
+    watch,
   };
 
   return {

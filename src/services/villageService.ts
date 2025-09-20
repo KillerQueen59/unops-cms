@@ -152,8 +152,6 @@ const transformVillageFromAPI = (
 
 // Village API Service
 export const villageService = {
-  // Basic Village CRUD operations using "🏘️ Villages" collection
-
   async getVillages(
     params?: PaginationParams
   ): Promise<PaginatedResponse<VillageData>> {
@@ -170,7 +168,6 @@ export const villageService = {
 
       const url = `/village/all${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       const response = await apiClient.get<VillageApiResponse>(url);
-      console.log('Village API response:', response);
 
       if (response.status && response.data?.villages) {
         const villages = response.data.villages.map(transformVillageFromAPI);
@@ -228,14 +225,10 @@ export const villageService = {
     return await apiClient.post<VillageData>('/village', villageData);
   },
 
-  async updateVillage(
-    villageData: UpdateVillageData,
-    files?: File[]
-  ): Promise<VillageData> {
-    const formData = createVillageFormData(villageData, files);
+  async updateVillage(villageData: UpdateVillageData): Promise<VillageData> {
     return await apiClient.put<VillageData>(
       `/village/${villageData.id}`,
-      formData
+      villageData
     );
   },
 
@@ -346,58 +339,10 @@ export const transformUIVillageForAPI = (
     sourceEconomy: village.mainSourceOfEconomy || '',
     srnStatus: village.srnStatus || '',
     // Category specific fields
-    incomesStart: village.incomesStart,
-    incomesEnd: village.incomesEnd,
+    startIncome: village.incomesStart,
+    endIncome: village.incomesEnd,
     seedCapital: village.seedCapital,
 
-    categoryId: '68c687806fe5698b8689b060',
+    categoryId: village.villageCategory || '',
   };
-};
-
-// Helper function to create FormData for village operations
-export const createVillageFormData = (
-  data: CreateVillageData | UpdateVillageData,
-  files?: File[]
-): FormData => {
-  const formData = new FormData();
-
-  // Basic fields
-  if (data.name) formData.append('name', data.name);
-  if (data.id) formData.append('areaId', data.id);
-  if (data.category) formData.append('category', data.category);
-  if (data.latitude) formData.append('latitude', data.latitude);
-  if (data.longitude) formData.append('longitude', data.longitude);
-  formData.append('startLandManaged', data.startLandManaged.toString());
-  if (data.endLandManaged !== undefined) {
-    formData.append('endLandManaged', data.endLandManaged.toString());
-  }
-  formData.append('startCarbonEmission', data.startCarbonEmission.toString());
-  if (data.endCarbonEmission !== undefined) {
-    formData.append('endCarbonEmission', data.endCarbonEmission.toString());
-  }
-  if (data.potency) formData.append('potency', data.potency);
-  if (data.climateIssue) formData.append('climateIssue', data.climateIssue);
-  if (data.sourceEconomy) formData.append('sourceEconomy', data.sourceEconomy);
-  if (data.srnStatus) formData.append('srnStatus', data.srnStatus);
-
-  // Category specific fields
-  if (data.incomesStart !== undefined) {
-    formData.append('incomesStart', data.incomesStart.toString());
-  }
-  if (data.incomesEnd !== undefined) {
-    formData.append('incomesEnd', data.incomesEnd.toString());
-  }
-  if (data.seedCapital !== undefined) {
-    formData.append('seedCapital', data.seedCapital.toString());
-  }
-  if (data.categoryId) formData.append('categoryId', data.categoryId);
-
-  // File handling
-  if (files) {
-    files.forEach((file) => {
-      formData.append('files', file);
-    });
-  }
-
-  return formData;
 };

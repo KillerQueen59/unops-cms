@@ -23,6 +23,7 @@ import { useDataPageImpl } from './useDataPageImpl';
 import { DataTable as DataTableType } from '@/types/data';
 import { UploadModal } from './components/UploadModal';
 import { PreviewModal } from './components/PreviewModal';
+import { ConfirmationModal } from '@/components';
 
 export default function DataPage() {
   const { state, action } = useDataPageImpl();
@@ -38,6 +39,9 @@ export default function DataPage() {
     previewFile,
     groupBy,
     isGrouped,
+    isDeleting,
+    showDeleteModal,
+    selectedData,
   } = state;
 
   const {
@@ -47,6 +51,8 @@ export default function DataPage() {
     setIsGrouped,
     closeUploadModal,
     closePreviewModal,
+    handleDeleteConfirm,
+    handleDeleteCancel,
   } = action;
 
   if (error) {
@@ -244,6 +250,18 @@ export default function DataPage() {
         open={isPreviewModalOpen}
         onClose={closePreviewModal}
         file={previewFile}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        open={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onSecondaryButtonClick={handleDeleteCancel}
+        onPrimaryButtonClick={handleDeleteConfirm}
+        title="Delete Document?"
+        message={`Are you sure you want to delete "${selectedData?.documentName}"? This action cannot be undone.`}
+        primaryButtonText={isDeleting ? 'Deleting...' : 'Delete'}
+        secondaryButtonText="Cancel"
       />
     </>
   );

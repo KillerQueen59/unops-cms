@@ -1,167 +1,111 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  trainingService,
   CreateTrainingData,
-  TrainingData,
-  TrainingFilters,
-  TrainingListParams,
   UpdateTrainingData,
-} from '@/types/training';
-import {
-  trainingApi,
-  transformTrainingForUI,
+  PaginationParams,
+  PaginatedResponse,
   transformUITrainingForAPI,
 } from '@/services/trainingService';
+import { TrainingData } from '@/types/training';
+import toast from 'react-hot-toast';
 
-export const TRAINING_QUERY_KEYS = {
+// Query Keys
+export const trainingKeys = {
   all: ['trainings'] as const,
-  lists: () => [...TRAINING_QUERY_KEYS.all, 'list'] as const,
-  list: (params?: TrainingListParams) =>
-    [...TRAINING_QUERY_KEYS.lists(), params] as const,
-  details: () => [...TRAINING_QUERY_KEYS.all, 'detail'] as const,
-  detail: (id: string) => [...TRAINING_QUERY_KEYS.details(), id] as const,
-  categories: () => [...TRAINING_QUERY_KEYS.all, 'categories'] as const,
+  lists: () => [...trainingKeys.all, 'list'] as const,
+  list: (filters: string) => [...trainingKeys.lists(), { filters }] as const,
+  details: () => [...trainingKeys.all, 'detail'] as const,
+  detail: (id: string | null) => [...trainingKeys.details(), id] as const,
 } as const;
 
-export function useTrainings(filters?: TrainingFilters) {
-  const params: TrainingListParams = {
-    search: filters?.searchQuery,
-    trainingType: filters?.trainingType,
-    village: filters?.village,
-    startDate: filters?.startDate,
-    endDate: filters?.endDate,
-    page: filters?.page,
-    pageSize: filters?.pageSize,
-  };
-
+export const useTrainings = (params?: PaginationParams) => {
   return useQuery({
-    queryKey: TRAINING_QUERY_KEYS.list(params),
-    queryFn: async () => {
-      const response = await trainingApi.getTrainings(params);
-      // Handle empty data gracefully - don't treat it as an error
-      if (!response.data || response.data.length === 0) {
-        return []; // Return empty array instead of throwing error
+    queryKey: trainingKeys.list(JSON.stringify(params || {})),
+    queryFn: async (): Promise<PaginatedResponse<TrainingData>> => {
+      try {
+        const result = await trainingService.getTrainings(params);
+        return result;
+      } catch (error) {
+        toast.error('Failed to fetch trainings');
+        return {
+          data: [],
+          totalData: 0,
+          page: params?.page || 1,
+          limit: params?.pageSize || 10,
+          totalPages: 0,
+        };
       }
-      return response.data.map(transformTrainingForUI);
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 5 * 60 * 1000,
     placeholderData: (previousData) => previousData,
   });
-}
+};
 
-/**
- * Hook to fetch a single training by ID
- */
-export function useTraining(trainingId: string) {
+export const useTraining = (
+  id: string | null,
+  options?: { enabled?: boolean }
+) => {
+  const enabled = options?.enabled ?? true;
   return useQuery({
-    queryKey: TRAINING_QUERY_KEYS.detail(trainingId),
-    queryFn: async () => {
-      const response = await trainingApi.getTrainingById(trainingId);
-      return transformTrainingForUI(response.data);
-    },
-    enabled: !!trainingId,
-    staleTime: 1000 * 60 * 5,
+    queryKey: trainingKeys.detail(id),
+    queryFn: () => trainingService.getTrainingById(id!),
+    enabled: enabled && !!id,
   });
-}
+};
 
-/**
- * Hook to create a new training
- */
-export function useCreateTraining() {
+export const useCreateTraining = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      trainingData,
-      files,
-    }: {
-      trainingData: Partial<TrainingData>;
-      files?: File[];
-    }) => {
+    mutationFn: ({ trainingData }: { trainingData: Partial<TrainingData> }) => {
       const apiData = transformUITrainingForAPI(trainingData);
-      return trainingApi.createTraining(apiData as CreateTrainingData, files);
+      return trainingService.createTraining(apiData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: TRAINING_QUERY_KEYS.lists() });
-    },
-    onError: (error) => {
-      console.error('Failed to create training:', error);
+      queryClient.invalidateQueries({ queryKey: trainingKeys.lists() });
     },
   });
-}
+};
 
-/**
- * Hook to update an existing training
- */
-export function useUpdateTraining() {
+export const useUpdateTraining = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      trainingId,
-      trainingData,
-      files,
-    }: {
-      trainingId: string;
-      trainingData: Partial<TrainingData>;
-      files?: File[];
-    }) => {
+    mutationFn: ({ trainingData }: { trainingData: Partial<TrainingData> }) => {
       const apiData = transformUITrainingForAPI(trainingData);
-      return trainingApi.updateTraining(
-        trainingId,
-        apiData as UpdateTrainingData,
-        files
-      );
+
+      return trainingService.updateTraining(apiData, trainingData.id!);
     },
-    onSuccess: (_, { trainingId }) => {
-      queryClient.invalidateQueries({
-        queryKey: TRAINING_QUERY_KEYS.detail(trainingId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: TRAINING_QUERY_KEYS.lists(),
-      });
-    },
-    onError: (error) => {
-      console.error('Failed to update training:', error);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: trainingKeys.lists() });
     },
   });
-}
+};
 
-/**
- * Hook to delete a training
- */
-export function useDeleteTraining() {
+export const useDeleteTraining = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (trainingId: string) => trainingApi.deleteTraining(trainingId),
-    onSuccess: (_, trainingId) => {
-      queryClient.removeQueries({
-        queryKey: TRAINING_QUERY_KEYS.detail(trainingId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: TRAINING_QUERY_KEYS.lists(),
-      });
-    },
-    onError: (error) => {
-      console.error('Failed to delete training:', error);
+    mutationFn: (id: string) => trainingService.deleteTraining(id),
+    onSuccess: (_, deletedId) => {
+      queryClient.invalidateQueries({ queryKey: trainingKeys.lists() });
+      queryClient.removeQueries({ queryKey: trainingKeys.detail(deletedId) });
     },
   });
-}
+};
 
 /**
  * Hook to prefetch training data (useful for hover effects, navigation)
  */
-export function usePrefetchTraining() {
+export const usePrefetchTraining = () => {
   const queryClient = useQueryClient();
 
   return (trainingId: string) => {
     queryClient.prefetchQuery({
-      queryKey: TRAINING_QUERY_KEYS.detail(trainingId),
-      queryFn: async () => {
-        const response = await trainingApi.getTrainingById(trainingId);
-        return transformTrainingForUI(response.data);
-      },
+      queryKey: trainingKeys.detail(trainingId),
+      queryFn: () => trainingService.getTrainingById(trainingId),
       staleTime: 1000 * 60 * 5,
     });
   };
-}
+};

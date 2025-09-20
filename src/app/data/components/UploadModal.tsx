@@ -13,12 +13,15 @@ import {
   MenuItem,
   ToggleButton,
   ToggleButtonGroup,
+  Autocomplete,
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 import Image from 'next/image';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DataFormData, dataFormSchema } from '@/types/dataForm';
+import { useUploadDocument } from '@/hooks/useDocumentData';
+import { southSumatraRegencies } from '@/app/village/constants';
 
 interface UploadModalProps {
   open: boolean;
@@ -28,7 +31,7 @@ interface UploadModalProps {
 export const UploadModal: React.FC<UploadModalProps> = ({ open, onClose }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
-  // const uploadMutation = useUploadFile();
+  const uploadMutation = useUploadDocument();
 
   const {
     control,
@@ -41,7 +44,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({ open, onClose }) => {
     resolver: zodResolver(dataFormSchema),
     defaultValues: {
       documentName: '',
-      description: '',
+      link: '',
       category: 'regency',
       regency: '',
     },
@@ -132,7 +135,14 @@ export const UploadModal: React.FC<UploadModalProps> = ({ open, onClose }) => {
 
   const onSubmit = async (data: DataFormData) => {
     try {
-      // await uploadMutation.mutateAsync(data);
+      const uploadData = {
+        areaId: data.regency,
+        title: data.documentName,
+        link: data.link || '',
+        file: data.file,
+      };
+
+      await uploadMutation.mutateAsync(uploadData);
       handleClose();
     } catch (error) {
       console.error('Upload failed:', error);
@@ -221,38 +231,6 @@ export const UploadModal: React.FC<UploadModalProps> = ({ open, onClose }) => {
                 />
               </Box>
 
-              {/* Description */}
-              <Box>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#374151',
-                    fontWeight: 500,
-                    mb: 1,
-                  }}
-                >
-                  Description
-                </Typography>
-                <Controller
-                  name="description"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      multiline
-                      rows={3}
-                      placeholder="Enter description (optional)..."
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: '8px',
-                        },
-                      }}
-                    />
-                  )}
-                />
-              </Box>
-
               {/* Category */}
               <Box>
                 <Typography
@@ -318,39 +296,52 @@ export const UploadModal: React.FC<UploadModalProps> = ({ open, onClose }) => {
                   >
                     Regency <span style={{ color: '#ef4444' }}>*</span>
                   </Typography>
-                  <Controller
-                    name="regency"
-                    control={control}
-                    render={({ field }) => (
-                      <FormControl fullWidth>
-                        <Select
-                          {...field}
-                          displayEmpty
-                          error={!!errors.regency}
-                          sx={{
-                            borderRadius: '8px',
-                          }}
-                        >
-                          <MenuItem value="">Choose regency...</MenuItem>
-                          <MenuItem value="Kabupaten Ogan Komering Ulu">
-                            Kabupaten Ogan Komering Ulu
-                          </MenuItem>
-                          <MenuItem value="Kota Palembang">
-                            Kota Palembang
-                          </MenuItem>
-                          <MenuItem value="Kabupaten Lahat">
-                            Kabupaten Lahat
-                          </MenuItem>
-                          <MenuItem value="Kabupaten Muara Enim">
-                            Kabupaten Muara Enim
-                          </MenuItem>
-                          <MenuItem value="Kabupaten Banyuasin">
-                            Kabupaten Banyuasin
-                          </MenuItem>
-                        </Select>
-                      </FormControl>
+                  <Autocomplete
+                    options={southSumatraRegencies}
+                    getOptionLabel={(option) => option.name}
+                    value={
+                      southSumatraRegencies.find(
+                        (reg) => reg.code === watch('regency')
+                      ) || null
+                    }
+                    onChange={(event, newValue) => {
+                      setValue('regency', newValue?.code || '');
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder="Search regency/city..."
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: '12px',
+                          },
+                        }}
+                      />
                     )}
+                    renderOption={(props, option) => (
+                      <Box component="li" {...props} key={option.code}>
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            {option.name}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: '#6B7280' }}
+                          >
+                            Capital: {option.capital} •{' '}
+                            {option.type === 'city' ? 'City' : 'Regency'}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    )}
+                    noOptionsText="No regency/city found"
+                    sx={{
+                      '& .MuiAutocomplete-inputRoot': {
+                        borderRadius: '12px',
+                      },
+                    }}
                   />
+
                   {errors.regency && (
                     <Typography
                       variant="caption"
@@ -362,6 +353,34 @@ export const UploadModal: React.FC<UploadModalProps> = ({ open, onClose }) => {
                   )}
                 </Box>
               )}
+
+              <Typography
+                variant="body2"
+                sx={{
+                  color: '#374151',
+                  fontWeight: 500,
+                }}
+              >
+                Link
+              </Typography>
+              <Controller
+                name="link"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    placeholder="Enter link name..."
+                    error={!!errors.link}
+                    helperText={errors.link?.message}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '8px',
+                      },
+                    }}
+                  />
+                )}
+              />
 
               {/* File Upload */}
               <Box>

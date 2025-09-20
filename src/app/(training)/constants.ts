@@ -1,6 +1,6 @@
 export enum TraininType {
-  Livelihood = 'Livelihood',
-  AdaptationMitigation = 'Adaptation & Mitigation',
+  Livelihood = 'livelihood',
+  AdaptationMitigation = 'adaptation_mitigation',
 }
 
 export const trainingTypeOptions = [

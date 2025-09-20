@@ -1,7 +1,12 @@
 import { useDataStore } from '@/stores/dataStore';
 import { DataFile } from '@/types/data';
 import { createDataColumns } from './DataColumn';
-import { useDataFiles, useDeleteFile } from '@/hooks/useDocumentData';
+import {
+  useDocuments,
+  useDeleteDocument,
+  useDownloadFile,
+} from '@/hooks/useDocumentData';
+import { useState, useEffect } from 'react';
 
 export const useDataPageImpl = () => {
   const {
@@ -20,8 +25,47 @@ export const useDataPageImpl = () => {
     setIsGrouped,
   } = useDataStore();
 
-  const { data: dataFiles = [], isLoading, error } = useDataFiles();
-  const deleteMutation = useDeleteFile();
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedData, setSelectedData] = useState<DataFile | null>(null);
+
+  // Use pagination parameters
+  const {
+    data: documentsResponse,
+    isLoading,
+    error,
+  } = useDocuments({
+    page: currentPage,
+    pageSize: pageSize,
+    search: searchQuery,
+    area: isGrouped && groupBy !== 'other' ? groupBy : undefined,
+  });
+
+  // Extract documents and pagination info from response
+  const dataFiles = documentsResponse?.data || [];
+
+  const totalItems = documentsResponse?.totalData || 0;
+  const totalPages = documentsResponse?.totalPages || 0;
+
+  const deleteMutation = useDeleteDocument();
+  const downloadMutation = useDownloadFile();
+
+  // Reset page when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, groupBy, isGrouped]);
+
+  // Pagination handlers
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1);
+  };
 
   const handleUpload = () => {
     openUploadModal();
@@ -33,37 +77,32 @@ export const useDataPageImpl = () => {
 
   const handleDownload = async (file: DataFile) => {
     try {
-      if (file.file) {
-        // For uploaded files, create download
-        const url = URL.createObjectURL(file.file);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = file.fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      } else {
-        // For mock files, simulate download
-        console.log(`Downloading ${file.fileName}...`);
-        // In a real app, this would initiate actual file download
-        alert(`Downloading ${file.fileName}...`);
-      }
+      await downloadMutation.mutateAsync(file);
     } catch (error) {
       console.error('Download failed:', error);
     }
   };
 
-  const handleDelete = async (file: DataFile) => {
-    if (
-      window.confirm(`Are you sure you want to delete "${file.documentName}"?`)
-    ) {
+  const handleDeleteConfirm = async () => {
+    if (selectedData) {
       try {
-        await deleteMutation.mutateAsync(file.id);
+        await deleteMutation.mutateAsync(selectedData.id);
+        setShowDeleteModal(false);
+        setSelectedData(null);
       } catch (error) {
         console.error('Delete failed:', error);
       }
     }
+  };
+
+  const handleDelete = (file: DataFile) => {
+    setShowDeleteModal(true);
+    setSelectedData(file);
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setSelectedData(null);
   };
 
   const columns = createDataColumns({
@@ -72,26 +111,18 @@ export const useDataPageImpl = () => {
     onDelete: handleDelete,
   });
 
-  // Filter data based on search query and selected category
+  // Filter data based on grouping (if needed for client-side filtering)
   const filteredData = dataFiles.filter((file) => {
-    // First filter by search query
-    const matchesSearch =
-      !searchQuery ||
-      file.documentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      file.fileName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      file.description?.toLowerCase().includes(searchQuery.toLowerCase());
-
-    // Then filter by category if grouping is enabled
-    if (!isGrouped) return matchesSearch;
+    if (!isGrouped) return true;
 
     // Filter by selected category
     if (groupBy === 'regency') {
-      return matchesSearch && file.category === 'regency';
+      return file.category === 'regency';
     } else if (groupBy === 'other') {
-      return matchesSearch && file.category === 'other';
+      return file.category === 'other';
     }
 
-    return matchesSearch;
+    return true;
   });
 
   const state = {
@@ -105,6 +136,15 @@ export const useDataPageImpl = () => {
     previewFile,
     groupBy,
     isGrouped,
+    // Pagination state
+    totalItems,
+    totalPages,
+    currentPage,
+    pageSize,
+    isDeleting: deleteMutation.isPending,
+    isDownloading: downloadMutation.isPending,
+    showDeleteModal,
+    selectedData,
   };
 
   const action = {
@@ -117,6 +157,12 @@ export const useDataPageImpl = () => {
     setIsGrouped,
     closeUploadModal,
     closePreviewModal,
+    // Pagination actions
+    handlePageChange,
+    handlePageSizeChange,
+    setShowDeleteModal,
+    handleDeleteConfirm,
+    handleDeleteCancel,
   };
 
   return { state, action };

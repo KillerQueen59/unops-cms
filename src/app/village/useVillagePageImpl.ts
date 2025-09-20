@@ -1,5 +1,5 @@
 import { useVillageStore } from '@/stores/villageStore';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { VillageData } from '@/types/village';
 import {
   useVillages,

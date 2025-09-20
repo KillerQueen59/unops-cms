@@ -1,4 +1,5 @@
-import { ControlledFieldContainer, RadioFieldContainer } from '@/components';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ControlledFieldContainer } from '@/components';
 import { TrainingFormData } from '@/types/trainingForm';
 import {
   Box,
@@ -10,6 +11,7 @@ import {
   Button,
   TextField,
   Alert,
+  Autocomplete,
 } from '@mui/material';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
 import { trainingTypeOptions } from '../../constants';
@@ -19,18 +21,25 @@ export const Form = ({
   errors,
   isSubmitting,
   submitError,
+  villageOptions,
+  isLoading,
+  setValue,
   handleFormSubmit,
   handleBack,
+  watch,
 }: {
   control: Control<TrainingFormData>;
   errors: FieldErrors<TrainingFormData>;
   isSubmitting: boolean;
   submitError?: string | null;
+  villageOptions: { label: string; value: string }[];
+  isLoading: boolean;
+  setValue: (field: keyof TrainingFormData, value: any) => void;
   handleFormSubmit: () => void;
   handleBack: () => void;
+  watch: (field: keyof TrainingFormData) => any;
 }) => {
-  console.log('submitError', submitError);
-
+  const selectedVillage = watch('villageId');
   return (
     <form
       onSubmit={(e) => {
@@ -54,15 +63,6 @@ export const Form = ({
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-              <ControlledFieldContainer
-                label="Training Name"
-                name="trainingName"
-                control={control}
-                placeholder="Input training name..."
-                required
-                error={errors.trainingName}
-              />
-
               <ControlledFieldContainer
                 label="Training Type"
                 name="trainingType"
@@ -97,6 +97,16 @@ export const Form = ({
                   )}
                 />
               </ControlledFieldContainer>
+
+              {/* TODO: Change to Select */}
+              <ControlledFieldContainer
+                label="Training Name"
+                name="trainingName"
+                control={control}
+                placeholder="Input training name..."
+                required
+                error={errors.trainingName}
+              />
             </Box>
 
             <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
@@ -107,29 +117,49 @@ export const Form = ({
                 required
                 error={errors.village}
               >
-                <Controller
-                  name="village"
-                  control={control}
-                  render={({ field }) => (
-                    <FormControl fullWidth error={!!errors.village}>
-                      <Select
-                        {...field}
-                        displayEmpty
-                        sx={{
+                <Autocomplete
+                  options={villageOptions}
+                  getOptionLabel={(option) => option.label}
+                  value={
+                    villageOptions.find(
+                      (village) => village.value === selectedVillage
+                    ) || null
+                  }
+                  onChange={(event, newValue) => {
+                    setValue('village', newValue?.label || '');
+                    setValue('villageId', newValue?.value || '');
+                  }}
+                  disabled={isLoading}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder={'Search village..'}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
                           borderRadius: '12px',
-                        }}
-                      >
-                        <MenuItem value="" disabled>
-                          <span style={{ color: '#9CA3AF' }}>
-                            Choose village name...
-                          </span>
-                        </MenuItem>
-                        <MenuItem value="Desa A">Desa A</MenuItem>
-                        <MenuItem value="Desa B">Desa B</MenuItem>
-                        <MenuItem value="Desa C">Desa C</MenuItem>
-                      </Select>
-                    </FormControl>
+                          backgroundColor: '#fff',
+                        },
+                      }}
+                    />
                   )}
+                  renderOption={(props, option) => (
+                    <Box component="li" {...props} key={option.value}>
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          {option.label}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#6B7280' }}>
+                          Code: {option.value}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  )}
+                  noOptionsText={'No villages found'}
+                  sx={{
+                    '& .MuiAutocomplete-inputRoot': {
+                      borderRadius: '12px',
+                    },
+                  }}
                 />
               </ControlledFieldContainer>
               <ControlledFieldContainer
