@@ -65,9 +65,9 @@ export const IncomeModal = ({
 
   useEffect(() => {
     if (existingData && isEdit) {
-      const [monthName, yearStr] = existingData.month.split(' ');
-      setSelectedMonth(monthName);
-      setSelectedYear(yearStr);
+      console.log('Setting existing data:', existingData);
+      setSelectedMonth(existingData.month);
+      setSelectedYear(existingData.year);
       setAmount(existingData.amount);
     } else {
       setSelectedMonth('');
@@ -83,7 +83,6 @@ export const IncomeModal = ({
       return;
     }
 
-    // Check for duplicate entries (except when editing the current entry)
     const isDuplicate = existingEntries.some((entry) => {
       const isSameMonthYear =
         entry.month === selectedMonth && entry.year === selectedYear;

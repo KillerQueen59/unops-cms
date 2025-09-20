@@ -5,16 +5,29 @@ import { Header } from './components/Header';
 import { useVillageStore } from '@/stores/villageStore';
 import { MonthlyDataPerMonth } from './components/MonthlyDataPerMonth';
 import { PageEnum } from '@/constants/page';
+import { ConfirmationModal } from '@/components';
+import { useDeleteVillage } from '@/hooks/useVillageData';
 
 export const DetailVillagePage = () => {
-  const { updateBreadcrumbs, setPage, selectedVillage, breadcrumbs } =
-    useVillageStore();
+  const {
+    updateBreadcrumbs,
+    setPage,
+    navigateToEdit,
+    selectedVillage,
+    breadcrumbs,
+  } = useVillageStore();
   const [activeTab, setActiveTab] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const deleteVillageMutation = useDeleteVillage();
 
   useEffect(() => {
     updateBreadcrumbs(PageEnum.DETAIL, selectedVillage?.villageName);
   }, [updateBreadcrumbs]);
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+  };
 
   const handleBack = () => {
     setPage(PageEnum.LIST);
@@ -50,43 +63,15 @@ export const DetailVillagePage = () => {
     seedCapital: 0,
   };
 
-  // Mock data for monthly reports
-  const monthlyReports = [
-    {
-      id: 1,
-      title: 'Training Fire community',
-      type: 'Intervention Type 1',
-      date: '23 April 2025',
-    },
-    {
-      id: 2,
-      title: 'Training Fire community',
-      type: 'Intervention Type 1',
-      date: '23 April 2025',
-    },
-    {
-      id: 3,
-      title: 'Training Fire community',
-      type: 'Intervention Type 1',
-      date: '23 April 2025',
-    },
-    {
-      id: 4,
-      title: 'Training Fire community',
-      type: 'Intervention Type 1',
-      date: '23 April 2025',
-    },
-    {
-      id: 5,
-      title: 'Training Fire community',
-      type: 'Intervention Type 1',
-      date: '23 April 2025',
-    },
-  ];
-
-  const filteredReports = monthlyReports.filter((report) =>
-    report.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleDeleteConfirm = async () => {
+    try {
+      await deleteVillageMutation.mutateAsync(villageData.villageCode);
+      setShowDeleteModal(false);
+      handleBack();
+    } catch (error) {
+      console.error('Failed to delete village:', error);
+    }
+  };
 
   return (
     <Box
@@ -107,16 +92,33 @@ export const DetailVillagePage = () => {
           breadcrumbs={breadcrumbs}
           villageData={villageData}
           handleBack={handleBack}
+          handleDelete={() => {
+            setShowDeleteModal(true);
+          }}
+          handleEdit={() => navigateToEdit(villageData)}
         />
       </Paper>
-      {/* Category 1 Monthly Sustainable Lands Report */}
 
       <MonthlyDataPerMonth
         activeTab={activeTab}
         handleTabChange={handleTabChange}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
-        filteredReports={filteredReports}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        open={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onSecondaryButtonClick={handleDeleteCancel}
+        onPrimaryButtonClick={() => {
+          handleDeleteConfirm();
+          handleBack();
+        }}
+        title="Delete Village?"
+        message={`Are you sure you want to delete "${villageData?.villageName}"? This action cannot be undone.`}
+        primaryButtonText={'Delete'}
+        secondaryButtonText="Cancel"
       />
     </Box>
   );

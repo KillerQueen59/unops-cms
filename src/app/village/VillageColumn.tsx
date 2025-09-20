@@ -1,13 +1,12 @@
-import { TrainingData } from '@/types/training';
 import { Box, IconButton } from '@mui/material';
 import { ColumnDef } from '@tanstack/react-table';
-import { Edit as EditIcon, Visibility as ViewIcon } from '@mui/icons-material';
 import {
   FileMagnifyingGlassIcon,
   PencilIcon,
   TrashIcon,
 } from '@phosphor-icons/react';
 import { VillageData } from '@/types/village';
+import { southSumatraRegencies } from './constants';
 
 interface VillageColumnProps {
   onView?: (data: VillageData) => void;
@@ -29,12 +28,20 @@ export const createVillageColumns = ({
     header: 'Village Code',
   },
   {
-    accessorKey: 'totalLandManage',
-    header: 'Total Land Managed',
+    accessorKey: 'villageCoordinate',
+    header: 'Village Coordinate',
+    cell: ({ row }) =>
+      `${row.original.villageLat.toFixed(6) || '-'}, ${row.original.villageLng.toFixed(6) || '-'}`,
   },
   {
-    accessorKey: 'totalPopulation',
-    header: 'Total Population',
+    accessorKey: 'villageRegency',
+    header: 'Village Regency',
+    cell: ({ row }) =>
+      southSumatraRegencies.find(
+        (regency) =>
+          regency.code ===
+          row.original.villageCode.split('.').splice(0, 2).join('.')
+      )?.name || '-',
   },
   {
     id: 'actions',

@@ -3,9 +3,12 @@ import {
   villageService,
   CreateVillageData,
   UpdateVillageData,
-  UnsustainableLandData,
-  IncomeTrackingData,
+  CreateMonthlyDataRequest,
+  CreateIncomeRequest,
+  PaginationParams,
+  PaginatedResponse,
 } from '@/services/villageService';
+import { VillageData } from '@/types/village';
 
 // Query Keys
 export const villageKeys = {
@@ -22,20 +25,27 @@ export const villageKeys = {
 } as const;
 
 // Village CRUD Hooks
-export const useVillages = () => {
+export const useVillages = (params?: PaginationParams) => {
   return useQuery({
-    queryKey: villageKeys.lists(),
-    queryFn: async () => {
+    queryKey: villageKeys.list(JSON.stringify(params || {})),
+    queryFn: async (): Promise<PaginatedResponse<VillageData>> => {
       try {
-        const result = await villageService.getVillages();
-        // Ensure we always return an array
-        return Array.isArray(result) ? result : [];
+        const result = await villageService.getVillages(params);
+        console.log('Fetched villages:', result);
+        return result;
       } catch (error) {
         console.error('Failed to fetch villages:', error);
-        // Return empty array on error to prevent crashes
-        return [];
+        // Return empty paginated response on error to prevent crashes
+        return {
+          data: [],
+          totalData: 0,
+          page: params?.page || 1,
+          limit: params?.pageSize || 10,
+          totalPages: 0,
+        };
       }
     },
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   });
 };
 
@@ -97,10 +107,15 @@ export const useDeleteVillage = () => {
 };
 
 // Category 1: Unsustainable Land Hooks
-export const useUnsustainableLandData = () => {
+export const useUnsustainableLandData = (params?: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  sortBy?: string;
+}) => {
   return useQuery({
-    queryKey: ['unsustainable-land'],
-    queryFn: villageService.getUnsustainableLandData,
+    queryKey: ['unsustainable-land', params],
+    queryFn: () => villageService.getUnsustainableLandData(params),
   });
 };
 
@@ -108,7 +123,7 @@ export const useAddUnsustainableLandData = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: UnsustainableLandData) =>
+    mutationFn: (data: CreateMonthlyDataRequest) =>
       villageService.addUnsustainableLandData(data),
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -127,7 +142,7 @@ export const useUpdateUnsustainableLandData = () => {
       data,
     }: {
       unsustainableLandId: string;
-      data: Partial<UnsustainableLandData>;
+      data: CreateMonthlyDataRequest;
     }) => villageService.updateUnsustainableLandData(unsustainableLandId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -152,10 +167,15 @@ export const useDeleteUnsustainableLandData = () => {
 };
 
 // Category 2: Income Tracking Hooks
-export const useIncomeTrackingData = () => {
+export const useIncomeTrackingData = (params?: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  sortBy?: string;
+}) => {
   return useQuery({
-    queryKey: ['income-tracking'],
-    queryFn: villageService.getIncomeTrackingData,
+    queryKey: ['income-tracking', params],
+    queryFn: () => villageService.getIncomeTrackingData(params),
   });
 };
 
@@ -163,7 +183,7 @@ export const useAddIncomeTrackingData = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: IncomeTrackingData) =>
+    mutationFn: (data: CreateIncomeRequest) =>
       villageService.addIncomeTrackingData(data),
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -182,7 +202,7 @@ export const useUpdateIncomeTrackingData = () => {
       data,
     }: {
       incomeId: string;
-      data: Partial<IncomeTrackingData>;
+      data: CreateIncomeRequest;
     }) => villageService.updateIncomeTrackingData(incomeId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({

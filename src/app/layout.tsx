@@ -7,6 +7,7 @@ import theme from '@/theme';
 import BaseLayout from '@/components/BaseLayout';
 import { ReactQueryProvider } from '@/providers';
 import { AuthProvider } from '@/providers/AuthProvider';
+import { Toaster } from 'react-hot-toast';
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
@@ -19,6 +20,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           <AuthProvider>
             <AppRouterCacheProvider options={{ enableCssLayer: true }}>
               <ThemeProvider theme={theme}>
+                <Toaster />
                 {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
                 <CssBaseline />
                 <BaseLayout>{props.children}</BaseLayout>

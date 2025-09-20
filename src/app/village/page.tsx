@@ -35,6 +35,9 @@ export default function VillagePage() {
     showDeleteModal,
     villageToDelete,
     isDeleting,
+    totalItems,
+    currentPage,
+    pageSize,
   } = state;
 
   const {
@@ -44,6 +47,8 @@ export default function VillagePage() {
     handleCloseCategoryModal,
     handleDeleteConfirm,
     handleDeleteCancel,
+    handlePageChange,
+    handlePageSizeChange,
   } = action;
 
   if (error) {
@@ -151,27 +156,24 @@ export default function VillagePage() {
         </Box>
       ) : (
         <DataTable<VillageTable>
-          data={(villages || []).filter((village) => {
-            if (!searchQuery) return true;
-            return (
-              village.villageName
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase()) ||
-              village.villageCode
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase())
-            );
-          })}
+          data={villages || []}
           columns={columns}
           title="Village Data"
           searchable={true}
           filterable={true}
-          pageSize={10}
+          pageSize={pageSize}
           pageSizeOptions={[5, 10, 25, 50]}
           stickyHeader={true}
           maxHeight={600}
           externalGlobalFilter={searchQuery}
           setExternalGlobalFilter={setSearchQuery}
+          // Server-side pagination props
+          manualPagination={true}
+          totalItems={totalItems}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+          loading={isLoading}
         />
       )}
 

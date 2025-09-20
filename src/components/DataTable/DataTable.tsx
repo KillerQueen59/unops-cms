@@ -12,6 +12,7 @@ import {
   SortingState,
   ColumnFiltersState,
   Row,
+  PaginationState,
 } from '@tanstack/react-table';
 import {
   Table,
@@ -67,6 +68,12 @@ export interface DataTableProps<T extends Record<string, unknown>> {
   pageSizeOptions?: number[];
   setExternalGlobalFilter?: (filter: string) => void;
   externalGlobalFilter?: string;
+  // Server-side pagination props
+  manualPagination?: boolean;
+  totalItems?: number;
+  currentPage?: number;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
 }
 
 // Global filter function that searches across all columns
@@ -98,11 +105,40 @@ export default function DataTable<T extends Record<string, unknown>>({
   pageSizeOptions = [5, 10, 25, 50],
   setExternalGlobalFilter,
   externalGlobalFilter,
+  // Server-side pagination props
+  manualPagination = false,
+  totalItems,
+  currentPage = 1,
+  onPageChange,
+  onPageSizeChange,
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState<string>('');
-  const [rowsPerPage, setRowsPerPage] = useState(pageSize);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: pageSize,
+  });
+
+  useEffect(() => {
+    if (externalGlobalFilter !== undefined) {
+      setGlobalFilter(externalGlobalFilter);
+    }
+  }, [externalGlobalFilter]);
+
+  const handleGlobalFilterChange = (value: string) => {
+    setGlobalFilter(value);
+    // Reset to first page when filtering
+    if (manualPagination && onPageChange) {
+      onPageChange(1);
+    } else {
+      setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+    }
+    // Update external filter if provided
+    if (setExternalGlobalFilter) {
+      setExternalGlobalFilter(value);
+    }
+  };
 
   const table = useReactTable({
     data,
@@ -111,6 +147,7 @@ export default function DataTable<T extends Record<string, unknown>>({
       sorting,
       columnFilters,
       globalFilter,
+      pagination,
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -120,19 +157,22 @@ export default function DataTable<T extends Record<string, unknown>>({
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     globalFilterFn,
-    initialState: {
-      pagination: {
-        pageSize,
-      },
-    },
+    manualPagination: manualPagination,
+    pageCount: manualPagination
+      ? Math.ceil((totalItems || 0) / pagination.pageSize)
+      : -1,
   });
 
-  const totalItems = table.getFilteredRowModel().rows.length;
-  const currentPage = table.getState().pagination.pageIndex + 1;
+  // Use different logic based on pagination mode
+  const actualTotalItems = manualPagination ? totalItems || 0 : data.length;
+  const actualCurrentPage = manualPagination
+    ? currentPage
+    : table.getState().pagination.pageIndex + 1;
   const itemsPerPage = table.getState().pagination.pageSize;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const startItem = (currentPage - 1) * itemsPerPage + 1;
-  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+  const actualTotalPages = Math.ceil(actualTotalItems / itemsPerPage);
+  const startItem = (actualCurrentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(actualCurrentPage * itemsPerPage, actualTotalItems);
+
   const handleRowsPerPageChange = (
     event:
       | React.ChangeEvent<HTMLInputElement>
@@ -142,18 +182,25 @@ export default function DataTable<T extends Record<string, unknown>>({
     const value =
       (event.target as HTMLInputElement).value ||
       (event.target as { value: unknown }).value;
-    const newRowsPerPage = Number(value);
-    setRowsPerPage(newRowsPerPage);
-    table.setPageSize(newRowsPerPage);
+    const newPageSize = Number(value);
+
+    if (manualPagination && onPageSizeChange) {
+      onPageSizeChange(newPageSize);
+    } else {
+      setPagination({
+        pageIndex: 0,
+        pageSize: newPageSize,
+      });
+    }
   };
 
-  useEffect(() => {
-    if (externalGlobalFilter) {
-      setGlobalFilter(externalGlobalFilter);
+  const handlePageChange = (_: unknown, newPage: number) => {
+    if (manualPagination && onPageChange) {
+      onPageChange(newPage);
     } else {
-      setGlobalFilter('');
+      setPagination((prev) => ({ ...prev, pageIndex: newPage - 1 }));
     }
-  }, [externalGlobalFilter]);
+  };
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden', borderRadius: '16px' }}>
@@ -265,12 +312,12 @@ export default function DataTable<T extends Record<string, unknown>>({
               >
                 {startItem} to {endItem}
               </Box>{' '}
-              of {totalItems} items.
+              of {actualTotalItems} items.
             </Typography>
             <FormControl size="small" variant="outlined">
               <InputLabel>Rows per page</InputLabel>
               <Select
-                value={rowsPerPage}
+                value={pagination.pageSize}
                 onChange={handleRowsPerPageChange}
                 label="Rows per page"
                 sx={{ minWidth: 120 }}
@@ -285,13 +332,14 @@ export default function DataTable<T extends Record<string, unknown>>({
           </FooterText>
           <PaginationContainer>
             <Pagination
-              count={totalPages}
-              page={currentPage}
-              onChange={(_, newPage) => table.setPageIndex(newPage - 1)}
+              count={actualTotalPages}
+              page={actualCurrentPage}
+              onChange={handlePageChange}
               shape="rounded"
               color="primary"
               siblingCount={1}
               boundaryCount={1}
+              disabled={loading || actualTotalPages <= 1}
             />
           </PaginationContainer>
         </CustomTableFooter>

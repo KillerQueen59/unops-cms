@@ -69,7 +69,12 @@ export const villageDataSchema = z.object({
 
   // Cat 2 - exactly as in your interface
   incomes: z.array(villagePerMonthSchema).optional(),
-  seedCapital: z.number().min(0, 'Modal benih tidak boleh negatif').optional(),
+  seedCapital: z
+    .string()
+    .refine((val) => val === '' || (!isNaN(Number(val)) && Number(val) >= 0), {
+      message: 'Modal benih harus berupa angka dan tidak boleh negatif',
+    })
+    .optional(),
 });
 
 export const villageFormSchema = villageDataSchema.omit({ id: true });

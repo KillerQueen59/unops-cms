@@ -26,8 +26,8 @@ interface VillageState {
   setSelectedCategory: (category: string) => void;
 
   // Navigation actions
-  navigateToDetail: (training: VillageData) => void;
-  navigateToEdit: (training: VillageData) => void;
+  navigateToDetail: (village: VillageData) => void;
+  navigateToEdit: (village: VillageData) => void;
 
   // Breadcrumb actions
   setBreadcrumbs: (breadcrumbs: BreadcrumbItem[]) => void;
@@ -104,7 +104,7 @@ export const useVillageStore = create<VillageState>()(
             break;
           case PageEnum.ADD:
             newBreadcrumbs.push({
-              label: 'Add Village',
+              label: villageName ? `Edit ${villageName}` : 'Add Village',
               isActive: true,
             });
             break;
@@ -159,7 +159,7 @@ export const useVillageStore = create<VillageState>()(
           false,
           'navigateToEdit'
         );
-        updateBreadcrumbs(PageEnum.ADD);
+        updateBreadcrumbs(PageEnum.ADD, village.villageName);
       },
 
       reset: () => set(initialState, false, 'reset'),

@@ -1,5 +1,5 @@
 import { useVillageStore } from '@/stores/villageStore';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { VillageData } from '@/types/village';
 import {
   useVillages,
@@ -31,7 +31,27 @@ export const useVillagePageImpl = () => {
     null
   );
 
-  const { data: villages = [], isLoading, error } = useVillages();
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const [isEdit, setIsEdit] = useState(false);
+
+  // Use pagination parameters
+  const {
+    data: villagesResponse,
+    isLoading,
+    error,
+  } = useVillages({
+    page: currentPage,
+    pageSize: pageSize,
+    search: searchQuery,
+  });
+
+  // Extract villages and pagination info from response
+  const villages = villagesResponse?.data || [];
+  const totalItems = villagesResponse?.totalData || 0;
+  const totalPages = villagesResponse?.totalPages || 0;
 
   // Only fetch village detail when a village is selected
   const { data: villageDetail, isLoading: isLoadingVillage } = useVillage(
@@ -46,29 +66,54 @@ export const useVillagePageImpl = () => {
   // Ensure villages is always an array
   const safeVillages = Array.isArray(villages) ? villages : [];
 
+  // Reset page when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  // Pagination handlers
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1); // Reset to first page when changing page size
+  };
+
   useEffect(() => {
     if (page === PageEnum.LIST) {
       updateBreadcrumbs(PageEnum.LIST);
     }
   }, [page, updateBreadcrumbs]);
 
-  // Effect to handle navigation after village detail is loaded
   useEffect(() => {
     if (villageDetail && selectedVillageId && !isLoadingVillage) {
-      // Update the store with detailed village data and navigate
-      // Mapped village response to VillageData structure
-      navigateToDetail(villageDetail);
-      setSelectedVillageId(null); // Reset after navigation
+      if (isEdit) {
+        navigateToEdit(villageDetail);
+      } else {
+        navigateToDetail(villageDetail);
+      }
+
+      setSelectedVillageId(null);
+      setIsEdit(false);
     }
-  }, [villageDetail, selectedVillageId, isLoadingVillage, navigateToDetail]);
+  }, [
+    villageDetail,
+    selectedVillageId,
+    isLoadingVillage,
+    navigateToDetail,
+    isEdit,
+    navigateToEdit,
+  ]);
 
   const handleView = (data: VillageData) => {
-    // Set the selected village ID to trigger the detail fetch
     setSelectedVillageId(data.villageCode);
   };
 
   const handleEdit = (data: VillageData) => {
-    navigateToEdit(data);
+    setIsEdit(true);
+    setSelectedVillageId(data.villageCode);
   };
 
   const handleAddNew = () => {
@@ -128,6 +173,11 @@ export const useVillagePageImpl = () => {
     villageToDelete,
     isDeleting: deleteVillageMutation.isPending,
     isLoadingVillage, // Add this to show loading state during detail fetch
+    // Pagination state
+    totalItems,
+    totalPages,
+    currentPage,
+    pageSize,
   };
 
   const action = {
@@ -140,6 +190,9 @@ export const useVillagePageImpl = () => {
     setSearchQuery,
     handleCategorySelect,
     handleCloseCategoryModal,
+    // Pagination actions
+    handlePageChange,
+    handlePageSizeChange,
   };
 
   return { state, action };

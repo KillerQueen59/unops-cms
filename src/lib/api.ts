@@ -3,7 +3,7 @@ const API_BASE_URL = 'http://unops-api-dudw4t-af60f1-31-97-222-225.traefik.me';
 
 // Static Bearer Token - Replace this with your actual token
 const STATIC_BEARER_TOKEN =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGM2ODc4ZWUxMzExNDExZmU2NDk2YjgiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzU4MjE2NzA3LCJleHAiOjE3NTgzMDMxMDd9.6fEZgPNSpQ5Y68sP8BF_NtgJ9MzmyBM_kHRkSeewaCo';
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGM2ODc4ZWUxMzExNDExZmU2NDk2YjgiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzU4MzA1MjY0LCJleHAiOjE3NTgzOTE2NjR9.g0xtb1aaLxZqlGpAx60-a-pOrDVhwWkMdtn9gpUTgwY';
 // Simplified token management - always returns the static token
 const getAuthToken = (): string => {
   return STATIC_BEARER_TOKEN;

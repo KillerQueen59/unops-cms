@@ -1,19 +1,26 @@
 import { CustomBreadcrumbs } from '@/components';
 import { BreadcrumbItem } from '@/types/common';
 import { VillageData } from '@/types/village';
-import { Box, IconButton, Typography } from '@mui/material';
+import { Box, Button, IconButton, Typography } from '@mui/material';
 import { CaretLeftIcon } from '@phosphor-icons/react';
 import { getRegencyName } from '../../helper';
-import { PROVINCE_NAME } from '../../constants';
+import { PROVINCE_NAME, VillageCategory } from '../../constants';
+import { CategoryEnum } from '@/constants/category';
+import { TrashIcon } from '@phosphor-icons/react/dist/ssr';
+import { EditIcon } from 'lucide-react';
 
 export const Header = ({
   breadcrumbs,
   villageData,
   handleBack,
+  handleDelete,
+  handleEdit,
 }: {
   breadcrumbs: BreadcrumbItem[];
   villageData: VillageData;
   handleBack: () => void;
+  handleDelete: () => void;
+  handleEdit: () => void;
 }) => {
   return (
     <Box>
@@ -68,7 +75,9 @@ export const Header = ({
               fontWeight: 500,
             }}
           >
-            {villageData.villageCategory}
+            {villageData.villageCategory === CategoryEnum.CATEGORY_1
+              ? VillageCategory.Category1
+              : VillageCategory.Category2}
           </Box>
         </Box>
       </Box>
@@ -130,7 +139,6 @@ export const Header = ({
           </Typography>
         </Box>
 
-        {/* Carbon Emissions */}
         <Box>
           <Typography
             variant="body2"
@@ -142,7 +150,8 @@ export const Header = ({
             variant="body1"
             sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
           >
-            {villageData.villageLat}, {villageData.villageLng}
+            {villageData.villageLat.toFixed(6)},{' '}
+            {villageData.villageLng.toFixed(6)}
           </Typography>
         </Box>
       </Box>
@@ -196,7 +205,7 @@ export const Header = ({
             variant="body1"
             sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
           >
-            {villageData.carbonEmisionStart}
+            {villageData.carbonEmisionStart || '-'}
           </Typography>
         </Box>
 
@@ -211,9 +220,174 @@ export const Header = ({
             variant="body1"
             sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
           >
-            {villageData.carbonEmisionEnd}
+            {villageData.carbonEmisionEnd || '-'}
           </Typography>
         </Box>
+      </Box>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: 4,
+          mb: 4,
+          px: 2,
+        }}
+      >
+        <Box>
+          <Typography
+            variant="body2"
+            sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
+          >
+            SRN Status
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
+          >
+            {villageData.srnStatus || '-'}
+          </Typography>
+        </Box>
+
+        <Box>
+          <Typography
+            variant="body2"
+            sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
+          >
+            Potency
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
+          >
+            {villageData.potency || '-'}
+          </Typography>
+        </Box>
+
+        <Box>
+          <Typography
+            variant="body2"
+            sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
+          >
+            Climate Issues
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
+          >
+            {villageData.climateIssue || '-'}
+          </Typography>
+        </Box>
+
+        <Box>
+          <Typography
+            variant="body2"
+            sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
+          >
+            Source Of Economy
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
+          >
+            {villageData.mainSourceOfEconomy || '-'}
+          </Typography>
+        </Box>
+      </Box>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: 4,
+          mb: 4,
+          px: 2,
+        }}
+      >
+        {villageData.villageCategory === CategoryEnum.CATEGORY_1 ? (
+          <>
+            <Box>
+              <Typography
+                variant="body2"
+                sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
+              >
+                Income Start
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
+              >
+                {villageData.incomesStart || '-'}
+              </Typography>
+            </Box>
+
+            <Box>
+              <Typography
+                variant="body2"
+                sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
+              >
+                Income End
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
+              >
+                {villageData.incomesEnd || '-'}
+              </Typography>
+            </Box>
+          </>
+        ) : (
+          <Box>
+            <Typography
+              variant="body2"
+              sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
+            >
+              Seed Capital
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
+            >
+              {villageData.seedCapital || '-'}
+            </Typography>
+          </Box>
+        )}
+      </Box>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          gap: 2,
+          mb: 4,
+          px: 2,
+        }}
+      >
+        <Button
+          variant="outlined"
+          color="error"
+          startIcon={<TrashIcon />}
+          onClick={handleDelete}
+          sx={{
+            borderRadius: '12px',
+            width: '180px',
+            minHeight: '50px',
+            px: 3,
+          }}
+        >
+          Delete Village
+        </Button>
+        <Button
+          variant="outlined"
+          color="primary"
+          startIcon={<EditIcon />}
+          onClick={handleEdit}
+          sx={{
+            borderRadius: '12px',
+            width: '180px',
+            minHeight: '50px',
+            px: 3,
+          }}
+        >
+          Edit Village
+        </Button>
       </Box>
     </Box>
   );

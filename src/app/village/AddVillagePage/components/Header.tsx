@@ -7,12 +7,10 @@ export const Header = ({
   breadcrumbs,
   isEditMode,
   handleBack,
-  handleDelete,
 }: {
   breadcrumbs: BreadcrumbItem[];
   isEditMode: boolean;
   handleBack: () => void;
-  handleDelete?: () => void;
 }) => {
   return (
     <Box>
@@ -63,21 +61,6 @@ export const Header = ({
             </Typography>
           </Box>
         </Box>
-
-        {isEditMode && handleDelete && (
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<TrashIcon />}
-            onClick={handleDelete}
-            sx={{
-              borderRadius: '12px',
-              px: 3,
-            }}
-          >
-            Delete Village
-          </Button>
-        )}
       </Box>
     </Box>
   );

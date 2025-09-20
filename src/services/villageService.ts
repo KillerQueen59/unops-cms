@@ -18,8 +18,8 @@ export interface CreateVillageData {
   sourceEconomy?: string;
   srnStatus?: string;
   // Category 1 fields
-  incomesStart?: number;
-  incomesEnd?: number;
+  startIncome?: number;
+  endIncome?: number;
   // Category 2 fields
   seedCapital?: number;
   categoryId: string;
@@ -29,21 +29,69 @@ export interface UpdateVillageData extends CreateVillageData {
   id: string;
 }
 
-// Monthly data interfaces for category-specific endpoints
+export interface MonthlyData {
+  _id?: string;
+  id?: number;
+  villageId?: string;
+  month: string;
+  date: string;
+  count: number;
+}
+
 export interface UnsustainableLandData {
-  id?: string; // Optional for create operations, present for updates/deletes
+  unsustainableLands?: MonthlyData[];
+  totalData?: number;
+}
+
+export interface CreateMonthlyDataRequest {
   villageId: string;
-  month: number;
-  year: number;
-  unsustainableLand: number;
+  month: string;
+  count: number;
+}
+
+export interface UnsustainableLandApiResponse {
+  status: boolean;
+  message: string;
+  data: UnsustainableLandData;
 }
 
 export interface IncomeTrackingData {
-  id?: string; // Optional for create operations, present for updates/deletes
+  _id?: string; // Optional for create operations, present for updates/deletes
   villageId: string;
-  month: number;
-  year: number;
+  month: string; // Format: "MM-YYYY" (e.g., "09-2025")
+  count: number;
+}
+
+export interface IncomeApiResponse {
+  status: boolean;
+  message: string;
+  data: {
+    incomes: IncomeTrackingData[];
+  };
+  totalData: number;
+}
+
+export interface CreateIncomeRequest {
+  villageId: string;
+  month: string; // Format: "MM-YYYY"
   income: number;
+}
+
+// Pagination interfaces
+export interface PaginationParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  categoryId?: string;
+  sortBy?: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  totalData: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
 // API Response interfaces
@@ -106,16 +154,55 @@ const transformVillageFromAPI = (
 export const villageService = {
   // Basic Village CRUD operations using "🏘️ Villages" collection
 
-  async getVillages(): Promise<VillageData[]> {
+  async getVillages(
+    params?: PaginationParams
+  ): Promise<PaginatedResponse<VillageData>> {
     try {
-      const response = await apiClient.get<VillageApiResponse>('/village/all');
+      const queryParams = new URLSearchParams();
+
+      if (params?.page) queryParams.append('page', params.page.toString());
+      if (params?.pageSize)
+        queryParams.append('pageSize', params.pageSize.toString());
+      if (params?.search) queryParams.append('search', params.search);
+      if (params?.categoryId)
+        queryParams.append('categoryId', params.categoryId);
+      if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+
+      const url = `/village/all${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const response = await apiClient.get<VillageApiResponse>(url);
+      console.log('Village API response:', response);
+
       if (response.status && response.data?.villages) {
-        return response.data.villages.map(transformVillageFromAPI);
+        const villages = response.data.villages.map(transformVillageFromAPI);
+        const totalData = response.data.totalData || villages.length;
+        const page = params?.page || 1;
+        const pageSize = params?.pageSize || 10;
+
+        return {
+          data: villages,
+          totalData,
+          page,
+          limit: pageSize,
+          totalPages: Math.ceil(totalData / pageSize),
+        };
       }
-      return [];
+
+      return {
+        data: [],
+        totalData: 0,
+        page: params?.page || 1,
+        limit: params?.pageSize || 10,
+        totalPages: 0,
+      };
     } catch (error) {
       console.error('Failed to fetch villages:', error);
-      return [];
+      return {
+        data: [],
+        totalData: 0,
+        page: params?.page || 1,
+        limit: params?.pageSize || 10,
+        totalPages: 0,
+      };
     }
   },
 
@@ -158,27 +245,38 @@ export const villageService = {
 
   // Category 1: Unsustainable Land operations using "🌱 Monthly Unsustainable Land" collection
 
-  async getUnsustainableLandData(): Promise<UnsustainableLandData[]> {
-    return await apiClient.get<UnsustainableLandData[]>(
-      '/village/monthly-unsustainable-land/all'
-    );
+  async getUnsustainableLandData(params?: {
+    page?: number;
+    pageSize?: number;
+    search?: string;
+    sortBy?: string;
+  }): Promise<UnsustainableLandApiResponse> {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.pageSize)
+      queryParams.append('pageSize', params.pageSize.toString());
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+
+    const url = `/village/unsustainableland/all${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return await apiClient.get<UnsustainableLandApiResponse>(url);
   },
 
   async addUnsustainableLandData(
-    data: UnsustainableLandData
+    data: CreateMonthlyDataRequest
   ): Promise<UnsustainableLandData> {
     return await apiClient.post<UnsustainableLandData>(
-      '/village/monthly-unsustainable-land',
+      '/village/unsustainableLand',
       data
     );
   },
 
   async updateUnsustainableLandData(
     unsustainableLandId: string,
-    data: Partial<UnsustainableLandData>
+    data: CreateMonthlyDataRequest
   ): Promise<UnsustainableLandData> {
     return await apiClient.put<UnsustainableLandData>(
-      `/village/monthly-unsustainable-land/${unsustainableLandId}`,
+      `/village/unsustainableLand/${unsustainableLandId}`,
       data
     );
   },
@@ -186,40 +284,46 @@ export const villageService = {
   async deleteUnsustainableLandData(
     unsustainableLandId: string
   ): Promise<void> {
-    await apiClient.delete(
-      `/village/monthly-unsustainable-land/${unsustainableLandId}`
-    );
+    await apiClient.delete(`/village/unsustainableland/${unsustainableLandId}`);
   },
 
   // Category 2: Income Tracking operations using "💰 Monthly Income Tracking" collection
 
-  async getIncomeTrackingData(): Promise<IncomeTrackingData[]> {
-    return await apiClient.get<IncomeTrackingData[]>(
-      '/village/monthly-income/all'
-    );
+  async getIncomeTrackingData(params?: {
+    page?: number;
+    pageSize?: number;
+    search?: string;
+    sortBy?: string;
+  }): Promise<IncomeApiResponse> {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.pageSize)
+      queryParams.append('pageSize', params.pageSize.toString());
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+
+    const url = `/village/income/all${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return await apiClient.get<IncomeApiResponse>(url);
   },
 
   async addIncomeTrackingData(
-    data: IncomeTrackingData
+    data: CreateIncomeRequest
   ): Promise<IncomeTrackingData> {
-    return await apiClient.post<IncomeTrackingData>(
-      '/village/monthly-income',
-      data
-    );
+    return await apiClient.post<IncomeTrackingData>('/village/income', data);
   },
 
   async updateIncomeTrackingData(
     incomeId: string,
-    data: Partial<IncomeTrackingData>
+    data: CreateIncomeRequest
   ): Promise<IncomeTrackingData> {
     return await apiClient.put<IncomeTrackingData>(
-      `/village/monthly-income/${incomeId}`,
+      `/village/income/${incomeId}`,
       data
     );
   },
 
   async deleteIncomeTrackingData(incomeId: string): Promise<void> {
-    await apiClient.delete(`/village/monthly-income/${incomeId}`);
+    await apiClient.delete(`/village/income/${incomeId}`);
   },
 };
 
@@ -228,9 +332,8 @@ export const transformUIVillageForAPI = (
   village: Partial<VillageData>
 ): UpdateVillageData => {
   return {
-    id: village.id || '',
+    id: village.villageCode || '',
     name: village.villageName || '',
-    areaId: village.villageCode || '',
     category: village.villageCategory || '',
     latitude: village.villageLat?.toString() || '0',
     longitude: village.villageLng?.toString() || '0',
@@ -260,7 +363,7 @@ export const createVillageFormData = (
 
   // Basic fields
   if (data.name) formData.append('name', data.name);
-  if (data.areaId) formData.append('areaId', data.areaId);
+  if (data.id) formData.append('areaId', data.id);
   if (data.category) formData.append('category', data.category);
   if (data.latitude) formData.append('latitude', data.latitude);
   if (data.longitude) formData.append('longitude', data.longitude);

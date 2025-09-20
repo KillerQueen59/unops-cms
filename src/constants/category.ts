@@ -1,0 +1,4 @@
+export enum CategoryEnum {
+  CATEGORY_1 = '68c687806fe5698b8689b060',
+  CATEGORY_2 = '68c687806fe5698b8689b061',
+}

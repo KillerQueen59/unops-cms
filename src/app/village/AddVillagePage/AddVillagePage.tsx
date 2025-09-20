@@ -16,6 +16,7 @@ export const AddVillagePage = () => {
     isSubmitting,
     isDeleting,
     errors,
+    selectedVillage,
   } = state;
 
   const {
@@ -25,7 +26,6 @@ export const AddVillagePage = () => {
     handleLeaveCancel,
     handleSubmitConfirm,
     handleSubmitCancel,
-    handleDelete,
     handleDeleteConfirm,
     handleDeleteCancel,
     setValue,
@@ -39,7 +39,6 @@ export const AddVillagePage = () => {
           breadcrumbs={breadcrumbs}
           isEditMode={isEditMode}
           handleBack={handleBack}
-          handleDelete={handleDelete}
         />
 
         <Form
@@ -51,6 +50,8 @@ export const AddVillagePage = () => {
           setValue={setValue}
           selectedCategory={state.selectedCategory ?? ''}
           watch={watch}
+          isEditMode={isEditMode}
+          selectedData={selectedVillage}
         />
       </Box>
 

@@ -13,6 +13,9 @@ import {
   CreateVillageData,
   UpdateVillageData,
 } from '@/services/villageService';
+import { VillageCategory } from '../constants';
+import { CategoryEnum } from '@/constants/category';
+import toast from 'react-hot-toast';
 
 export const useAddVillagePageImpl = () => {
   const {
@@ -22,6 +25,7 @@ export const useAddVillagePageImpl = () => {
     selectedCategory,
     breadcrumbs,
   } = useVillageStore();
+
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -63,7 +67,7 @@ export const useAddVillagePageImpl = () => {
         selectedVillage?.unsustainableLandClearings || [],
       // Cat 2
       incomes: selectedVillage?.incomes || [],
-      seedCapital: selectedVillage?.seedCapital || undefined,
+      seedCapital: selectedVillage?.seedCapital?.toString() || '',
     },
   });
 
@@ -99,23 +103,24 @@ export const useAddVillagePageImpl = () => {
   }, [watchedValues]);
 
   useEffect(() => {
-    updateBreadcrumbs(PageEnum.ADD);
-  }, [updateBreadcrumbs]);
+    updateBreadcrumbs(PageEnum.ADD, selectedVillage?.villageName);
+  }, [updateBreadcrumbs, selectedVillage?.villageName]);
 
   const isEditMode = !!selectedVillage;
 
   useEffect(() => {
     if (selectedVillage) {
+      console.log('Resetting form with village data:', selectedVillage);
       reset({
         villageName: selectedVillage.villageName || '',
         villageCode: selectedVillage.villageCode || '',
         villageCategory: selectedVillage.villageCategory || '',
         villageLat: selectedVillage.villageLat || 0,
         villageLng: selectedVillage.villageLng || 0,
-        landManageStart: selectedVillage.landManageStart?.toString() || '0',
+        landManageStart: selectedVillage.landManageStart?.toString() || '',
         landManageEnd: selectedVillage.landManageEnd?.toString() || '',
         carbonEmisionStart:
-          selectedVillage.carbonEmisionStart?.toString() || '0',
+          selectedVillage.carbonEmisionStart?.toString() || '',
         carbonEmisionEnd: selectedVillage.carbonEmisionEnd?.toString() || '',
         potency: selectedVillage.potency || '',
         climateIssue: selectedVillage.climateIssue || '',
@@ -128,7 +133,7 @@ export const useAddVillagePageImpl = () => {
           selectedVillage.unsustainableLandClearings || [],
         // Cat 2
         incomes: selectedVillage.incomes || [],
-        seedCapital: selectedVillage.seedCapital || undefined,
+        seedCapital: selectedVillage.seedCapital?.toString() || '',
       });
     }
   }, [selectedVillage, reset]);
@@ -193,14 +198,10 @@ export const useAddVillagePageImpl = () => {
 
   const onSubmit = async (data: VillageFormData) => {
     try {
-      console.log('Saving village:', data);
-
       // Transform form data to API format
       const villageData: CreateVillageData = {
         name: data.villageName,
         id: data.villageCode,
-        // category: data.villageCategory,
-        // totalPopulation: 0,
         latitude: `${data.villageLat}`,
         longitude: `${data.villageLng}`,
         startLandManaged: Number(data.landManageStart) || 0,
@@ -214,12 +215,14 @@ export const useAddVillagePageImpl = () => {
         potency: data.potency,
         climateIssue: data.climateIssue,
         sourceEconomy: data.mainSourceOfEconomy,
-        // srnStatus: data.srnStatus,
-        // incomesStart: data.incomesStart ? Number(data.incomesStart) : undefined,
-        incomesEnd: data.incomesEnd ? Number(data.incomesEnd) : undefined,
-        seedCapital: data.seedCapital,
-
-        categoryId: '68c687806fe5698b8689b060',
+        srnStatus: data.srnStatus,
+        startIncome: data.incomesStart ? Number(data.incomesStart) : undefined,
+        endIncome: data.incomesEnd ? Number(data.incomesEnd) : undefined,
+        seedCapital: data.seedCapital ? Number(data.seedCapital) : undefined,
+        categoryId:
+          data.villageCategory === VillageCategory.Category1
+            ? CategoryEnum.CATEGORY_1
+            : CategoryEnum.CATEGORY_2,
       };
 
       if (isEditMode && selectedVillage) {
@@ -239,6 +242,7 @@ export const useAddVillagePageImpl = () => {
 
       navigateBack();
     } catch (error) {
+      toast.error('Failed to save village: ' + (error as Error).message);
       console.error('Failed to save village:', error);
       // Handle error (could show toast or alert)
     }
@@ -258,9 +262,8 @@ export const useAddVillagePageImpl = () => {
     isDeleting: deleteVillageMutation.isPending,
     errors,
     selectedCategory,
+    selectedVillage,
   };
-
-  console.log('errors', errors);
 
   const action = {
     handleBack,

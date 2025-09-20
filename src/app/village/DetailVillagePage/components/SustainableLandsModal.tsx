@@ -76,6 +76,8 @@ export const SustainableLandsModal = ({
     setError('');
   }, [existingData, isEdit, open]);
 
+  console.log('yearStr', selectedYear, existingData);
+
   const handleSave = () => {
     if (!selectedMonth || !selectedYear || count === '') {
       setError('Please fill in all fields');

@@ -12,12 +12,12 @@ import {
 } from '@mui/material';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
 import { PROVINCE_NAME, southSumatraRegencies } from '../../constants';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getVillageOptions } from '../../helper';
 import { MapPicker } from '@/components/MapPicker';
 import southSumatraOnly from '@/hooks/sumatra-only';
 import { ControlledFieldContainer } from '@/components';
-import { trainingTypeOptions } from '@/app/(training)/constants';
+import { VillageData } from '@/types/village';
 
 export const Form = ({
   control,
@@ -28,6 +28,8 @@ export const Form = ({
   setValue,
   selectedCategory,
   watch,
+  isEditMode,
+  selectedData,
 }: {
   control: Control<VillageFormData>;
   errors: FieldErrors<VillageFormData>;
@@ -37,24 +39,49 @@ export const Form = ({
   setValue: (name: keyof VillageFormData, value: any) => void;
   selectedCategory: string;
   watch: (field: keyof VillageFormData) => any;
+  isEditMode: boolean;
+  selectedData: VillageData | null;
 }) => {
+  const villageCode = selectedData?.villageCode || '';
+
   const [selectedRegency, setSelectedRegency] = useState<string>('');
   const [selectedVillage, setSelectedVillage] = useState<string>('');
   const [villageOptions, setVillageOptions] = useState<
     Array<{ value: string; label: string }>
   >([]);
+  const [triggerChangeRegency, setTriggerChangeRegency] = useState(false);
+
+  useEffect(() => {
+    if (isEditMode && villageCode) {
+      const regencyCode = villageCode.split('.').splice(0, 2).join('.');
+      const regency = southSumatraRegencies.find(
+        (reg) => reg.code === regencyCode
+      );
+
+      setSelectedRegency(regency?.code || '');
+      const villages: Array<{ value: string; label: string }> =
+        getVillageOptions(regencyCode);
+      setVillageOptions(villages);
+      setSelectedVillage(villageCode);
+    }
+  }, [isEditMode, villageCode]);
 
   useEffect(() => {
     if (selectedRegency) {
       const villages: Array<{ value: string; label: string }> =
         getVillageOptions(selectedRegency);
       setVillageOptions(villages);
-      setSelectedVillage('');
+      if (villageCode && !triggerChangeRegency) {
+        const selectedVillage = villages.find((v) => v.value === villageCode);
+        setSelectedVillage(selectedVillage?.value || '');
+      } else {
+        setSelectedVillage('');
+      }
     } else {
       setVillageOptions([]);
       setSelectedVillage('');
     }
-  }, [selectedRegency]);
+  }, [selectedRegency, triggerChangeRegency, villageCode]);
 
   return (
     <form
@@ -140,6 +167,9 @@ export const Form = ({
                     ) || null
                   }
                   onChange={(event, newValue) => {
+                    if (isEditMode) {
+                      setTriggerChangeRegency(true);
+                    }
                     setSelectedRegency(newValue?.code || '');
                   }}
                   renderInput={(params) => (
@@ -550,6 +580,7 @@ export const Form = ({
                 control={control}
                 placeholder="Input climate issue..."
                 error={errors.climateIssue}
+                required
               />
             </Box>
 
