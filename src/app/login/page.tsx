@@ -16,7 +16,6 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthStatus } from '@/hooks/useAuth';
-import { login } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 // Login form schema
@@ -58,7 +57,7 @@ export default function LoginPage() {
 
     try {
       // Use the login function from api.ts
-      await login(data.email, data.password);
+      // await login(data.email, data.password);
 
       toast.success('Login successful!');
       router.push('/training');

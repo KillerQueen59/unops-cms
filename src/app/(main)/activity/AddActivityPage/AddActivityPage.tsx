@@ -45,7 +45,6 @@ export const AddActivityPage = () => {
           errors={errors}
           isSubmitting={isSubmitting}
           handleFormSubmit={handleFormSubmit}
-          handleBack={handleBack}
           villageOptions={villageOptions}
           watch={watch}
           setValue={setValue}

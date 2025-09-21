@@ -186,14 +186,9 @@ export default function ActivityPage() {
         <DataTable<ActivityTable>
           data={activities.filter((activity) => {
             if (!searchQuery) return true;
-            return (
-              activity.activityName
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase()) ||
-              activity.activityCategory
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase())
-            );
+            return activity.activityName
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase());
           })}
           columns={columns}
           title="Activity Data"

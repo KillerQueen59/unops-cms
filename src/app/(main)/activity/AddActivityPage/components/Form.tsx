@@ -38,7 +38,11 @@ export const Form = ({
   errors: FieldErrors<ActivityFormData>;
   isSubmitting: boolean;
   handleFormSubmit: () => void;
-  villageOptions: { label: string; value: string; category: string }[];
+  villageOptions: {
+    label: string;
+    value: string;
+    category: string | undefined;
+  }[];
   watch: (names?: string | string[]) => any;
   setValue: (
     name: keyof ActivityFormData,
