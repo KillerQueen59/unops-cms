@@ -4,11 +4,11 @@ import {
   CreateTrainingData,
   UpdateTrainingData,
   PaginationParams,
-  PaginatedResponse,
   transformUITrainingForAPI,
 } from '@/services/trainingService';
 import { TrainingData } from '@/types/training';
 import toast from 'react-hot-toast';
+import { PaginatedResponse } from '@/types/common';
 
 // Query Keys
 export const trainingKeys = {

@@ -1,6 +1,7 @@
 // Components exports
 export { default as BaseDrawer } from './BaseDrawer';
 export { default as BaseLayout } from './BaseLayout';
+export { default as ProtectedRoute } from './ProtectedRoute';
 export { default as DataTable } from './DataTable/DataTable';
 
 // Training specific components

@@ -1,4 +1,5 @@
 import { apiClient } from '@/lib/api';
+import { PaginatedResponse } from '@/types/common';
 import { DataFile } from '@/types/data';
 
 // Base Document interface matching API response
@@ -43,14 +44,6 @@ export interface PaginationParams {
   area?: string;
   sortBy?: string;
   sortOrder?: string;
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  totalData: number;
-  page: number;
-  limit: number;
-  totalPages: number;
 }
 
 // API Response interfaces

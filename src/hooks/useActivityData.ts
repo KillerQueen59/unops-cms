@@ -1,156 +1,131 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  activityApi,
-  transformActivityForUI,
-  transformUIActivityForAPI,
-} from '@/services/activityService';
-import { ActivityData } from '@/types/activity';
-import type {
-  ActivityListParams,
+  activityService,
   CreateActivityData,
   UpdateActivityData,
+  ActivityListParams,
 } from '@/services/activityService';
+import { ActivityData } from '@/types/activity';
+import toast from 'react-hot-toast';
+import { PaginatedResponse } from '@/types/common';
 
-// Query keys for React Query - following best practices
-export const ACTIVITY_QUERY_KEYS = {
+// Query Keys
+export const activityKeys = {
   all: ['activities'] as const,
-  lists: () => [...ACTIVITY_QUERY_KEYS.all, 'list'] as const,
-  list: (params?: ActivityListParams) =>
-    [...ACTIVITY_QUERY_KEYS.lists(), params] as const,
-  details: () => [...ACTIVITY_QUERY_KEYS.all, 'detail'] as const,
-  detail: (id: string) => [...ACTIVITY_QUERY_KEYS.details(), id] as const,
-  categories: () => [...ACTIVITY_QUERY_KEYS.all, 'categories'] as const,
+  lists: () => [...activityKeys.all, 'list'] as const,
+  list: (filters: string) => [...activityKeys.lists(), { filters }] as const,
+  details: () => [...activityKeys.all, 'detail'] as const,
+  detail: (id: string | null) => [...activityKeys.details(), id] as const,
+  categories: () => [...activityKeys.all, 'categories'] as const,
 } as const;
 
-/**
- * Hook to fetch all activities with optional filtering and pagination
- */
 export const useActivities = (params?: ActivityListParams) => {
   return useQuery({
-    queryKey: ACTIVITY_QUERY_KEYS.list(params),
-    queryFn: async () => {
-      const response = await activityApi.getActivities(params);
-      // Transform API data to UI format
-      return {
-        ...response,
-        data: response.data.map(transformActivityForUI),
-      };
+    queryKey: activityKeys.list(JSON.stringify(params || {})),
+    queryFn: async (): Promise<PaginatedResponse<ActivityData>> => {
+      try {
+        const result = await activityService.getActivities(params);
+        return result;
+      } catch (error) {
+        toast.error('Failed to fetch activities');
+        return {
+          data: [],
+          totalData: 0,
+          page: params?.page || 1,
+          limit: params?.pageSize || 10,
+          totalPages: 0,
+        };
+      }
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    placeholderData: (previousData) => previousData, // Keep previous data while loading
+    staleTime: 5 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
   });
 };
 
-/**
- * Hook to fetch a single activity by ID
- */
-export const useActivity = (activityId: string) => {
+export const useActivity = (
+  id: string | null,
+  options?: { enabled?: boolean }
+) => {
+  const enabled = options?.enabled ?? true;
   return useQuery({
-    queryKey: ACTIVITY_QUERY_KEYS.detail(activityId),
-    queryFn: async () => {
-      const response = await activityApi.getActivityById(activityId);
-      return transformActivityForUI(response.data);
-    },
-    enabled: !!activityId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    queryKey: activityKeys.detail(id),
+    queryFn: () => activityService.getActivityById(id!),
+    enabled: enabled && !!id,
   });
 };
 
-/**
- * Hook to fetch activity categories
- */
 export const useActivityCategories = () => {
   return useQuery({
-    queryKey: ACTIVITY_QUERY_KEYS.categories(),
-    queryFn: () => activityApi.getCategories(),
+    queryKey: activityKeys.categories(),
+    queryFn: () => activityService.getCategories(),
     staleTime: 1000 * 60 * 30, // 30 minutes (categories don't change often)
   });
 };
 
-/**
- * Hook to create a new activity
- */
 export const useCreateActivity = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
+    mutationFn: ({
       activityData,
       files,
     }: {
-      activityData: Partial<ActivityData>;
+      activityData: CreateActivityData;
       files?: File[];
-    }) => {
-      const apiData = transformUIActivityForAPI(activityData);
-      return activityApi.createActivity(apiData as CreateActivityData, files);
-    },
+    }) => activityService.createActivity(activityData, files),
     onSuccess: () => {
-      // Invalidate and refetch activities lists
-      queryClient.invalidateQueries({
-        queryKey: ACTIVITY_QUERY_KEYS.lists(),
-      });
+      queryClient.invalidateQueries({ queryKey: activityKeys.lists() });
+      toast.success('Activity created successfully');
     },
     onError: (error) => {
       console.error('Failed to create activity:', error);
+      toast.error('Failed to create activity');
     },
   });
-}; /**
- * Hook to update an existing activity
- */
+};
+
 export const useUpdateActivity = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
+    mutationFn: ({
       activityId,
       activityData,
       files,
     }: {
       activityId: string;
-      activityData: Partial<ActivityData>;
+      activityData: UpdateActivityData;
       files?: File[];
-    }) => {
-      const apiData = transformUIActivityForAPI(activityData);
-      return activityApi.updateActivity(
-        activityId,
-        apiData as UpdateActivityData,
-        files
+    }) => activityService.updateActivity(activityId, activityData, files),
+    onSuccess: (updatedActivity, { activityId }) => {
+      queryClient.invalidateQueries({ queryKey: activityKeys.lists() });
+      queryClient.setQueryData(
+        activityKeys.detail(activityId),
+        updatedActivity
       );
-    },
-    onSuccess: (_, { activityId }) => {
-      // Invalidate specific activity and activities lists
-      queryClient.invalidateQueries({
-        queryKey: ACTIVITY_QUERY_KEYS.detail(activityId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: ACTIVITY_QUERY_KEYS.lists(),
-      });
+      toast.success('Activity updated successfully');
     },
     onError: (error) => {
       console.error('Failed to update activity:', error);
+      toast.error('Failed to update activity');
     },
   });
 };
 
-/**
- * Hook to delete an activity
- */
 export const useDeleteActivity = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (activityId: string) => activityApi.deleteActivity(activityId),
-    onSuccess: (_, activityId) => {
-      // Remove the deleted activity from cache and invalidate lists
-      queryClient.removeQueries({
-        queryKey: ACTIVITY_QUERY_KEYS.detail(activityId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: ACTIVITY_QUERY_KEYS.lists(),
-      });
+    mutationFn: (activityId: string) =>
+      activityService.deleteActivity(activityId),
+    onSuccess: (_, deletedId) => {
+      queryClient.invalidateQueries({ queryKey: activityKeys.lists() });
+      queryClient.removeQueries({ queryKey: activityKeys.detail(deletedId) });
+      toast.success('Activity deleted successfully');
     },
     onError: (error) => {
       console.error('Failed to delete activity:', error);
+      toast.error('Failed to delete activity');
     },
   });
 };

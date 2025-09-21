@@ -1,4 +1,5 @@
 import { apiClient } from '@/lib/api';
+import { PaginatedResponse } from '@/types/common';
 import { TrainingData } from '@/types/training';
 
 // Training API interfaces
@@ -47,14 +48,6 @@ export interface PaginationParams {
   village?: string;
   startDate?: string;
   endDate?: string;
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  totalData: number;
-  page: number;
-  limit: number;
-  totalPages: number;
 }
 
 // API Response interfaces

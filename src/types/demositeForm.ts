@@ -2,10 +2,10 @@ import { DemositeType } from './demosite';
 
 export interface DemositeFormData {
   title: string;
-  description: string;
+  header: File;
   type: DemositeType;
-  locationName: string;
+  name: string;
   story: string;
-  isTop10: boolean;
-  images: File[];
+  link: string;
+  photos: File[];
 }

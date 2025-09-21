@@ -1,13 +1,15 @@
 export interface ActivityData {
   id: string;
   activityName: string;
-  activityCategory: string; // enum soon
+  villageId: string;
   description: string;
   startDate: string;
   endDate: string;
-  status: 'active' | 'inactive';
-  progress: number;
-  files: File[];
+  status: 'not yet' | 'ongoing' | 'completed';
+  percentage: string;
+  type?: 'workshop' | 'training' | 'demosite';
+  files: File[] | string[];
+  category?: string;
 }
 
 export type ActivityTable = {

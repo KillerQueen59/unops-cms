@@ -22,6 +22,8 @@ export interface VillageData {
   // Cat 2
   incomes?: VillagePerMonth[];
   seedCapital?: number;
+
+  categoryName?: string;
 }
 
 export interface VillagePerMonth {

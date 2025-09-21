@@ -1,15 +1,16 @@
 import { apiClient } from '@/lib/api';
-import { DemositeData } from '@/types/demosite';
+import { PaginatedResponse } from '@/types/common';
+import { DemositeData, DemositeType } from '@/types/demosite';
 
 // Demosite API interfaces based on Postman collection
 export interface CreateDemositeData {
-  header: string;
+  header: File;
   title: string;
-  type: 'hero' | 'location'; // Based on Postman collection query params
+  type: 'hero' | 'location';
   name: string;
   story: string;
-  link: string;
-  photos?: File[]; // File array for form data
+  link?: string;
+  photos?: File[];
 }
 
 export interface UpdateDemositeData extends CreateDemositeData {
@@ -21,26 +22,124 @@ export interface DemositeQueryParams {
   page?: number;
   pageSize?: number;
   type?: 'hero' | 'location';
+  search?: string;
   sortBy?: string;
 }
+
+// API Response interfaces
+interface DemositeApiResponse {
+  status: boolean;
+  message: string;
+  data: {
+    demosites: Array<{
+      _id: string;
+      header: string;
+      title: string;
+      type: 'hero' | 'location';
+      name: string;
+      story: string;
+      link: string;
+      photos?: string[];
+    }>;
+    totalData: number;
+  };
+}
+
+// Transform API response to our internal format
+const transformDemositeFromAPI = (
+  apiDemosite: DemositeApiResponse['data']['demosites'][0]
+): DemositeData => {
+  return {
+    id: apiDemosite._id,
+    header: apiDemosite.header || '',
+    title: apiDemosite.title || '',
+    type:
+      apiDemosite.type === 'hero'
+        ? DemositeType.LocalHeroes
+        : DemositeType.StoryOfVillage,
+    name: apiDemosite.name || '',
+    story: apiDemosite.story || '',
+    link: apiDemosite.link || '',
+    photos: apiDemosite.photos || [],
+    createdAt: '',
+    updatedAt: '',
+    createdBy: '',
+    updatedBy: '',
+    description: '',
+    isTop10: false,
+  };
+};
 
 // Demosite API Service
 export const demositeService = {
   // Get all demosites with optional filtering
-  async getDemosites(params?: DemositeQueryParams): Promise<DemositeData[]> {
-    const queryParams: Record<string, string> = {};
+  async getDemosites(
+    params?: DemositeQueryParams
+  ): Promise<PaginatedResponse<DemositeData>> {
+    try {
+      const queryParams = new URLSearchParams();
 
-    if (params?.page) queryParams.page = params.page.toString();
-    if (params?.pageSize) queryParams.pageSize = params.pageSize.toString();
-    if (params?.type) queryParams.type = params.type;
-    if (params?.sortBy) queryParams.sortBy = params.sortBy;
+      if (params?.page) queryParams.append('page', params.page.toString());
+      if (params?.pageSize)
+        queryParams.append('pageSize', params.pageSize.toString());
+      if (params?.type) queryParams.append('type', params.type);
+      if (params?.search) queryParams.append('search', params.search);
+      if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
 
-    return await apiClient.get<DemositeData[]>('/demosite/all', queryParams);
+      const url = `/demosite/all${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const response = await apiClient.get<DemositeApiResponse>(url);
+
+      if (response.status && response.data?.demosites) {
+        const demosites = response.data.demosites.map(transformDemositeFromAPI);
+        const totalData = response.data.totalData || demosites.length;
+        const page = params?.page || 1;
+        const pageSize = params?.pageSize || 10;
+
+        return {
+          data: demosites,
+          totalData,
+          page,
+          limit: pageSize,
+          totalPages: Math.ceil(totalData / pageSize),
+        };
+      }
+
+      return {
+        data: [],
+        totalData: 0,
+        page: params?.page || 1,
+        limit: params?.pageSize || 10,
+        totalPages: 0,
+      };
+    } catch (error) {
+      console.error('Failed to fetch demosites:', error);
+      return {
+        data: [],
+        totalData: 0,
+        page: params?.page || 1,
+        limit: params?.pageSize || 10,
+        totalPages: 0,
+      };
+    }
   },
 
   // Get demosite by ID
   async getDemositeById(id: string): Promise<DemositeData> {
-    return await apiClient.get<DemositeData>(`/demosite/${id}`);
+    try {
+      const response = await apiClient.get<{
+        status: boolean;
+        message: string;
+        data: DemositeApiResponse['data']['demosites'][0];
+      }>(`/demosite/${id}`);
+
+      if (response.status && response.data) {
+        return transformDemositeFromAPI(response.data);
+      }
+      throw new Error('Demosite not found');
+    } catch (error) {
+      console.error('Failed to fetch demosite by ID:', error);
+      throw error;
+    }
   },
 
   // Create new demosite with file upload support
@@ -90,28 +189,4 @@ export const createDemositeFormData = (
   }
 
   return formData;
-};
-
-// Helper function to transform UI data to API format
-export const transformUIDemositeForAPI = (
-  demosite: Partial<DemositeData>,
-  photos?: File[]
-): UpdateDemositeData => {
-  // Map DemositeType enum to API type
-  const getApiType = (type?: string): 'hero' | 'location' => {
-    if (type === 'Local Heroes') return 'hero';
-    if (type === 'Story of Village') return 'location';
-    return 'hero'; // default
-  };
-
-  return {
-    id: demosite.id || '',
-    header: demosite.header || '',
-    title: demosite.title || '',
-    type: getApiType(demosite.type?.toString()),
-    name: demosite.name || '',
-    story: demosite.story || '',
-    link: demosite.link || '',
-    photos: photos,
-  };
 };

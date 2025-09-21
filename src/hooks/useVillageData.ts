@@ -6,10 +6,10 @@ import {
   CreateMonthlyDataRequest,
   CreateIncomeRequest,
   PaginationParams,
-  PaginatedResponse,
 } from '@/services/villageService';
 import { VillageData } from '@/types/village';
 import toast from 'react-hot-toast';
+import { PaginatedResponse } from '@/types/common';
 
 // Query Keys
 export const villageKeys = {

@@ -8,7 +8,8 @@ export const activityFormSchema = z
       .min(3, 'Activity name must be at least 3 characters')
       .max(100, 'Activity name must not exceed 100 characters'),
 
-    activityCategory: z.string().min(1, 'Activity category is required'),
+    // activityCategory: z.string().min(1, 'Activity category is required'),
+    villageId: z.string().min(1, 'Village is required'),
 
     description: z
       .string()
@@ -32,15 +33,24 @@ export const activityFormSchema = z
         return !isNaN(parsed.getTime());
       }, 'Invalid end date format'),
 
-    status: z.enum(['active', 'inactive'], {
-      message: 'Status must be either active or inactive',
+    status: z.enum(['not yet', 'ongoing', 'completed'], {
+      message: 'Status must be either not yet, ongoing, or completed',
     }),
 
-    progress: z
-      .number()
-      .min(0, 'Progress cannot be less than 0')
-      .max(100, 'Progress cannot be more than 100')
-      .int('Progress must be a whole number'),
+    type: z.enum(['workshop', 'training', 'demosite'], {
+      message: 'Type must be either workshop, training, or demosite',
+    }),
+    percentage: z
+      .string()
+      .min(1, 'Percentage is required')
+      .refine((val) => !isNaN(Number(val)), 'Percentage must be a valid number')
+      .refine((val) => Number(val) >= 0, 'Percentage cannot be less than 0')
+      .refine((val) => Number(val) <= 100, 'Percentage cannot be more than 100')
+      .refine(
+        (val) => Number.isInteger(Number(val)),
+        'Percentage must be a whole number'
+      ),
+    category: z.string().optional(),
 
     files: z.array(z.any()),
   })

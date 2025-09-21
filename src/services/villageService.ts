@@ -1,4 +1,5 @@
 import { apiClient } from '@/lib/api';
+import { PaginatedResponse } from '@/types/common';
 import { VillageData } from '@/types/village';
 
 // Village API interfaces
@@ -86,14 +87,6 @@ export interface PaginationParams {
   sortBy?: string;
 }
 
-export interface PaginatedResponse<T> {
-  data: T[];
-  totalData: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
-
 // API Response interfaces
 interface VillageApiResponse {
   status: boolean;
@@ -117,6 +110,7 @@ interface VillageApiResponse {
       startIncome?: number;
       endIncome?: number;
       seedCapital?: number;
+      categoryName?: string;
     }>;
     totalData: number;
   };
@@ -147,6 +141,7 @@ const transformVillageFromAPI = (
     seedCapital: apiVillage.seedCapital,
     unsustainableLandClearings: [],
     incomes: [],
+    categoryName: apiVillage.categoryName || '',
   };
 };
 

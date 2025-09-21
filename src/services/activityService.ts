@@ -1,22 +1,18 @@
 import { apiClient } from '@/lib/api';
+import { PaginatedResponse } from '@/types/common';
+import { ActivityData } from '@/types/activity';
+import { CategoryEnum } from '@/constants/category';
 
-// Activity types based on actual API response structure from Postman collection
+// Activity API interfaces based on the curl commands
 export interface Activity {
   _id: string;
   villageId: string;
   name: string;
-  startDate: string;
-  endDate: string;
+  start_date: string;
+  end_date: string;
   description: string;
   status: 'not yet' | 'ongoing' | 'completed';
   type: 'training' | 'workshop' | 'demosite';
-  category:
-    | 'capacity_building'
-    | 'infrastructure'
-    | 'environmental'
-    | 'social'
-    | 'economic'
-    | 'other';
   percentage: number;
   attachments?: string[]; // File URLs from API
   createdAt: string;
@@ -31,222 +27,195 @@ export interface Activity {
 export interface CreateActivityData {
   villageId: string;
   name: string;
-  startDate: string;
-  endDate: string;
+  start_date: string;
+  end_date: string;
   description: string;
   status: 'not yet' | 'ongoing' | 'completed';
   type: 'training' | 'workshop' | 'demosite';
-  category:
-    | 'capacity_building'
-    | 'infrastructure'
-    | 'environmental'
-    | 'social'
-    | 'economic'
-    | 'other';
   percentage: number;
-  attachments?: File[]; // Files for upload
+  category?: string;
 }
 
 export interface UpdateActivityData {
+  villageId?: string;
   name?: string;
-  startDate?: string;
-  endDate?: string;
+  start_date?: string;
+  end_date?: string;
   description?: string;
   status?: 'not yet' | 'ongoing' | 'completed';
   type?: 'training' | 'workshop' | 'demosite';
-  category?:
-    | 'capacity_building'
-    | 'infrastructure'
-    | 'environmental'
-    | 'social'
-    | 'economic'
-    | 'other';
   percentage?: number;
-  attachments?: File[]; // Files for upload
+  category?: string;
 }
 
+// Pagination interfaces
 export interface ActivityListParams {
   page?: number;
   pageSize?: number;
   search?: string;
   status?: 'not yet' | 'ongoing' | 'completed';
   type?: 'training' | 'workshop' | 'demosite';
-  category?:
-    | 'capacity_building'
-    | 'infrastructure'
-    | 'environmental'
-    | 'social'
-    | 'economic'
-    | 'other';
   sortBy?: string;
 }
 
-interface ActivityListResponse {
-  data: Activity[];
-  total: number;
-  page: number;
-  pageSize: number;
+// API Response interfaces
+interface ActivityApiResponse {
+  status: boolean;
+  message: string;
+  data: {
+    activities: Activity[];
+    totalData: number;
+  };
 }
 
-interface ActivityCategoriesResponse {
-  data: string[];
-}
-
-export interface ActivityResponse {
+interface SingleActivityApiResponse {
   status: boolean;
   message: string;
   data: Activity;
 }
 
+interface ActivityCategoriesResponse {
+  status: boolean;
+  message: string;
+  data: string[];
+}
+
+// Transform API response to our internal format
+const transformActivityFromAPI = (apiActivity: Activity): ActivityData => {
+  return {
+    id: apiActivity._id,
+    villageId: apiActivity.villageId,
+    activityName: apiActivity.name,
+    description: apiActivity.description,
+    startDate: apiActivity.start_date,
+    endDate: apiActivity.end_date,
+    status: apiActivity.status,
+    percentage: apiActivity.percentage.toString(),
+    files: apiActivity.attachments || [],
+  };
+};
+
 // Activity API Service
-export const activityApi = {
-  // Read Operations (activities.read permission)
+export const activityService = {
+  async getActivities(
+    params?: ActivityListParams
+  ): Promise<PaginatedResponse<ActivityData>> {
+    try {
+      const queryParams = new URLSearchParams();
 
-  /**
-   * Get all activities - GET /village/activity/all
-   */
-  getActivities: async (
-    params: ActivityListParams = {}
-  ): Promise<ActivityListResponse> => {
-    // Filter out undefined/null values for cleaner query strings
-    const cleanParams = Object.fromEntries(
-      Object.entries(params)
-        .filter(
-          ([, value]) => value !== undefined && value !== null && value !== ''
-        )
-        .map(([key, value]) => [key, value.toString()])
-    );
+      if (params?.page) queryParams.append('page', params.page.toString());
+      if (params?.pageSize)
+        queryParams.append('pageSize', params.pageSize.toString());
+      if (params?.search) queryParams.append('search', params.search);
+      if (params?.status) queryParams.append('status', params.status);
+      if (params?.type) queryParams.append('type', params.type);
+      if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
 
-    return apiClient.get<ActivityListResponse>(
-      '/village/activity/all',
-      cleanParams
-    );
+      const url = `/village/activity/all${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const response = await apiClient.get<ActivityApiResponse>(url);
+
+      if (response.status && response.data?.activities) {
+        const activities = response.data.activities.map(
+          transformActivityFromAPI
+        );
+        const totalData = response.data.totalData || activities.length;
+        const page = params?.page || 1;
+        const pageSize = params?.pageSize || 10;
+
+        return {
+          data: activities,
+          totalData,
+          page,
+          limit: pageSize,
+          totalPages: Math.ceil(totalData / pageSize),
+        };
+      }
+
+      return {
+        data: [],
+        totalData: 0,
+        page: params?.page || 1,
+        limit: params?.pageSize || 10,
+        totalPages: 0,
+      };
+    } catch (error) {
+      console.error('Failed to fetch activities:', error);
+      return {
+        data: [],
+        totalData: 0,
+        page: params?.page || 1,
+        limit: params?.pageSize || 10,
+        totalPages: 0,
+      };
+    }
   },
 
-  /**
-   * Get activity by ID
-   */
-  getActivityById: async (activityId: string): Promise<ActivityResponse> => {
-    return apiClient.get<ActivityResponse>(`/activity/${activityId}`);
+  async getActivityById(id: string): Promise<ActivityData> {
+    try {
+      const response = await apiClient.get<SingleActivityApiResponse>(
+        `/village/activity/${id}`
+      );
+
+      if (response.status && response.data) {
+        return transformActivityFromAPI(response.data);
+      }
+      throw new Error('Activity not found');
+    } catch (error) {
+      console.error('Failed to fetch activity by ID:', error);
+      throw error;
+    }
   },
 
-  /**
-   * Get activity categories - GET /village/activity/categories
-   */
-  getCategories: async (): Promise<ActivityCategoriesResponse> => {
+  async getCategories(): Promise<ActivityCategoriesResponse> {
     const endpoint = '/village/activity/categories';
-
     return apiClient.get<ActivityCategoriesResponse>(endpoint);
   },
 
-  // Write Operations (activities.write permission)
-
-  /**
-   * Create new activity - POST /village/activity (with FormData support)
-   */
-  createActivity: async (
+  async createActivity(
     activityData: CreateActivityData,
     files?: File[]
-  ): Promise<ActivityResponse> => {
-    if (files && files.length > 0) {
-      // Use FormData for file uploads
-      const formData = createActivityFormData(activityData, files);
-      return apiClient.post<ActivityResponse>('/village/activity', formData);
-    }
+  ): Promise<{
+    status: boolean;
+    message: string;
+  }> {
+    // Use FormData for consistency with API (since it supports file uploads)
+    const formData = createActivityFormData(activityData, files);
+    const response = await apiClient.post<SingleActivityApiResponse>(
+      '/village/activity',
+      formData
+    );
 
-    // Use JSON for data-only requests
-    return apiClient.post<ActivityResponse>('/village/activity', activityData);
+    return {
+      status: response.status,
+      message: response.message,
+    };
   },
 
-  /**
-   * Update existing activity - PUT /village/activity/:id (with FormData support)
-   */
-  updateActivity: async (
+  async updateActivity(
     activityId: string,
     activityData: UpdateActivityData,
     files?: File[]
-  ): Promise<ActivityResponse> => {
-    if (files && files.length > 0) {
-      // Use FormData for file uploads
-      const formData = createActivityFormData(activityData, files);
-      return apiClient.put<ActivityResponse>(
-        `/village/activity/${activityId}`,
-        formData
-      );
-    }
-
-    // Use JSON for data-only requests
-    return apiClient.put<ActivityResponse>(
+  ): Promise<{
+    status: boolean;
+    message: string;
+  }> {
+    // Use FormData for consistency with API (since it supports file uploads)
+    const formData = createActivityFormData(activityData, files);
+    const response = await apiClient.put<SingleActivityApiResponse>(
       `/village/activity/${activityId}`,
-      activityData
+      formData
     );
+
+    return {
+      status: response.status,
+      message: response.message,
+    };
   },
 
-  // Delete Operations (activities.delete permission)
-
-  /**
-   * Delete activity - DELETE /village/activity/:id
-   */
-  deleteActivity: async (
-    activityId: string
-  ): Promise<{ status: boolean; message: string }> => {
-    return apiClient.delete(`/village/activity/${activityId}`);
+  async deleteActivity(activityId: string): Promise<void> {
+    await apiClient.delete(`/village/activity/${activityId}`);
   },
 };
-
-// Helper functions for data transformation
-export const transformActivityForUI = (activity: Activity): ActivityData => {
-  // Map API status to UI status
-  const mapStatus = (apiStatus: Activity['status']): 'active' | 'inactive' => {
-    switch (apiStatus) {
-      case 'ongoing':
-        return 'active';
-      case 'completed':
-      case 'not yet':
-      default:
-        return 'inactive';
-    }
-  };
-
-  return {
-    id: activity._id,
-    activityName: activity.name,
-    activityCategory: activity.category,
-    description: activity.description,
-    startDate: activity.startDate,
-    endDate: activity.endDate,
-    status: mapStatus(activity.status),
-    progress: 0, // Progress not in API response, default to 0
-    files: [], // Files would need separate API handling
-  };
-};
-
-export const transformUIActivityForAPI = (
-  activity: Partial<ActivityData>
-): UpdateActivityData => {
-  // Map UI status to API status
-  const mapStatus = (uiStatus?: 'active' | 'inactive'): Activity['status'] => {
-    switch (uiStatus) {
-      case 'active':
-        return 'ongoing';
-      case 'inactive':
-        return 'not yet';
-      default:
-        return 'not yet';
-    }
-  };
-
-  return {
-    name: activity.activityName,
-    description: activity.description,
-    startDate: activity.startDate,
-    endDate: activity.endDate,
-    status: mapStatus(activity.status),
-  };
-};
-
-// Import the existing ActivityData type for backwards compatibility
-import { ActivityData } from '@/types/activity';
 
 // Helper function to create FormData for activity creation/update
 export const createActivityFormData = (
@@ -256,13 +225,18 @@ export const createActivityFormData = (
   const formData = new FormData();
 
   // Add activity data fields
+  if (data.villageId) formData.append('villageId', data.villageId);
   if (data.name) formData.append('name', data.name);
   if (data.description) formData.append('description', data.description);
-  if (data.startDate) formData.append('startDate', data.startDate);
-  if (data.endDate) formData.append('endDate', data.endDate);
+  if (data.start_date) formData.append('start_date', data.start_date);
+  if (data.end_date) formData.append('end_date', data.end_date);
   if (data.status) formData.append('status', data.status);
   if (data.type) formData.append('type', data.type);
-  if (data.category) formData.append('category', data.category);
+  if (data.category) {
+    formData.append('category', 'capacity_building'); //DUMMY
+  }
+  if (data.percentage !== undefined)
+    formData.append('percentage', data.percentage.toString());
 
   // Add files if provided
   if (files) {
@@ -272,4 +246,19 @@ export const createActivityFormData = (
   }
 
   return formData;
+};
+
+// Helper function to transform UI data to API format
+export const transformUIActivityForAPI = (
+  activity: Partial<ActivityData>
+): UpdateActivityData => {
+  return {
+    name: activity.activityName,
+    description: activity.description,
+    start_date: activity.startDate,
+    end_date: activity.endDate,
+    status: activity.status,
+    percentage: activity.percentage ? Number(activity.percentage) : 0,
+    villageId: activity.villageId,
+  };
 };

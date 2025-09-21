@@ -15,7 +15,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import { Avatar } from '@mui/material';
+import { Avatar, Menu, MenuItem, Button } from '@mui/material';
 import {
   DownloadIcon,
   FarmIcon,
@@ -25,6 +25,8 @@ import {
 } from '@phosphor-icons/react';
 import { usePathname } from 'next/navigation';
 import { SolarRoofIcon } from '@phosphor-icons/react/dist/ssr';
+import { logout } from '@/lib/api';
+import { useAuthStatus } from '@/hooks/useAuth';
 
 const drawerWidth = 240;
 
@@ -117,7 +119,22 @@ interface BaseDrawerProps {
 export default function BaseDrawer({ children }: BaseDrawerProps) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(true);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const pathname = usePathname();
+  const { user } = useAuthStatus();
+
+  const handleUserMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleUserMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    handleUserMenuClose();
+    logout();
+  };
 
   const navigationItems = [
     {
@@ -133,7 +150,7 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
               weight="fill"
             />
           ),
-          href: '/',
+          href: '/training',
         },
         {
           text: 'Village',
@@ -249,30 +266,58 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
           </IconButton>
           <Box flexGrow={1} />
           <Box display="flex" alignItems="center">
-            <Avatar />
-            <Box
-              display={'flex'}
-              flexDirection="column"
-              ml={2}
-              color={theme.palette.text.primary}
+            <Button
+              onClick={handleUserMenuClick}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                textTransform: 'none',
+                color: 'inherit',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                },
+              }}
             >
-              <Typography
-                variant="subtitle2"
-                noWrap
-                component="div"
-                gutterBottom={false}
+              <Avatar />
+              <Box
+                display={'flex'}
+                flexDirection="column"
+                ml={2}
+                color={theme.palette.text.primary}
               >
-                Admin Name
-              </Typography>
-              <Typography
-                variant="body2"
-                noWrap
-                component="div"
-                color="text.secondary"
-              >
-                Admin Role
-              </Typography>
-            </Box>
+                <Typography
+                  variant="subtitle2"
+                  noWrap
+                  component="div"
+                  gutterBottom={false}
+                >
+                  {user?.name || 'Admin Name'}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  noWrap
+                  component="div"
+                  color="text.secondary"
+                >
+                  {user?.role?.name || 'Admin Role'}
+                </Typography>
+              </Box>
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleUserMenuClose}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+            >
+              <MenuItem onClick={handleLogout}>Logout</MenuItem>
+            </Menu>
           </Box>
         </Toolbar>
       </AppBar>
@@ -284,7 +329,7 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
         </DrawerHeader>
         <Divider />
         <List>
-          {navigationItems.map((item, index) => (
+          {navigationItems.map((item) => (
             <Box key={item.section}>
               <Typography
                 variant="subtitle1"

@@ -1,13 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  documentService,
-  CreateDocumentData,
-  UpdateDocumentData,
-  PaginationParams,
-  PaginatedResponse,
-} from '@/services/documentService';
+import { documentService, PaginationParams } from '@/services/documentService';
 import { DataFile } from '@/types/data';
 import toast from 'react-hot-toast';
+import { PaginatedResponse } from '@/types/common';
 
 // Query Keys
 export const documentKeys = {
@@ -41,60 +36,6 @@ export const useDocuments = (params?: PaginationParams) => {
     },
     staleTime: 5 * 60 * 1000,
     placeholderData: (previousData) => previousData,
-  });
-};
-
-/**
- * Hook to fetch a single document by ID
- */
-export const useDocument = (
-  id: string | null,
-  options?: { enabled?: boolean }
-) => {
-  const enabled = options?.enabled ?? true;
-  return useQuery({
-    queryKey: documentKeys.detail(id),
-    queryFn: () => documentService.getDocument(id!),
-    enabled: enabled && !!id,
-  });
-};
-
-/**
- * Hook to create a new document
- */
-export const useCreateDocument = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ documentData }: { documentData: CreateDocumentData }) =>
-      documentService.createDocument(documentData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: documentKeys.lists() });
-    },
-  });
-};
-
-/**
- * Hook to update an existing document
- */
-export const useUpdateDocument = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({
-      documentId,
-      documentData,
-    }: {
-      documentId: string;
-      documentData: UpdateDocumentData;
-    }) => documentService.updateDocument(documentId, documentData),
-    onSuccess: (updatedDocument, variables) => {
-      queryClient.invalidateQueries({ queryKey: documentKeys.lists() });
-      queryClient.setQueryData(
-        documentKeys.detail(variables.documentId),
-        updatedDocument
-      );
-    },
   });
 };
 
