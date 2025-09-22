@@ -1,59 +1,104 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useUserStore } from '@/stores/userStore';
 import { User } from '@/types/user';
-import { useUsers, useDeleteUser } from '@/hooks/useUserData';
+import { useUsers, useDeleteUser, useUser } from '@/hooks/useUserData';
 import { createUserColumns } from './UserColumn';
 
 export const useUserPageImpl = () => {
   const {
     searchQuery,
-    currentPage,
-    itemsPerPage,
     isFilterModalOpen,
-    users,
-    isLoading,
-    error,
     page,
     setSearchQuery,
-    setCurrentPage,
-    setItemsPerPage,
     setIsFilterModalOpen,
     navigateToAdd,
     navigateToDetail,
     navigateToEdit,
-    setUsers,
-    setLoading,
-    setError,
   } = useUserStore();
 
+  // Local state for pagination and selected user
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [isEdit, setIsEdit] = useState(false);
+
+  // Use pagination parameters
   const {
-    data: fetchedUsers = [],
-    isLoading: isFetching,
-    error: fetchError,
-  } = useUsers();
+    data: usersResponse,
+    isLoading,
+    error,
+  } = useUsers({
+    page: currentPage,
+    pageSize: pageSize,
+    search: searchQuery,
+    sortBy: 'createdAt',
+  });
+
+  // Extract users and pagination info from response
+  const users = usersResponse?.data || [];
+  const totalItems = usersResponse?.totalData || 0;
+  const totalPages = usersResponse?.totalPages || 0;
+
+  // Only fetch user detail when a user is selected
+  const { data: userDetail, isLoading: isLoadingUser } = useUser(
+    selectedUserId,
+    {
+      enabled: !!selectedUserId,
+    }
+  );
+
   const deleteMutation = useDeleteUser();
 
-  // Update store when data changes - use refs to avoid dependency issues
-  const storeActionsRef = React.useRef({ setUsers, setLoading, setError });
-  storeActionsRef.current = { setUsers, setLoading, setError };
+  // Ensure users is always an array
+  const safeUsers = Array.isArray(users) ? users : [];
 
-  React.useEffect(() => {
-    const { setUsers, setLoading, setError } = storeActionsRef.current;
-    setUsers(fetchedUsers);
-    setLoading(isFetching);
-    setError(fetchError?.message || null);
-  }, [isFetching]);
+  // Reset page when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  // Handle user detail navigation
+  useEffect(() => {
+    if (userDetail && selectedUserId && !isLoadingUser) {
+      if (isEdit) {
+        navigateToEdit(userDetail);
+      } else {
+        navigateToDetail(userDetail);
+      }
+
+      setSelectedUserId(null);
+      setIsEdit(false);
+    }
+  }, [
+    userDetail,
+    selectedUserId,
+    isLoadingUser,
+    navigateToDetail,
+    isEdit,
+    navigateToEdit,
+  ]);
+
+  // Pagination handlers
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1); // Reset to first page when changing page size
+  };
 
   const handleAddNew = () => {
     navigateToAdd();
   };
 
   const handleView = (user: User) => {
-    navigateToDetail(user);
+    setSelectedUserId(user.id);
   };
 
   const handleEdit = (user: User) => {
-    navigateToEdit(user);
+    setIsEdit(true);
+    setSelectedUserId(user.id);
   };
 
   const handleDelete = async (user: User) => {
@@ -75,14 +120,10 @@ export const useUserPageImpl = () => {
   };
 
   const handleApplyFilter = (filters: Record<string, unknown>) => {
-    // Implementation for applying filters
-    console.log('Applying filters:', filters);
     setIsFilterModalOpen(false);
   };
 
   const handleClearFilter = () => {
-    // Implementation for clearing filters
-    console.log('Clearing filters');
     setIsFilterModalOpen(false);
   };
 
@@ -92,27 +133,21 @@ export const useUserPageImpl = () => {
     onDelete: handleDelete,
   });
 
-  // Filter data based on search query
-  const filteredUsers = users.filter((user) => {
-    if (!searchQuery) return true;
-    return (
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.role.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  });
-
   const state = {
     columns,
-    users: filteredUsers,
-    error,
+    users: safeUsers,
+    error: error?.message || null,
     isLoading,
     searchQuery,
-    currentPage,
-    itemsPerPage,
     isFilterModalOpen,
-    totalUsers: filteredUsers.length,
+    totalUsers: totalItems,
     page,
+    isLoadingUser,
+    // Pagination state
+    totalItems,
+    totalPages,
+    currentPage,
+    pageSize,
   };
 
   const action = {
@@ -125,8 +160,9 @@ export const useUserPageImpl = () => {
     handleApplyFilter,
     handleClearFilter,
     setSearchQuery,
-    setCurrentPage,
-    setItemsPerPage,
+    // Pagination actions
+    handlePageChange,
+    handlePageSizeChange,
   };
 
   return { state, action };

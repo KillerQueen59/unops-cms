@@ -1,17 +1,17 @@
 export interface DataFile extends Record<string, unknown> {
-  id: string;
-  documentName: string;
-  createdDate: string;
-  fileSize: number;
-  fileType: string;
-  fileName: string;
+  _id: string;
+  areaId: string;
+  title: string;
+  fileUrl: string;
+  mimetype: string;
+  updatedAt: string;
+  createdAt: string;
+  file?: File;
+  documentName?: string;
+  fileName?: string;
+  fileSize?: number;
   description?: string;
   uploadedBy?: string;
-  status: 'active' | 'archived';
-  file?: File;
-  fileUrl?: string;
-  regency?: string;
-  category: 'regency' | 'other';
 }
 
 export type DataTable = DataFile;

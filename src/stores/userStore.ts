@@ -1,13 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { User, UserHistoryLog } from '@/types/user';
-
-export enum UserPageEnum {
-  LIST = 'list',
-  ADD = 'add',
-  DETAIL = 'detail',
-  EDIT = 'edit',
-}
+import { PageEnum } from '@/constants/page';
 
 export interface BreadcrumbItem {
   label: string;
@@ -23,7 +17,7 @@ interface UserState {
   userHistory: UserHistoryLog[];
   isLoading: boolean;
   error: string | null;
-  page: UserPageEnum;
+  page: PageEnum;
 
   // Breadcrumb state
   breadcrumbs: BreadcrumbItem[];
@@ -39,7 +33,7 @@ interface UserState {
 
 interface UserActions {
   // Navigation actions
-  setPage: (page: UserPageEnum) => void;
+  setPage: (page: PageEnum) => void;
   navigateToAdd: () => void;
   navigateToDetail: (user: User) => void;
   navigateToEdit: (user: User) => void;
@@ -47,7 +41,7 @@ interface UserActions {
 
   // Breadcrumb actions
   setBreadcrumbs: (breadcrumbs: BreadcrumbItem[]) => void;
-  updateBreadcrumbs: (page: UserPageEnum, userName?: string) => void;
+  updateBreadcrumbs: (page: PageEnum, userName?: string) => void;
 
   // Filter actions
   setSearchQuery: (query: string) => void;
@@ -73,7 +67,7 @@ const initialState: UserState = {
   userHistory: [],
   isLoading: false,
   error: null,
-  page: UserPageEnum.LIST,
+  page: PageEnum.LIST,
   breadcrumbs: [{ label: 'User Management', isActive: true }],
   searchQuery: '',
   currentPage: 1,
@@ -91,42 +85,38 @@ export const useUserStore = create<UserState & UserActions>()(
 
       navigateToAdd: () => {
         const { updateBreadcrumbs } = get();
-        set(
-          { page: UserPageEnum.ADD, selectedUser: null },
-          false,
-          'navigateToAdd'
-        );
-        updateBreadcrumbs(UserPageEnum.ADD);
+        set({ page: PageEnum.ADD, selectedUser: null }, false, 'navigateToAdd');
+        updateBreadcrumbs(PageEnum.ADD);
       },
 
       navigateToDetail: (user) => {
         const { updateBreadcrumbs } = get();
         set(
-          { selectedUser: user, page: UserPageEnum.DETAIL },
+          { selectedUser: user, page: PageEnum.DETAIL },
           false,
           'navigateToDetail'
         );
-        updateBreadcrumbs(UserPageEnum.DETAIL, user.name);
+        updateBreadcrumbs(PageEnum.DETAIL, user.name);
       },
 
       navigateToEdit: (user) => {
         const { updateBreadcrumbs } = get();
         set(
-          { selectedUser: user, page: UserPageEnum.EDIT },
+          { selectedUser: user, page: PageEnum.EDIT },
           false,
           'navigateToEdit'
         );
-        updateBreadcrumbs(UserPageEnum.EDIT, user.name);
+        updateBreadcrumbs(PageEnum.EDIT, user.name);
       },
 
       navigateToList: () => {
         const { updateBreadcrumbs } = get();
         set(
-          { page: UserPageEnum.LIST, selectedUser: null },
+          { page: PageEnum.LIST, selectedUser: null },
           false,
           'navigateToList'
         );
-        updateBreadcrumbs(UserPageEnum.LIST);
+        updateBreadcrumbs(PageEnum.LIST);
       },
 
       // Breadcrumb actions
@@ -139,15 +129,15 @@ export const useUserStore = create<UserState & UserActions>()(
         ];
 
         switch (page) {
-          case UserPageEnum.ADD:
+          case PageEnum.ADD:
             newBreadcrumbs.push({ label: 'Add New User', isActive: true });
             break;
-          case UserPageEnum.DETAIL:
+          case PageEnum.DETAIL:
             if (userName) {
               newBreadcrumbs.push({ label: userName, isActive: true });
             }
             break;
-          case UserPageEnum.EDIT:
+          case PageEnum.EDIT:
             if (userName) {
               newBreadcrumbs.push(
                 {

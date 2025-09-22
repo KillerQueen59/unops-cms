@@ -19,10 +19,26 @@ import {
   TextField,
   Autocomplete,
 } from '@mui/material';
-import { File, Trash } from '@phosphor-icons/react';
+import { File as FileIcon, Trash } from '@phosphor-icons/react';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import Image from 'next/image';
+
+interface ApiFile {
+  url: string;
+  title: string;
+  mimetype: string;
+}
+
+interface FileWithMetadata extends File {
+  isExisting?: false;
+}
+
+interface ApiFileWithMetadata extends ApiFile {
+  isExisting: true;
+}
+
+type UnifiedFile = FileWithMetadata | ApiFileWithMetadata;
 
 export const Form = ({
   control,
@@ -33,6 +49,7 @@ export const Form = ({
   watch,
   setValue,
   isLoadingVillage,
+  initialFiles = [],
 }: {
   control: Control<ActivityFormData>;
   errors: FieldErrors<ActivityFormData>;
@@ -50,10 +67,118 @@ export const Form = ({
     options?: object
   ) => void;
   isLoadingVillage: boolean;
+  initialFiles?: UnifiedFile[];
 }) => {
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [allFiles, setAllFiles] = useState<UnifiedFile[]>(initialFiles);
+
   const [isDragOver, setIsDragOver] = useState(false);
   const selectedVillage = watch('villageId');
+  const currentStatus = watch('status');
+  const startDate = watch('startDate');
+  const endDate = watch('endDate');
+
+  // Helper functions
+  const isApiFile = (file: UnifiedFile): file is ApiFileWithMetadata => {
+    return 'isExisting' in file && file.isExisting === true;
+  };
+
+  const isFileObject = (file: UnifiedFile): file is FileWithMetadata => {
+    return file instanceof File;
+  };
+
+  const getFileTitle = (file: UnifiedFile): string => {
+    return isApiFile(file) ? file.title : file.name;
+  };
+
+  const getFileMimetype = (file: UnifiedFile): string => {
+    return isApiFile(file) ? file.mimetype : file.type;
+  };
+
+  const getFileSize = (file: UnifiedFile): number => {
+    return isFileObject(file) ? file.size : 0;
+  };
+
+  const getFileDate = (file: UnifiedFile): Date => {
+    return isFileObject(file) ? new Date(file.lastModified) : new Date();
+  };
+
+  const getFileId = (file: UnifiedFile, index: number): string => {
+    if (isApiFile(file)) {
+      return file.title;
+    } else {
+      return `${file.name}-${file.lastModified}-${index}`;
+    }
+  };
+
+  // Sync files with form whenever allFiles changes
+  useEffect(() => {
+    setValue('files', allFiles, { shouldValidate: true });
+  }, [allFiles, setValue]);
+
+  // Effect to handle percentage changes based on status
+  useEffect(() => {
+    if (currentStatus === 'not yet') {
+      setValue('percentage', '0', { shouldValidate: true });
+    } else if (currentStatus === 'completed') {
+      setValue('percentage', '100', { shouldValidate: true });
+    }
+  }, [currentStatus, setValue]);
+
+  // Effect to handle date validation when start date changes
+  useEffect(() => {
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+
+      if (start > end) {
+        setValue('endDate', '', { shouldValidate: true });
+      }
+    }
+  }, [startDate, endDate, setValue]);
+
+  // Effect to handle date validation when end date changes
+  useEffect(() => {
+    if (endDate && startDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+
+      if (end < start) {
+        setValue('startDate', '', { shouldValidate: true });
+      }
+    }
+  }, [endDate, startDate, setValue]);
+
+  // Function to determine if percentage field should be disabled
+  const isPercentageDisabled = () => {
+    return currentStatus === 'not yet' || currentStatus === 'completed';
+  };
+
+  // Function to get percentage value based on status
+  const getPercentageValue = () => {
+    if (currentStatus === 'not yet') return '0';
+    if (currentStatus === 'completed') return '100';
+    const currentPercentage = watch('percentage');
+    return currentPercentage ? String(currentPercentage) : '';
+  };
+
+  // Function to get minimum date for end date
+  const getMinEndDate = () => {
+    if (startDate) {
+      const start = new Date(startDate);
+      start.setDate(start.getDate() + 1);
+      return start.toISOString().split('T')[0];
+    }
+    return undefined;
+  };
+
+  const getMaxStartDate = () => {
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setDate(end.getDate() - 1);
+      return end.toISOString().split('T')[0];
+    }
+    return undefined;
+  };
 
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -62,11 +187,20 @@ export const Form = ({
     const files = Array.from(e.dataTransfer.files);
     const validFiles = files.filter((file) => {
       const validTypes = ['image/jpeg', 'image/png', 'application/pdf'];
-      const maxSize = 5 * 1024 * 1024; // 5MB
+      const maxSize = 5 * 1024 * 1024;
       return validTypes.includes(file.type) && file.size <= maxSize;
     });
 
-    setUploadedFiles((prev) => [...prev, ...validFiles]);
+    const newFiles: FileWithMetadata[] = validFiles.map((file) => {
+      return {
+        ...file,
+        name: file.name,
+        type: file.type,
+        isExisting: false,
+      } as FileWithMetadata;
+    });
+
+    setAllFiles((prev) => [...prev, ...newFiles]);
   }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -88,18 +222,19 @@ export const Form = ({
           const maxSize = 5 * 1024 * 1024; // 5MB
           return validTypes.includes(file.type) && file.size <= maxSize;
         });
-        setUploadedFiles((prev) => [...prev, ...validFiles]);
+
+        setAllFiles((prev) => [...prev, ...validFiles]);
       }
     },
     []
   );
 
   const removeFile = useCallback((index: number) => {
-    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+    setAllFiles((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return '';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -108,11 +243,11 @@ export const Form = ({
 
   const getFileIcon = (fileType: string) => {
     if (fileType.includes('image')) {
-      return <File size={24} color="#F59E0B" weight="fill" />;
+      return <FileIcon size={24} color="#F59E0B" weight="fill" />;
     } else if (fileType.includes('pdf')) {
-      return <File size={24} color="#EF4444" weight="fill" />;
+      return <FileIcon size={24} color="#EF4444" weight="fill" />;
     }
-    return <File size={24} color="#6B7280" weight="fill" />;
+    return <FileIcon size={24} color="#6B7280" weight="fill" />;
   };
 
   const formatDate = (date: Date) => {
@@ -129,6 +264,7 @@ export const Form = ({
       })
     );
   };
+
   return (
     <form
       onSubmit={(e) => {
@@ -137,6 +273,7 @@ export const Form = ({
       }}
     >
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {/* Activity Name and Village */}
         <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
           <ControlledFieldContainer
             label="Activity Name"
@@ -203,7 +340,7 @@ export const Form = ({
           </ControlledFieldContainer>
         </Box>
 
-        {/* Start Date and End Date Row */}
+        {/* Start Date and End Date */}
         <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
           <ControlledFieldContainer
             label="Start Date"
@@ -214,6 +351,11 @@ export const Form = ({
             required
             error={errors.startDate}
             sx={{ flex: 1, minWidth: '300px' }}
+            InputProps={{
+              inputProps: {
+                max: getMaxStartDate(),
+              },
+            }}
           />
           <ControlledFieldContainer
             label="End Date"
@@ -224,10 +366,15 @@ export const Form = ({
             required
             error={errors.endDate}
             sx={{ flex: 1, minWidth: '300px' }}
+            InputProps={{
+              inputProps: {
+                min: getMinEndDate(),
+              },
+            }}
           />
         </Box>
 
-        {/* Current Status and Current Progress Row */}
+        {/* Status and Progress */}
         <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
           <ControlledFieldContainer
             label="Status"
@@ -267,11 +414,68 @@ export const Form = ({
             placeholder="Choose current progress..."
             required
             error={errors.percentage}
+            disabled={isPercentageDisabled()}
             InputProps={{
-              inputProps: { min: 0, max: 100 },
+              inputProps: {
+                min: 0,
+                max: 100,
+                style: {
+                  backgroundColor: isPercentageDisabled()
+                    ? '#F3F4F6'
+                    : 'transparent',
+                  color: isPercentageDisabled() ? '#6B7280' : 'inherit',
+                },
+              },
             }}
-          />
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: isPercentageDisabled()
+                  ? '#F3F4F6'
+                  : 'transparent',
+                '&.Mui-disabled': {
+                  backgroundColor: '#F3F4F6',
+                },
+              },
+            }}
+          >
+            <Controller
+              name="percentage"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  disabled={isPercentageDisabled()}
+                  value={getPercentageValue()}
+                  onChange={(e) => {
+                    if (!isPercentageDisabled()) {
+                      const value = e.target.value;
+                      const numValue = parseInt(value) || 0;
+                      if (numValue >= 0 && numValue <= 100) {
+                        field.onChange(value);
+                      }
+                    }
+                  }}
+                  placeholder="Choose current progress..."
+                  inputProps={{ min: 0, max: 100 }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '12px',
+                      backgroundColor: isPercentageDisabled()
+                        ? '#F3F4F6'
+                        : 'transparent',
+                      '&.Mui-disabled': {
+                        backgroundColor: '#F3F4F6',
+                      },
+                    },
+                  }}
+                />
+              )}
+            />
+          </ControlledFieldContainer>
         </Box>
+
+        {/* Type */}
         <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
           <ControlledFieldContainer
             label="Type"
@@ -332,12 +536,12 @@ export const Form = ({
           </Typography>
 
           {/* Show uploaded files list */}
-          {uploadedFiles.length > 0 && (
+          {allFiles.length > 0 && (
             <Box sx={{ mb: 3 }}>
               <List sx={{ bgcolor: 'background.paper', borderRadius: 2 }}>
-                {uploadedFiles.map((file, index) => (
+                {allFiles.map((file, index) => (
                   <ListItem
-                    key={index}
+                    key={getFileId(file, index)}
                     sx={{
                       border: '1px solid #E5E7EB',
                       borderRadius: '8px',
@@ -346,20 +550,41 @@ export const Form = ({
                     }}
                   >
                     <ListItemIcon sx={{ minWidth: 40 }}>
-                      {getFileIcon(file.type)}
+                      {getFileIcon(getFileMimetype(file))}
                     </ListItemIcon>
                     <ListItemText
                       primary={
-                        <Typography
-                          variant="body2"
-                          sx={{ fontWeight: 'medium' }}
+                        <Box
+                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
                         >
-                          {file.name}
-                        </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{ fontWeight: 'medium' }}
+                          >
+                            {getFileTitle(file)}
+                          </Typography>
+                          {isApiFile(file) && (
+                            <Box
+                              sx={{
+                                px: 1,
+                                py: 0.25,
+                                bgcolor: '#E0F2FE',
+                                color: '#0369A1',
+                                borderRadius: '4px',
+                                fontSize: '0.75rem',
+                                fontWeight: 500,
+                              }}
+                            >
+                              Existing
+                            </Box>
+                          )}
+                        </Box>
                       }
                       secondary={
                         <Typography variant="caption" color="text.secondary">
-                          {formatDate(new Date())} • {formatFileSize(file.size)}
+                          {formatDate(getFileDate(file))}
+                          {getFileSize(file) > 0 &&
+                            ` • ${formatFileSize(getFileSize(file))}`}
                         </Typography>
                       }
                     />

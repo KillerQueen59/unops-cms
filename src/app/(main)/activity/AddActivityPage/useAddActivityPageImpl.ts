@@ -1,15 +1,14 @@
 'use client';
 
+import { PageEnum } from '@/constants/page';
 import { useCreateActivity, useUpdateActivity } from '@/hooks/useActivityData';
 import { useVillages } from '@/hooks/useVillageData';
 import {
   CreateActivityData,
   UpdateActivityData,
 } from '@/services/activityService';
-import { ActivityPageEnum, useActivityStore } from '@/stores/activityStore';
-import { ActivityData } from '@/types/activity';
+import { useActivityStore } from '@/stores/activityStore';
 import { ActivityFormData, activityFormSchema } from '@/types/activityForm';
-import { VillageFormData } from '@/types/villageForm';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -34,6 +33,21 @@ export const useAddActivityPageImpl = () => {
     category: village.categoryName,
   }));
 
+  const formatDateForInput = (dateString: string | undefined): string => {
+    if (!dateString) return '';
+
+    try {
+      const date = new Date(dateString);
+
+      if (isNaN(date.getTime())) return '';
+
+      return date.toISOString().split('T')[0];
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return '';
+    }
+  };
+
   const {
     control,
     handleSubmit,
@@ -46,10 +60,10 @@ export const useAddActivityPageImpl = () => {
     defaultValues: {
       activityName: selectedActivity?.activityName || '',
       villageId: selectedActivity?.villageId || '',
-      category: '',
+      category: selectedActivity?.category || '',
       description: selectedActivity?.description || '',
-      startDate: selectedActivity?.startDate || '',
-      endDate: selectedActivity?.endDate || '',
+      startDate: formatDateForInput(selectedActivity?.startDate),
+      endDate: formatDateForInput(selectedActivity?.endDate),
       status: selectedActivity?.status || 'not yet',
       percentage: selectedActivity?.percentage || '',
       type: selectedActivity?.type || undefined,
@@ -78,7 +92,7 @@ export const useAddActivityPageImpl = () => {
   }, [watchedValues]);
 
   useEffect(() => {
-    updateBreadcrumbs(ActivityPageEnum.ADD);
+    updateBreadcrumbs(PageEnum.ADD);
   }, [updateBreadcrumbs]);
 
   const isEditMode = !!selectedActivity;
@@ -89,8 +103,8 @@ export const useAddActivityPageImpl = () => {
         activityName: selectedActivity.activityName || '',
         villageId: selectedActivity.villageId || '',
         description: selectedActivity.description || '',
-        startDate: selectedActivity.startDate || '',
-        endDate: selectedActivity.endDate || '',
+        startDate: formatDateForInput(selectedActivity.startDate),
+        endDate: formatDateForInput(selectedActivity.endDate),
         status: selectedActivity.status || 'inactive',
         percentage: selectedActivity.percentage || '',
         type: selectedActivity.type || undefined,
@@ -108,8 +122,8 @@ export const useAddActivityPageImpl = () => {
   };
 
   const navigateBack = () => {
-    setPage(ActivityPageEnum.LIST);
-    updateBreadcrumbs(ActivityPageEnum.LIST);
+    setPage(PageEnum.LIST);
+    updateBreadcrumbs(PageEnum.LIST);
   };
 
   const handleLeaveConfirm = () => {
@@ -196,6 +210,7 @@ export const useAddActivityPageImpl = () => {
     villageOptions,
     isLoadingVillages: isLoading,
     submitError,
+    selectedActivity,
   };
 
   const action = {

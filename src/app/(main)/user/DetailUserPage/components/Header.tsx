@@ -17,7 +17,6 @@ export const Header = () => {
 
   const handleDelete = () => {
     // TODO: Implement delete functionality
-    console.log('Delete user:', selectedUser.id);
   };
 
   const getRoleColor = (role: UserRole) => {

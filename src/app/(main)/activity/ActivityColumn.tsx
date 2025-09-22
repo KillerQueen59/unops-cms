@@ -5,6 +5,7 @@ import {
   PencilIcon,
   TrashIcon,
 } from '@phosphor-icons/react';
+import dayjs from 'dayjs';
 import { ActivityData } from '@/types/activity';
 
 interface ActivityColumnProps {
@@ -29,10 +30,20 @@ export const createActivityColumns = ({
   {
     accessorKey: 'startDate',
     header: 'Start Date',
+    cell: ({ row }) => {
+      const startDate = row.original.startDate;
+      if (!startDate) return '-';
+      return dayjs(startDate).format('DD MMM YYYY');
+    },
   },
   {
     accessorKey: 'endDate',
     header: 'End Date',
+    cell: ({ row }) => {
+      const endDate = row.original.endDate;
+      if (!endDate) return '-';
+      return dayjs(endDate).format('DD MMM YYYY');
+    },
   },
   {
     accessorKey: 'status',
@@ -42,15 +53,20 @@ export const createActivityColumns = ({
 
       const getStatusColors = (status: string) => {
         switch (status) {
-          case 'active':
+          case 'completed':
             return {
               backgroundColor: '#D1FAE5',
               color: '#059669',
             };
-          case 'inactive':
+          case 'not yet':
             return {
               backgroundColor: '#FEE2E2',
               color: '#DC2626',
+            };
+          case 'ongoing':
+            return {
+              backgroundColor: '#FEF3C7',
+              color: '#D97706',
             };
           default:
             return {
@@ -74,7 +90,7 @@ export const createActivityColumns = ({
                   backgroundColor: colors.backgroundColor,
                 }}
               />
-              {status}
+              {status.charAt(0).toUpperCase() + status.slice(1)}
             </Box>
           }
           sx={{

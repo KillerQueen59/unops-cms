@@ -1,12 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { ActivityData } from '@/types/activity';
-
-export enum ActivityPageEnum {
-  ADD,
-  LIST,
-  DETAIL,
-}
+import { PageEnum } from '@/constants/page';
 
 export interface BreadcrumbItem {
   label: string;
@@ -21,7 +16,7 @@ interface ActivityState {
   selectedActivity: ActivityData | null;
   isLoading: boolean;
   error: string | null;
-  page: ActivityPageEnum;
+  page: PageEnum;
 
   // Breadcrumb state
   breadcrumbs: BreadcrumbItem[];
@@ -33,7 +28,7 @@ interface ActivityState {
   isFilterModalOpen: boolean;
 
   // Actions
-  setPage: (page: ActivityPageEnum) => void;
+  setPage: (page: PageEnum) => void;
 
   // Navigation actions
   navigateToDetail: (activity: ActivityData) => void;
@@ -41,7 +36,7 @@ interface ActivityState {
 
   // Breadcrumb actions
   setBreadcrumbs: (breadcrumbs: BreadcrumbItem[]) => void;
-  updateBreadcrumbs: (page: ActivityPageEnum, activityName?: string) => void;
+  updateBreadcrumbs: (page: PageEnum, activityName?: string) => void;
 
   // Filter actions
   setSearchQuery: (query: string) => void;
@@ -72,7 +67,7 @@ const initialState = {
   isEditModalOpen: false,
   isDeleteModalOpen: false,
   isFilterModalOpen: false,
-  page: ActivityPageEnum.LIST,
+  page: PageEnum.LIST,
   breadcrumbs: [] as BreadcrumbItem[],
 };
 
@@ -101,25 +96,31 @@ export const useActivityStore = create<ActivityState>()(
             label: 'Activity',
             href: '/activity',
             onClick: () => {
-              setPage(ActivityPageEnum.LIST);
+              setPage(PageEnum.LIST);
             },
           },
         ];
 
         switch (page) {
-          case ActivityPageEnum.LIST:
+          case PageEnum.LIST:
             newBreadcrumbs.push({
               label: 'Activity List',
               isActive: true,
             });
             break;
-          case ActivityPageEnum.ADD:
+          case PageEnum.ADD:
             newBreadcrumbs.push({
               label: 'Add Activity',
               isActive: true,
             });
             break;
-          case ActivityPageEnum.DETAIL:
+          case PageEnum.EDIT:
+            newBreadcrumbs.push({
+              label: 'Edit Activity',
+              isActive: true,
+            });
+            break;
+          case PageEnum.DETAIL:
             newBreadcrumbs.push({
               label: activityName || 'Activity Detail',
               isActive: true,
@@ -156,21 +157,23 @@ export const useActivityStore = create<ActivityState>()(
       navigateToDetail: (activity) => {
         const { updateBreadcrumbs } = get();
         set(
-          { selectedActivity: activity, page: ActivityPageEnum.DETAIL },
+          { selectedActivity: activity, page: PageEnum.DETAIL },
           false,
           'navigateToDetail'
         );
-        updateBreadcrumbs(ActivityPageEnum.DETAIL, activity.activityName);
+        updateBreadcrumbs(PageEnum.DETAIL, activity.activityName);
       },
 
       navigateToEdit: (activity) => {
+        console.log('Navigating to edit activity:', activity);
+
         const { updateBreadcrumbs } = get();
         set(
-          { selectedActivity: activity, page: ActivityPageEnum.ADD },
+          { selectedActivity: activity, page: PageEnum.EDIT },
           false,
           'navigateToEdit'
         );
-        updateBreadcrumbs(ActivityPageEnum.ADD);
+        updateBreadcrumbs(PageEnum.EDIT, 'Edit ' + activity.activityName);
       },
 
       reset: () => set(initialState, false, 'reset'),

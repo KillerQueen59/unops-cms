@@ -30,9 +30,6 @@ export const createDataColumns = ({
         >
           {row.original.documentName}
         </Typography>
-        <Typography variant="caption" sx={{ color: '#6B7280' }}>
-          {row.original.fileName}
-        </Typography>
       </Box>
     ),
   },
@@ -41,7 +38,7 @@ export const createDataColumns = ({
     header: 'Created Date',
     cell: ({ row }) => (
       <Typography variant="body2" sx={{ color: '#6B7280' }}>
-        {new Date(row.original.createdDate).toLocaleDateString('id-ID', {
+        {new Date(row.original.createdAt).toLocaleDateString('id-ID', {
           day: 'numeric',
           month: 'long',
           year: 'numeric',
@@ -53,7 +50,6 @@ export const createDataColumns = ({
     accessorKey: 'regency',
     header: 'Regency',
     cell: ({ row }) => {
-      console.log(row.original.regency, southSumatraRegencies);
       return (
         <Typography variant="body2" sx={{ color: '#6B7280' }}>
           {row.original.regency

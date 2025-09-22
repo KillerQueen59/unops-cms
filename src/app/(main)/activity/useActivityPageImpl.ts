@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createActivityColumns } from './ActivityColumn';
-import { ActivityPageEnum, useActivityStore } from '@/stores/activityStore';
+import { useActivityStore } from '@/stores/activityStore';
 import {
   useActivities,
   useDeleteActivity,
@@ -10,6 +10,8 @@ import {
 } from '@/hooks/useActivityData';
 import { ActivityData } from '@/types/activity';
 import { ActivityFilters } from './components/FilterModal';
+import toast from 'react-hot-toast';
+import { PageEnum } from '@/constants/page';
 
 export const useActivityPageImpl = () => {
   const {
@@ -80,12 +82,12 @@ export const useActivityPageImpl = () => {
 
   const handlePageSizeChange = (newPageSize: number) => {
     setPageSize(newPageSize);
-    setCurrentPage(1); // Reset to first page when changing page size
+    setCurrentPage(1);
   };
 
   useEffect(() => {
-    if (page === ActivityPageEnum.LIST) {
-      updateBreadcrumbs(ActivityPageEnum.LIST);
+    if (page === PageEnum.LIST) {
+      updateBreadcrumbs(PageEnum.LIST);
     }
   }, [page, updateBreadcrumbs]);
 
@@ -120,8 +122,8 @@ export const useActivityPageImpl = () => {
 
   const handleAddNew = () => {
     resetActivity();
-    setPage(ActivityPageEnum.ADD);
-    updateBreadcrumbs(ActivityPageEnum.ADD);
+    setPage(PageEnum.ADD);
+    updateBreadcrumbs(PageEnum.ADD);
   };
 
   const handleDelete = (data: ActivityData) => {
@@ -136,8 +138,7 @@ export const useActivityPageImpl = () => {
         setShowDeleteModal(false);
         setActivityToDelete(null);
       } catch (error) {
-        console.error('Failed to delete activity:', error);
-        // Error handling is done in the mutation hook with toast
+        toast.error('Failed to delete activity. Please try again.');
       }
     }
   };

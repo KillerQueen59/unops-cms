@@ -1,25 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
-import { authApi, getAuthToken, STATIC_USER } from '@/lib/api';
+import { useQueryClient } from '@tanstack/react-query';
+import { getAuthToken, logout } from '@/lib/api';
 import { useEffect, useState } from 'react';
 
-// Auth Query Keys
-export const AUTH_QUERY_KEYS = {
-  currentUser: ['auth', 'currentUser'] as const,
-} as const;
-
-// Current User Query - Always returns static user data
-export const useCurrentUser = () => {
-  return useQuery({
-    queryKey: AUTH_QUERY_KEYS.currentUser,
-    queryFn: authApi.getCurrentUser,
-    staleTime: Infinity, // Cache forever since we're using static data
-  });
-};
-
-// Check if user has a valid token - reactive to auth changes
+// Simple auth status hook - just checks for token presence
 export const useAuthStatus = () => {
   const [token, setToken] = useState(() => getAuthToken());
-  const { data: response, isLoading, error } = useCurrentUser();
 
   // Listen for auth changes (login/logout events)
   useEffect(() => {
@@ -40,16 +25,32 @@ export const useAuthStatus = () => {
     };
   }, []);
 
-  console.log('token', token);
-
   // User is authenticated if they have a token
   const isAuthenticated = !!token;
 
   return {
     isAuthenticated,
-    user: isAuthenticated ? response?.data || STATIC_USER : null,
-    isLoading,
-    error: !isAuthenticated ? null : error, // Don't show errors if not authenticated
+    user: null, // We don't fetch user data upfront
+    isLoading: false, // No loading since we're not making API calls
+    error: null,
     hasToken: isAuthenticated,
   };
+}; // Logout hook
+export const useLogout = () => {
+  const queryClient = useQueryClient();
+
+  const handleLogout = () => {
+    // Clear token and dispatch event
+    logout();
+
+    // Clear all cached queries
+    queryClient.clear();
+
+    // Optionally redirect to login page
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
+  };
+
+  return { logout: handleLogout };
 };

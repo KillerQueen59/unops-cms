@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext } from 'react';
 import { useAuthStatus } from '@/hooks/useAuth';
-import { STATIC_USER } from '@/lib/api';
 
 interface User {
   _id: string;
@@ -28,7 +27,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user, isLoading, hasToken } = useAuthStatus();
 
   const value: AuthContextType = {
-    user: user || STATIC_USER,
+    user: user || {
+      _id: '',
+      name: '',
+      email: '',
+      role: { _id: '', name: '', permissions: [] },
+    },
     isLoading,
     isAuthenticated,
     hasToken,

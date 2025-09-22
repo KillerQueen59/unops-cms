@@ -2,7 +2,7 @@ import { CustomBreadcrumbs } from '@/components';
 import { BreadcrumbItem } from '@/types/common';
 import { ActivityData } from '@/types/activity';
 import { Box, Button, Chip, IconButton, Typography } from '@mui/material';
-import { CaretLeftIcon, PencilIcon, TrashIcon } from '@phosphor-icons/react';
+import { CaretLeftIcon, TrashIcon } from '@phosphor-icons/react';
 import { EditIcon } from 'lucide-react';
 
 export const Header = ({
@@ -22,6 +22,47 @@ export const Header = ({
   handleDelete: () => void;
   handleEdit: () => void;
 }) => {
+  const getStatusColors = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return {
+          backgroundColor: '#D1FAE5',
+          color: '#059669',
+        };
+      case 'not yet':
+        return {
+          backgroundColor: '#FEE2E2',
+          color: '#DC2626',
+        };
+      case 'ongoing':
+        return {
+          backgroundColor: '#FEF3C7',
+          color: '#D97706',
+        };
+      default:
+        return {
+          backgroundColor: '#F3F4F6',
+          color: '#6B7280',
+        };
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'Completed';
+      case 'not yet':
+        return 'Not Yet';
+      case 'ongoing':
+        return 'Ongoing';
+      default:
+        return 'Unknown';
+    }
+  };
+
+  const statusColors = getStatusColors(activityData.status);
+  const statusLabel = getStatusLabel(activityData.status);
+
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
@@ -75,19 +116,19 @@ export const Header = ({
                     width: '8px',
                     height: '8px',
                     borderRadius: '50%',
-                    backgroundColor: '#D97706',
+                    backgroundColor: statusColors.color,
                   }}
                 />
-                In Progress
+                {statusLabel}
               </Box>
             }
             sx={{
-              border: '1px solid #D97706',
-              color: '#D97706',
+              border: `1px solid ${statusColors.color}`,
+              color: statusColors.color,
+              backgroundColor: '#fff',
               fontWeight: 500,
               height: '32px',
             }}
-            variant="outlined"
           />
         </Box>
       </Box>
@@ -224,7 +265,7 @@ export const Header = ({
             px: 3,
           }}
         >
-          Delete Village
+          Delete Activity
         </Button>
         <Button
           variant="outlined"
@@ -238,7 +279,7 @@ export const Header = ({
             px: 3,
           }}
         >
-          Edit Village
+          Edit Activity
         </Button>
       </Box>
     </Box>

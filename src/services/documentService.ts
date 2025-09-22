@@ -14,6 +14,7 @@ export interface Document {
   fileType?: string;
   createdAt: string;
   updatedAt: string;
+  mimetype: string;
 }
 
 // Form data for creating/updating documents
@@ -65,10 +66,11 @@ interface SingleDocumentApiResponse {
 // Transform API response to our internal format
 const transformDocumentFromAPI = (apiDocument: Document): DataFile => {
   return {
-    id: apiDocument._id,
+    _id: apiDocument._id,
     documentName: apiDocument.title,
     fileName: apiDocument.fileName || 'document',
-    fileType: apiDocument.fileType || 'application/octet-stream',
+    fileType: apiDocument.mimetype || 'application/octet-stream',
+    mimetype: apiDocument.mimetype || 'application/octet-stream',
     fileSize: apiDocument.fileSize || 0,
     createdDate: new Date(apiDocument.createdAt).toISOString().split('T')[0],
     status: 'active' as const,
@@ -77,6 +79,11 @@ const transformDocumentFromAPI = (apiDocument: Document): DataFile => {
     description: apiDocument.title,
     category: 'other' as const,
     regency: apiDocument.areaId,
+    areaId: apiDocument.areaId || '',
+    title: apiDocument.title,
+    link: apiDocument.link,
+    updatedAt: apiDocument.updatedAt,
+    createdAt: apiDocument.createdAt,
   };
 };
 
@@ -208,33 +215,5 @@ export const documentService = {
 
   async deleteDocument(documentId: string): Promise<void> {
     await apiClient.delete(`/document/${documentId}`);
-  },
-
-  /**
-   * Download a document file
-   */
-  async downloadDocument(documentId: string, fileName: string): Promise<void> {
-    try {
-      const response = await fetch(`/api/documents/${documentId}/download`, {
-        method: 'GET',
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Download failed:', error);
-      throw error;
-    }
   },
 };

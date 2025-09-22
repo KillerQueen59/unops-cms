@@ -2,9 +2,10 @@
 
 import React, { useEffect } from 'react';
 import { Paper, Box, Typography } from '@mui/material';
-import { useUserStore, UserPageEnum } from '@/stores/userStore';
+import { useUserStore } from '@/stores/userStore';
 import { Header } from './components/Header';
 import { Content } from './components/Content';
+import { PageEnum } from '@/constants/page';
 
 export const DetailUserPage = () => {
   const { selectedUser, setPage, updateBreadcrumbs } = useUserStore();
@@ -12,8 +13,8 @@ export const DetailUserPage = () => {
   // Ensure breadcrumbs are set for DETAIL page
   useEffect(() => {
     if (selectedUser) {
-      setPage(UserPageEnum.DETAIL);
-      updateBreadcrumbs(UserPageEnum.DETAIL, selectedUser.name);
+      setPage(PageEnum.DETAIL);
+      updateBreadcrumbs(PageEnum.DETAIL, selectedUser.name);
     }
   }, [selectedUser, setPage, updateBreadcrumbs]);
 

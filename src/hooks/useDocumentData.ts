@@ -132,33 +132,3 @@ export const useBulkDeleteDocuments = () => {
     },
   });
 };
-
-/**
- * Hook to download a document file
- */
-export const useDownloadFile = () => {
-  return useMutation({
-    mutationFn: async (file: DataFile) => {
-      if (file.file) {
-        // For files that are File objects (newly uploaded), create download link
-        const url = URL.createObjectURL(file.file);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = file.fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      } else if (file.fileUrl) {
-        // For files with URLs (from server), use the download service
-        await documentService.downloadDocument(file.id, file.fileName);
-      } else {
-        throw new Error('No downloadable file or URL available');
-      }
-    },
-    onError: (error) => {
-      console.error('Failed to download file:', error);
-      toast.error('Failed to download file');
-    },
-  });
-};

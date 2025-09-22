@@ -18,6 +18,7 @@ export const AddActivityPage = () => {
     errors,
     villageOptions,
     isLoadingVillages,
+    selectedActivity,
   } = state;
 
   const {
@@ -49,6 +50,7 @@ export const AddActivityPage = () => {
           watch={watch}
           setValue={setValue}
           isLoadingVillage={isLoadingVillages}
+          initialFiles={selectedActivity?.files || []}
         />
       </Box>
 

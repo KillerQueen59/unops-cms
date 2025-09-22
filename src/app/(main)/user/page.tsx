@@ -18,19 +18,35 @@ import {
 import React from 'react';
 import DataTable from '@/components/DataTable/DataTable';
 import { useUserPageImpl } from './useUserPageImpl';
-import { UserPageEnum } from '@/stores/userStore';
 import { AddUserPage } from './AddUserPage/AddUserPage';
 import { DetailUserPage } from './DetailUserPage/DetailUserPage';
-import { EditUserPage } from './EditUserPage/EditUserPage';
 import { User as UserType } from '@/types/user';
+import { PageEnum } from '@/constants/page';
 
 export default function UserPage() {
   const { state, action } = useUserPageImpl();
 
-  const { searchQuery, users, error, isLoading, columns, totalUsers, page } =
-    state;
+  const {
+    searchQuery,
+    users,
+    error,
+    isLoading,
+    columns,
+    totalUsers,
+    page,
+    totalItems,
+    currentPage,
+    pageSize,
+    isLoadingUser,
+  } = state;
 
-  const { handleAddNew, handleOpenFilter, setSearchQuery } = action;
+  const {
+    handleAddNew,
+    handleOpenFilter,
+    setSearchQuery,
+    handlePageChange,
+    handlePageSizeChange,
+  } = action;
 
   if (error) {
     return (
@@ -41,16 +57,12 @@ export default function UserPage() {
   }
 
   // Route to different pages based on current page state
-  if (page === UserPageEnum.ADD) {
+  if (page === PageEnum.ADD) {
     return <AddUserPage />;
   }
 
-  if (page === UserPageEnum.DETAIL) {
+  if (page === PageEnum.DETAIL) {
     return <DetailUserPage />;
-  }
-
-  if (page === UserPageEnum.EDIT) {
-    return <EditUserPage />;
   }
 
   return (
@@ -84,7 +96,7 @@ export default function UserPage() {
             >
               {isLoading
                 ? 'Loading...'
-                : `This page shows a list of ${totalUsers} users`}
+                : `This page shows a list of ${totalItems} users`}
             </Typography>
           </Box>
         </Box>
@@ -163,7 +175,7 @@ export default function UserPage() {
         </Box>
       </Box>
 
-      {isLoading ? (
+      {isLoading || isLoadingUser ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
           <CircularProgress />
         </Box>
@@ -174,12 +186,19 @@ export default function UserPage() {
           title="User Management"
           searchable={true}
           filterable={true}
-          pageSize={10}
+          pageSize={pageSize}
           pageSizeOptions={[5, 10, 25, 50]}
           stickyHeader={true}
           maxHeight={600}
           externalGlobalFilter={searchQuery}
           setExternalGlobalFilter={setSearchQuery}
+          // Server-side pagination props
+          manualPagination={true}
+          totalItems={totalItems}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+          loading={isLoading}
         />
       )}
     </Paper>

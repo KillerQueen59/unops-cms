@@ -9,13 +9,26 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  IconButton,
+  CircularProgress,
 } from '@mui/material';
 import { useEffect } from 'react';
 import { Header } from './components/Header';
-import { ActivityPageEnum, useActivityStore } from '@/stores/activityStore';
+import { useActivityStore } from '@/stores/activityStore';
 import { useVillages } from '@/hooks/useVillageData';
 import { ConfirmationModal } from '@/components';
 import { useDeleteActivity } from '@/hooks/useActivityData';
+import { useFileDownload } from '@/hooks/useFileDownload';
+import { DataFile } from '@/types/data';
+import {
+  UnifiedFile,
+  isApiFile,
+  getFileTitle,
+  getFileMimetype,
+} from '@/types/activity';
+import { File, FileText, Download } from '@phosphor-icons/react';
+import toast from 'react-hot-toast';
+import { PageEnum } from '@/constants/page';
 
 export const DetailActivityPage = () => {
   const {
@@ -27,18 +40,20 @@ export const DetailActivityPage = () => {
   } = useActivityStore();
 
   useEffect(() => {
-    updateBreadcrumbs(ActivityPageEnum.DETAIL);
+    updateBreadcrumbs(PageEnum.DETAIL);
   }, [updateBreadcrumbs]);
 
   const handleBack = () => {
-    setPage(ActivityPageEnum.LIST);
-    updateBreadcrumbs(ActivityPageEnum.LIST);
+    setPage(PageEnum.LIST);
+    updateBreadcrumbs(PageEnum.LIST);
   };
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const deleteActivityMutation = useDeleteActivity();
 
-  const { data: villagesResponse, isLoading, error } = useVillages();
+  const { downloadFile, isDownloading } = useFileDownload();
+
+  const { data: villagesResponse } = useVillages();
   const villages = villagesResponse?.data || [];
 
   const villageOptions = villages.map((village) => ({
@@ -92,6 +107,53 @@ export const DetailActivityPage = () => {
     }
   };
 
+  const handleDownload = async (file: UnifiedFile) => {
+    try {
+      // Only handle download for API files (existing files with URLs)
+      if (isApiFile(file)) {
+        // Convert file object to DataFile format expected by useFileDownload
+        const dataFile: DataFile = {
+          _id: file.title,
+          title: file.title,
+          documentName: file.title,
+          fileName: file.title,
+          fileUrl: file.url.startsWith('http')
+            ? file.url
+            : `http://${file.url}`,
+          mimetype: file.mimetype,
+          areaId: '', // Add required fields with default values
+          updatedAt: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+        };
+
+        const success = await downloadFile(dataFile);
+        if (success) {
+          toast.success('Download started');
+        } else {
+          toast.error('Download failed');
+        }
+      } else {
+        // Handle regular File objects differently if needed
+        toast.error("Cannot download files that haven't been uploaded yet");
+      }
+    } catch {
+      toast.error('An error occurred during download');
+    }
+  };
+
+  // Using helper functions from types/activity
+
+  const getFileIcon = (fileType: string) => {
+    if (fileType.includes('pdf')) {
+      return <FileText size={24} color="#EF4444" weight="fill" />;
+    } else if (fileType.includes('image')) {
+      return <File size={24} color="#F59E0B" weight="fill" />;
+    }
+    return <File size={24} color="#6B7280" weight="fill" />;
+  };
+
+  console.log('selectedActivity', selectedActivity);
+
   return (
     <Box
       sx={{
@@ -120,7 +182,7 @@ export const DetailActivityPage = () => {
         />
       </Paper>
 
-      {/* Activity Log Section */}
+      {/* Documentation Section */}
       <Paper
         sx={{
           width: '100%',
@@ -140,44 +202,114 @@ export const DetailActivityPage = () => {
           Documentation
         </Typography>
 
-        <List sx={{ padding: 0 }}>
-          {selectedActivity?.files.map((doc, index) => (
-            <ListItem
-              key={index}
+        {selectedActivity?.files && selectedActivity.files.length > 0 ? (
+          <List sx={{ padding: 0 }}>
+            {selectedActivity.files.map((file, index) => {
+              const fileName = getFileTitle(file);
+              const fileMimeType = getFileMimetype(file);
+
+              return (
+                <ListItem
+                  key={`${fileName}-${index}`}
+                  sx={{
+                    padding: '16px 0',
+                    borderBottom:
+                      index < selectedActivity.files.length - 1
+                        ? '1px solid #F3F4F6'
+                        : 'none',
+                    alignItems: 'center',
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 40 }}>
+                    {getFileIcon(fileMimeType)}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 'medium', color: '#374151' }}
+                      >
+                        {fileName}
+                      </Typography>
+                    }
+                    secondary={
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 2,
+                          mt: 0.5,
+                        }}
+                      >
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            backgroundColor: '#F3F4F6',
+                            color: '#6B7280',
+                            px: 1,
+                            py: 0.25,
+                            borderRadius: '4px',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                          }}
+                        >
+                          {fileMimeType.split('/')[1]}
+                        </Typography>
+                      </Box>
+                    }
+                  />
+                  <IconButton
+                    onClick={() => handleDownload(file)}
+                    disabled={isDownloading(fileName)}
+                    sx={{
+                      color: '#0EA5E9',
+                      '&:hover': {
+                        backgroundColor: '#F0F9FF',
+                      },
+                    }}
+                  >
+                    {isDownloading(fileName) ? (
+                      <CircularProgress size={20} />
+                    ) : (
+                      <Download size={20} />
+                    )}
+                  </IconButton>
+                </ListItem>
+              );
+            })}
+          </List>
+        ) : (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              py: 6,
+              textAlign: 'center',
+            }}
+          >
+            <File size={48} color="#9CA3AF" weight="light" />
+            <Typography
+              variant="body1"
               sx={{
-                padding: '16px 0',
-                borderBottom:
-                  index < selectedActivity.files.length - 1
-                    ? '1px solid #F3F4F6'
-                    : 'none',
-                alignItems: 'flex-start',
+                color: '#6B7280',
+                mt: 2,
               }}
             >
-              {/* <ListItemIcon sx={{ minWidth: 40, mt: 0.5 }}>
-                {doc.type === 'pdf' ? (
-                  <FileText size={24} color="#EF4444" weight="fill" />
-                ) : (
-                  <File size={24} color="#F59E0B" weight="fill" />
-                )}
-              </ListItemIcon>
-              <ListItemText
-                primary={
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 'medium', color: '#374151' }}
-                  >
-                    {doc.name}
-                  </Typography>
-                }
-                secondary={
-                  <Typography variant="caption" color="text.secondary">
-                    {doc.date}
-                  </Typography>
-                }
-              /> */}
-            </ListItem>
-          ))}
-        </List>
+              No documents available
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#9CA3AF',
+                mt: 1,
+              }}
+            >
+              Files uploaded for this activity will appear here
+            </Typography>
+          </Box>
+        )}
       </Paper>
 
       {/* Delete Confirmation Modal */}

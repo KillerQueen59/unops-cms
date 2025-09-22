@@ -67,7 +67,6 @@ export const IncomeModal = ({
 
   useEffect(() => {
     if (existingData && isEdit) {
-      console.log('Setting existing data:', existingData);
       setSelectedMonth(existingData.month);
       setSelectedYear(existingData.year);
       setAmount(existingData.amount);

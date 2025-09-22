@@ -197,13 +197,11 @@ export const useAddTrainingPageImpl = () => {
         await updateTrainingMutation.mutateAsync({
           trainingData,
         });
-        console.log('Training updated successfully');
       } else {
         // Create new training
         await createTrainingMutation.mutateAsync({
           trainingData,
         });
-        console.log('Training created successfully');
       }
 
       navigateBack();

@@ -284,7 +284,6 @@ export const Form = ({
         link: data.link,
         photos: [...existingPhotoFiles, ...allPhotos],
       };
-      console.log('Updating form data:', form);
       await updateMutation.mutateAsync({ demositeData: form });
       handleBack();
     } catch (error) {

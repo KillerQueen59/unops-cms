@@ -91,7 +91,7 @@ export const createUserColumns = ({
     header: 'Action',
     cell: ({ row }) => (
       <Box sx={{ display: 'flex', gap: 1 }}>
-        <IconButton
+        {/* <IconButton
           size="small"
           onClick={() => onView?.(row.original)}
           sx={{
@@ -126,7 +126,7 @@ export const createUserColumns = ({
           }}
         >
           <PencilIcon size={16} />
-        </IconButton>
+        </IconButton> */}
         <IconButton
           size="small"
           onClick={() => onDelete?.(row.original)}

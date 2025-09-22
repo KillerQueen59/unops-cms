@@ -25,7 +25,7 @@ import {
 } from '@phosphor-icons/react';
 import { usePathname } from 'next/navigation';
 import { SolarRoofIcon } from '@phosphor-icons/react/dist/ssr';
-// import { logout } from '@/lib/api';
+import { logout } from '@/lib/api';
 import { useAuthStatus } from '@/hooks/useAuth';
 
 const drawerWidth = 240;
@@ -133,7 +133,7 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
 
   const handleLogout = () => {
     handleUserMenuClose();
-    // logout();
+    logout();
   };
 
   const navigationItems = [
@@ -291,7 +291,7 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
                   component="div"
                   gutterBottom={false}
                 >
-                  {user?.name || 'Admin Name'}
+                  {'Admin Name'}
                 </Typography>
                 <Typography
                   variant="body2"
@@ -299,7 +299,7 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
                   component="div"
                   color="text.secondary"
                 >
-                  {user?.role?.name || 'Admin Role'}
+                  {'Admin Role'}
                 </Typography>
               </Box>
             </Button>

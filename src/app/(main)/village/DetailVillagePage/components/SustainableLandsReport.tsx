@@ -113,8 +113,6 @@ const SustainableLandsReport = ({
   };
 
   const handleEditData = (data: MonthlyData) => {
-    console.log('Saving data:', data);
-
     const [monthName, year] = data.month.split(' ');
     setEditingData({
       id: data._id,
@@ -132,15 +130,11 @@ const SustainableLandsReport = ({
     }
   };
 
-  console.log('editingData', editingData);
-
   const handleSaveData = (data: {
     month: string;
     year: string;
     count: number;
   }) => {
-    console.log('Saving data:', data);
-
     if (!selectedVillage?.villageCode) return;
 
     // Convert month name to number

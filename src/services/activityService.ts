@@ -1,7 +1,6 @@
 import { apiClient } from '@/lib/api';
 import { PaginatedResponse } from '@/types/common';
-import { ActivityData } from '@/types/activity';
-import { CategoryEnum } from '@/constants/category';
+import { ActivityData, ApiFile } from '@/types/activity';
 
 // Activity API interfaces based on the curl commands
 export interface Activity {
@@ -14,7 +13,7 @@ export interface Activity {
   status: 'not yet' | 'ongoing' | 'completed';
   type: 'training' | 'workshop' | 'demosite';
   percentage: number;
-  attachments?: string[]; // File URLs from API
+  files?: ApiFile[];
   createdAt: string;
   updatedAt: string;
   village?: {
@@ -91,7 +90,15 @@ const transformActivityFromAPI = (apiActivity: Activity): ActivityData => {
     endDate: apiActivity.end_date,
     status: apiActivity.status,
     percentage: apiActivity.percentage.toString(),
-    files: apiActivity.attachments || [],
+    files:
+      apiActivity.files?.map((file) => ({
+        url: file.url,
+        title: file.title,
+        mimetype: file.mimetype,
+        isExisting: true,
+      })) || [],
+    type: apiActivity.type,
+    category: apiActivity.type,
   };
 };
 
@@ -223,7 +230,6 @@ export const createActivityFormData = (
   files?: File[]
 ): FormData => {
   const formData = new FormData();
-
   // Add activity data fields
   if (data.villageId) formData.append('villageId', data.villageId);
   if (data.name) formData.append('name', data.name);
@@ -244,6 +250,8 @@ export const createActivityFormData = (
       formData.append('files', file);
     });
   }
+
+  console.log('formData', formData);
 
   return formData;
 };

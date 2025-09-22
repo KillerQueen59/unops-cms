@@ -53,6 +53,7 @@ export default function DataPage() {
     closePreviewModal,
     handleDeleteConfirm,
     handleDeleteCancel,
+    handleDownload,
   } = action;
 
   if (error) {
@@ -250,6 +251,7 @@ export default function DataPage() {
         open={isPreviewModalOpen}
         onClose={closePreviewModal}
         file={previewFile}
+        handleDownload={handleDownload}
       />
 
       {/* Delete Confirmation Modal */}

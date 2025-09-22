@@ -1,16 +1,27 @@
 // API Configuration
 const API_BASE_URL = 'http://unops-api-dudw4t-af60f1-31-97-222-225.traefik.me';
 
-// Static Bearer Token - Replace this with your actual token
-const STATIC_BEARER_TOKEN =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGM2ODc4ZWUxMzExNDExZmU2NDk2YjgiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzU4Mzk1OTYyLCJleHAiOjE3NTg0ODIzNjJ9.64znloe1zAKT8M7STWGFeAoWzmlIVKdX5ML-y-xvV3I';
+// Token management - uses localStorage for persistence
+const TOKEN_STORAGE_KEY = 'auth_token';
 
-// Simplified token management - always returns the static token
-const getAuthToken = (): string => {
-  return STATIC_BEARER_TOKEN;
+export const getAuthToken = (): string | null => {
+  if (typeof window === 'undefined') return null; // SSR safety
+  return localStorage.getItem(TOKEN_STORAGE_KEY);
 };
 
-// HTTP Client optimized for TanStack Query
+export const setAuthToken = (token: string): void => {
+  if (typeof window === 'undefined') return; // SSR safety
+  localStorage.setItem(TOKEN_STORAGE_KEY, token);
+  // Dispatch custom event for auth state changes
+  window.dispatchEvent(new CustomEvent('auth-login'));
+};
+
+export const removeAuthToken = (): void => {
+  if (typeof window === 'undefined') return; // SSR safety
+  localStorage.removeItem(TOKEN_STORAGE_KEY);
+  window.dispatchEvent(new CustomEvent('auth-logout'));
+};
+
 class ApiClient {
   private baseURL: string;
 
@@ -47,6 +58,11 @@ class ApiClient {
 
       // Handle authentication errors
       if (response.status === 401) {
+        // Remove invalid token and redirect to login
+        // removeAuthToken();
+        // if (typeof window !== 'undefined') {
+        // window.location.href = '/login';
+        // }
         throw new Error('Authentication failed. Please check your token.');
       }
 
@@ -121,28 +137,64 @@ class ApiClient {
 
 export const apiClient = new ApiClient();
 
-// Static user data - since we're using static auth
-export const STATIC_USER = {
-  _id: '68c6878ee1311411fe6496b8',
-  name: 'Admin User',
-  email: 'admin@example.com',
-  role: {
-    _id: 'admin-role-id',
-    name: 'Admin',
-    permissions: ['read', 'write', 'delete', 'admin'],
-  },
+// Login credentials interface
+interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+// Login response interface
+interface LoginResponse {
+  status: boolean;
+  message: string;
+  data: {
+    authorization: string;
+  };
+}
+
+// UserResponse interface removed - not needed for simplified auth
+
+// Login function
+export const login = async (email: string, password: string): Promise<void> => {
+  const credentials: LoginCredentials = { email, password };
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Login failed');
+    }
+
+    const data: LoginResponse = await response.json();
+
+    if (!data.status || !data.data.authorization) {
+      throw new Error(data.message || 'Login failed - no token received');
+    }
+
+    // Store token and trigger auth event
+
+    const cleanToken = data.data.authorization.split(' ')[1];
+    setAuthToken(cleanToken);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Network error occurred during login');
+  }
 };
 
-// Simplified Auth API - returns static data
-export const authApi = {
-  // Get current user function for query
-  getCurrentUser: async () => {
-    return {
-      status: true,
-      message: 'User retrieved successfully',
-      data: STATIC_USER,
-    };
-  },
+// Logout function
+export const logout = (): void => {
+  removeAuthToken();
 };
 
-export { getAuthToken };
+// Auth API is no longer needed - we handle 401s globally in the apiClient
+
+// getAuthToken is already exported above

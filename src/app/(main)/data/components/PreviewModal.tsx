@@ -6,40 +6,30 @@ import {
   Typography,
   Button,
   IconButton,
-  Chip,
 } from '@mui/material';
 import {
   Close as CloseIcon,
   Download as DownloadIcon,
 } from '@mui/icons-material';
-import Image from 'next/image';
+import toast from 'react-hot-toast';
 import { DataFile } from '@/types/data';
-import { useDownloadFile } from '@/hooks/useDocumentData';
 
 interface PreviewModalProps {
   open: boolean;
   onClose: () => void;
   file: DataFile | null;
+  handleDownload: (file: DataFile) => Promise<void>;
 }
 
 export const PreviewModal: React.FC<PreviewModalProps> = ({
   open,
   onClose,
   file,
+  handleDownload,
 }) => {
-  const downloadMutation = useDownloadFile();
-
   if (!file) return null;
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  const getFileTypeDisplay = (fileType: string): string => {
+  const getFileTypeDisplay = (mimetype: string): string => {
     const typeMap: { [key: string]: string } = {
       'application/pdf': 'PDF',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
@@ -57,61 +47,61 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
     };
 
     return (
-      typeMap[fileType] || fileType.split('/')[1]?.toUpperCase() || 'Unknown'
+      typeMap[mimetype] || mimetype.split('/')[1]?.toUpperCase() || 'Unknown'
     );
   };
 
-  const handleDownload = async () => {
-    try {
-      await downloadMutation.mutateAsync(file);
-    } catch (error) {
-      console.error('Download failed:', error);
-    }
+  const getFileName = () => {
+    if (file.fileName) return file.fileName;
+    // Extract filename from URL if available
+    const urlParts = file.fileUrl.split('/');
+    return urlParts[urlParts.length - 1] || file.title;
   };
 
   const renderPreview = () => {
-    if (file.fileType.startsWith('image/')) {
-      // For images, show preview if it's an uploaded file
-      if (file.file) {
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              minHeight: 300,
-              backgroundColor: '#F9FAFB',
-              borderRadius: '12px',
-              border: '1px solid #E5E7EB',
+    const fullUrl = file.fileUrl.startsWith('https')
+      ? file.fileUrl.replace('https://', 'http://')
+      : file.fileUrl.startsWith('http')
+        ? file.fileUrl
+        : `http://${file.fileUrl}`;
+
+    if (file.mimetype.startsWith('image/')) {
+      return (
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: 300,
+            backgroundColor: '#F9FAFB',
+            borderRadius: '12px',
+            border: '1px solid #E5E7EB',
+          }}
+        >
+          <img
+            src={fullUrl}
+            alt={file.title}
+            style={{
+              maxWidth: '100%',
+              maxHeight: '400px',
+              objectFit: 'contain',
+              borderRadius: '8px',
+              zIndex: 1,
             }}
-          >
-            <Image
-              src={URL.createObjectURL(file.file)}
-              alt={file.documentName}
-              width={500}
-              height={400}
-              style={{
-                maxWidth: '100%',
-                maxHeight: '400px',
-                objectFit: 'contain',
-                borderRadius: '8px',
-              }}
-            />
-          </Box>
-        );
-      } else {
-        // For mock files, show placeholder
-        return (
+            onError={(e) => {
+              // Fallback if image fails to load
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.nextElementSibling?.classList.remove('hidden');
+            }}
+          />
           <Box
+            className="hidden"
             sx={{
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
               alignItems: 'center',
-              minHeight: 300,
-              backgroundColor: '#F9FAFB',
-              borderRadius: '12px',
-              border: '1px solid #E5E7EB',
+              position: 'absolute',
             }}
           >
             <Typography variant="h6" sx={{ color: '#6B7280', mb: 1 }}>
@@ -121,51 +111,29 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
               Preview not available for this image
             </Typography>
           </Box>
-        );
-      }
-    } else if (file.fileType === 'application/pdf') {
-      // For PDFs, show iframe if it's an uploaded file
-      if (file.file) {
-        return (
-          <Box
-            sx={{
-              borderRadius: '12px',
-              border: '1px solid #E5E7EB',
-              overflow: 'hidden',
+        </Box>
+      );
+    } else if (file.mimetype === 'application/pdf') {
+      return (
+        <Box
+          sx={{
+            borderRadius: '12px',
+            border: '1px solid #E5E7EB',
+            overflow: 'hidden',
+          }}
+        >
+          <iframe
+            src={fullUrl}
+            width="100%"
+            height="400px"
+            style={{ border: 'none' }}
+            title={file.title}
+            onError={() => {
+              toast.error('Failed to load PDF preview.');
             }}
-          >
-            <iframe
-              src={URL.createObjectURL(file.file)}
-              width="100%"
-              height="400px"
-              style={{ border: 'none' }}
-              title={file.documentName}
-            />
-          </Box>
-        );
-      } else {
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              minHeight: 300,
-              backgroundColor: '#F9FAFB',
-              borderRadius: '12px',
-              border: '1px solid #E5E7EB',
-            }}
-          >
-            <Typography variant="h6" sx={{ color: '#6B7280', mb: 1 }}>
-              PDF Document
-            </Typography>
-            <Typography variant="body2" sx={{ color: '#9CA3AF' }}>
-              Preview not available for this PDF
-            </Typography>
-          </Box>
-        );
-      }
+          />
+        </Box>
+      );
     } else {
       // For other file types, show file info
       return (
@@ -182,7 +150,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
           }}
         >
           <Typography variant="h6" sx={{ color: '#6B7280', mb: 1 }}>
-            {getFileTypeDisplay(file.fileType)} File
+            {getFileTypeDisplay(file.mimetype)} File
           </Typography>
           <Typography variant="body2" sx={{ color: '#9CA3AF', mb: 2 }}>
             Preview not available for this file type
@@ -190,8 +158,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
           <Button
             variant="contained"
             startIcon={<DownloadIcon />}
-            onClick={handleDownload}
-            disabled={downloadMutation.isPending}
+            onClick={() => handleDownload(file)}
             sx={{
               borderRadius: '8px',
               backgroundColor: '#0EA5E9',
@@ -242,34 +209,15 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
                   mb: 1,
                 }}
               >
-                {file.documentName}
+                {file.title}
               </Typography>
-              <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-                <Chip
-                  label={getFileTypeDisplay(file.fileType)}
-                  size="small"
-                  sx={{
-                    backgroundColor: '#F3F4F6',
-                    color: '#374151',
-                    fontWeight: 'medium',
-                  }}
-                />
-                <Chip
-                  label={formatFileSize(file.fileSize)}
-                  size="small"
-                  sx={{
-                    backgroundColor: '#EFF6FF',
-                    color: '#1D4ED8',
-                    fontWeight: 'medium',
-                  }}
-                />
-              </Box>
+
               <Typography variant="body2" sx={{ color: '#6B7280', mb: 1 }}>
-                <strong>File Name:</strong> {file.fileName}
+                <strong>File Name:</strong> {getFileName()}
               </Typography>
               <Typography variant="body2" sx={{ color: '#6B7280', mb: 1 }}>
                 <strong>Created:</strong>{' '}
-                {new Date(file.createdDate).toLocaleDateString('id-ID', {
+                {new Date(file.createdAt).toLocaleDateString('id-ID', {
                   day: 'numeric',
                   month: 'long',
                   year: 'numeric',
@@ -324,8 +272,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
             <Button
               variant="contained"
               startIcon={<DownloadIcon />}
-              onClick={handleDownload}
-              disabled={downloadMutation.isPending}
+              onClick={() => handleDownload(file)}
               sx={{
                 borderRadius: '12px',
                 minWidth: 120,

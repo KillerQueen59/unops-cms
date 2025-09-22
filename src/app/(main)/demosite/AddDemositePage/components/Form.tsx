@@ -234,7 +234,6 @@ export const Form = ({
         link: data.link,
         photos: data.photos,
       };
-      console.log('Submitting form data:', form);
       await createMutation.mutateAsync({ demositeData: form });
       handleBack();
     } catch (error) {

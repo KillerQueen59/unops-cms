@@ -110,7 +110,6 @@ export const useAddVillagePageImpl = () => {
 
   useEffect(() => {
     if (selectedVillage) {
-      console.log('Resetting form with village data:', selectedVillage);
       reset({
         villageName: selectedVillage.villageName || '',
         villageCode: selectedVillage.villageCode || '',

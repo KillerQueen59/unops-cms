@@ -19,11 +19,11 @@ import {
 import React from 'react';
 import { useActivityPageImpl } from './useActivityPageImpl';
 import { ActivityTable } from '@/types/activity';
-import { ActivityPageEnum } from '@/stores/activityStore';
 import { AddActivityPage } from './AddActivityPage/AddActivityPage';
 import { DetailActivityPage } from './DetailActivityPage/DetailActivityPage';
 import { FilterModal } from './components/FilterModal';
 import { ConfirmationModal } from '@/components';
+import { PageEnum } from '@/constants/page';
 
 export default function ActivityPage() {
   const { state, action } = useActivityPageImpl();
@@ -60,11 +60,11 @@ export default function ActivityPage() {
     );
   }
 
-  if (page === ActivityPageEnum.DETAIL) {
+  if (page === PageEnum.DETAIL) {
     return <DetailActivityPage />;
   }
 
-  if (page === ActivityPageEnum.ADD) {
+  if (page === PageEnum.ADD || page === PageEnum.EDIT) {
     return <AddActivityPage />;
   }
 

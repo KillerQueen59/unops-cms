@@ -1,12 +1,10 @@
 import { useDataStore } from '@/stores/dataStore';
 import { DataFile } from '@/types/data';
 import { createDataColumns } from './DataColumn';
-import {
-  useDocuments,
-  useDeleteDocument,
-  useDownloadFile,
-} from '@/hooks/useDocumentData';
+import { useDocuments, useDeleteDocument } from '@/hooks/useDocumentData';
 import { useState, useEffect } from 'react';
+import { useFileDownload } from '@/hooks/useFileDownload';
+import toast from 'react-hot-toast';
 
 export const useDataPageImpl = () => {
   const {
@@ -50,14 +48,30 @@ export const useDataPageImpl = () => {
   const totalPages = documentsResponse?.totalPages || 0;
 
   const deleteMutation = useDeleteDocument();
-  const downloadMutation = useDownloadFile();
+  const {
+    downloadFile,
+    downloading,
+    error: downloadError,
+    isDownloading,
+  } = useFileDownload();
 
-  // Reset page when search query changes
+  const handleDownload = async (file: DataFile) => {
+    try {
+      const success = await downloadFile(file);
+      if (success) {
+        toast.success('Download started');
+      } else {
+        toast.error('Download failed');
+      }
+    } catch (error) {
+      toast.error('An error occurred during download');
+    }
+  };
+
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, groupBy, isGrouped]);
 
-  // Pagination handlers
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -75,18 +89,10 @@ export const useDataPageImpl = () => {
     openPreviewModal(file);
   };
 
-  const handleDownload = async (file: DataFile) => {
-    try {
-      await downloadMutation.mutateAsync(file);
-    } catch (error) {
-      console.error('Download failed:', error);
-    }
-  };
-
   const handleDeleteConfirm = async () => {
     if (selectedData) {
       try {
-        await deleteMutation.mutateAsync(selectedData.id);
+        await deleteMutation.mutateAsync(selectedData._id);
         setShowDeleteModal(false);
         setSelectedData(null);
       } catch (error) {
@@ -142,7 +148,6 @@ export const useDataPageImpl = () => {
     currentPage,
     pageSize,
     isDeleting: deleteMutation.isPending,
-    isDownloading: downloadMutation.isPending,
     showDeleteModal,
     selectedData,
   };

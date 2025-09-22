@@ -10,13 +10,17 @@ import {
   TextField,
   CircularProgress,
   Alert,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthStatus } from '@/hooks/useAuth';
+import { login } from '@/lib/api';
 import toast from 'react-hot-toast';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 // Login form schema
 const loginSchema = z.object({
@@ -31,6 +35,16 @@ export default function LoginPage() {
   const { isAuthenticated, isLoading } = useAuthStatus();
   const [loginError, setLoginError] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleMouseDownPassword = (event: { preventDefault: () => void }) => {
+    event.preventDefault();
+  };
 
   const {
     control,
@@ -57,7 +71,7 @@ export default function LoginPage() {
 
     try {
       // Use the login function from api.ts
-      // await login(data.email, data.password);
+      await login(data.email, data.password);
 
       toast.success('Login successful!');
       router.push('/training');
@@ -74,32 +88,71 @@ export default function LoginPage() {
   // Show loading while checking auth status
   if (isLoading) {
     return (
-      <Container maxWidth="sm">
-        <Box
-          sx={{
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <CircularProgress />
-        </Box>
-      </Container>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          backgroundImage: 'url(/login_background.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+            zIndex: 1,
+          },
+        }}
+      >
+        <CircularProgress
+          sx={{ position: 'relative', zIndex: 2, color: 'white' }}
+        />
+      </Box>
     );
   }
 
   return (
-    <Container maxWidth="sm">
-      <Box
-        sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Paper sx={{ p: 4, width: '100%' }}>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        backgroundImage: 'url(/login_background.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          zIndex: 1,
+        },
+      }}
+    >
+      <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 2 }}>
+        <Paper
+          sx={{
+            p: 4,
+            width: '100%',
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 2,
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+          }}
+        >
           <Box sx={{ textAlign: 'center', mb: 3 }}>
             <Typography
               variant="h4"
@@ -146,11 +199,25 @@ export default function LoginPage() {
                   {...field}
                   fullWidth
                   label="Password"
-                  type="password"
                   margin="normal"
                   error={!!errors.password}
                   helperText={errors.password?.message}
                   disabled={isSubmitting}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleClickShowPassword}
+                          onMouseDown={handleMouseDownPassword}
+                          edge="end"
+                          disabled={isSubmitting}
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
               )}
             />
@@ -177,7 +244,7 @@ export default function LoginPage() {
             </Button>
           </Box>
         </Paper>
-      </Box>
-    </Container>
+      </Container>
+    </Box>
   );
 }

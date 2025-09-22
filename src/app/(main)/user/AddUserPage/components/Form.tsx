@@ -39,7 +39,9 @@ export const Form = () => {
 
   const onSubmit = async (data: UserFormData) => {
     try {
-      await createUserMutation.mutateAsync(data);
+      await createUserMutation.mutateAsync({
+        userData: data,
+      });
       navigateToList();
     } catch (error) {
       console.error('Failed to create user:', error);
