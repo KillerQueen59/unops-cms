@@ -4,21 +4,24 @@ import { BreadcrumbItem } from '@/stores/demositeStore';
 import { DemositeData } from '@/types/demosite';
 import { Box, Button, Chip, IconButton, Typography } from '@mui/material';
 import { CaretLeftIcon, PencilIcon, TrashIcon } from '@phosphor-icons/react';
+import { EditIcon } from 'lucide-react';
 
 export const Header = ({
   breadcrumbs,
   demositeData,
   handleBack,
+  handleDelete,
   handleEdit,
 }: {
   breadcrumbs: BreadcrumbItem[];
   demositeData: DemositeData;
   handleBack: () => void;
+  handleDelete: () => void;
   handleEdit: () => void;
 }) => {
   return (
     <Box>
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 2 }}>
         <CustomBreadcrumbs breadcrumbs={breadcrumbs} />
       </Box>
 
@@ -27,7 +30,6 @@ export const Header = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          mb: 4,
         }}
       >
         <Box
@@ -49,73 +51,96 @@ export const Header = ({
           >
             <CaretLeftIcon />
           </IconButton>
-          <Typography
-            variant="h5"
-            sx={{
-              fontWeight: 'bold',
-              color: '#374151',
-            }}
-          >
-            {demositeData?.title || 'Demosite Detail'}
-          </Typography>
+          <div>
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 'bold',
+                color: '#374151',
+                mb: 1,
+                fontSize: { xs: '24px', md: '32px' },
+              }}
+            >
+              {demositeData?.title || 'Demosite Detail'}
+            </Typography>
+
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                flexWrap: 'wrap',
+              }}
+            >
+              <Typography
+                variant="body1"
+                sx={{
+                  color: '#9CA3AF',
+                  fontSize: '16px',
+                }}
+              >
+                {demositeData?.name}
+              </Typography>
+
+              {demositeData?.name && demositeData?.type && (
+                <Box
+                  sx={{
+                    width: '4px',
+                    height: '4px',
+                    borderRadius: '50%',
+                    backgroundColor: '#9CA3AF',
+                  }}
+                />
+              )}
+
+              <Typography
+                variant="body1"
+                sx={{
+                  color: '#9CA3AF',
+                  fontSize: '16px',
+                }}
+              >
+                {demositeData?.type}
+              </Typography>
+            </Box>
+          </div>
         </Box>
 
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Chip
-              label={demositeData?.type || 'Unknown'}
-              variant="outlined"
-              size="small"
-              sx={{
-                backgroundColor: '#E1F6FD',
-                color: '#0092D1',
-                border: '1px solid #0092D1',
-              }}
-            />
-            {demositeData?.isTop10 && (
-              <Chip
-                label="Top 10"
-                size="small"
-                sx={{
-                  backgroundColor: '#FFF3CD',
-                  color: '#856404',
-                  border: '1px solid #FFEAA7',
-                }}
-              />
-            )}
-          </Box>
-
           {/* Action Buttons */}
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: 2,
+              mb: 4,
+              px: 2,
+            }}
+          >
             <Button
               variant="outlined"
-              startIcon={<TrashIcon size={16} />}
+              color="error"
+              startIcon={<TrashIcon />}
+              onClick={handleDelete}
               sx={{
-                borderColor: '#EF4444',
-                color: '#EF4444',
-                '&:hover': {
-                  borderColor: '#DC2626',
-                  backgroundColor: 'rgba(239, 68, 68, 0.04)',
-                },
-                borderRadius: '8px',
-                textTransform: 'none',
-                fontWeight: 500,
-                minWidth: '140px',
-                height: '40px',
+                borderRadius: '12px',
+                width: '180px',
+                minHeight: '50px',
+                px: 3,
               }}
             >
               Delete
             </Button>
             <Button
               variant="outlined"
-              startIcon={<PencilIcon size={16} />}
+              color="primary"
+              startIcon={<EditIcon />}
               onClick={handleEdit}
               sx={{
-                borderRadius: '8px',
-                textTransform: 'none',
-                fontWeight: 500,
-                minWidth: '140px',
-                height: '40px',
+                borderRadius: '12px',
+                width: '180px',
+                minHeight: '50px',
+                px: 3,
               }}
             >
               Edit

@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Paper, Box, Typography } from '@mui/material';
 import { Header } from './components/Header';
 import { Content } from './components/Content';
 import { useDemositeStore, DemositePageEnum } from '@/stores/demositeStore';
+import { ConfirmationModal } from '@/components';
+import { useDeleteDemosite } from '@/hooks/useDemositeData';
 
 export const DetailDemositePage = () => {
   const {
@@ -14,6 +16,9 @@ export const DetailDemositePage = () => {
     updateBreadcrumbs,
     navigateToEdit,
   } = useDemositeStore();
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const deleteDemositeMutation = useDeleteDemosite();
 
   // Ensure breadcrumbs are set for DETAIL page
   useEffect(() => {
@@ -30,6 +35,30 @@ export const DetailDemositePage = () => {
   const handleEdit = () => {
     if (selectedDemosite) {
       navigateToEdit(selectedDemosite);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+  };
+
+  const demosite = selectedDemosite || {
+    id: '',
+    title: '',
+    description: '',
+    location: '',
+    establishedDate: '',
+    imageUrl: '',
+    status: 'inactive',
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await deleteDemositeMutation.mutateAsync(demosite.id);
+      setShowDeleteModal(false);
+      handleBack();
+    } catch (error) {
+      console.error('Failed to delete activity:', error);
     }
   };
 
@@ -53,11 +82,28 @@ export const DetailDemositePage = () => {
           demositeData={selectedDemosite}
           handleBack={handleBack}
           handleEdit={handleEdit}
+          handleDelete={() => {
+            setShowDeleteModal(true);
+          }}
         />
       </Box>
       <Box sx={{ padding: '28px' }}>
         <Content />
       </Box>
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        open={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onSecondaryButtonClick={handleDeleteCancel}
+        onPrimaryButtonClick={() => {
+          handleDeleteConfirm();
+          handleBack();
+        }}
+        title="Delete Demosite?"
+        message={`Are you sure you want to delete "${selectedDemosite?.title}"? This action cannot be undone.`}
+        primaryButtonText={'Delete'}
+        secondaryButtonText="Cancel"
+      />
     </Paper>
   );
 };

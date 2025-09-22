@@ -152,8 +152,6 @@ export const DetailActivityPage = () => {
     return <File size={24} color="#6B7280" weight="fill" />;
   };
 
-  console.log('selectedActivity', selectedActivity);
-
   return (
     <Box
       sx={{

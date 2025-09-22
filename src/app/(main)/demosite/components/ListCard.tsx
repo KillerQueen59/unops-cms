@@ -17,6 +17,12 @@ export const ListCard = ({
     e.currentTarget.src = placeholderUrl;
   };
 
+  // Ensure we have a valid image URL or fall back to placeholder
+  const imageUrl =
+    demosite.header && demosite.header.trim() !== ''
+      ? `http://${demosite.header}`
+      : placeholderUrl;
+
   return (
     <Box
       key={demosite.id}
@@ -30,8 +36,8 @@ export const ListCard = ({
       <CardMedia
         component="img"
         height="180"
-        image={demosite.header}
-        alt={demosite.title}
+        image={imageUrl}
+        alt={demosite.title || 'Demosite image'}
         onError={handleImageError}
         sx={{
           objectFit: 'cover',

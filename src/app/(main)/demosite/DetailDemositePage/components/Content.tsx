@@ -1,9 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { useDemositeStore } from '@/stores/demositeStore';
+import { ImagePreviewModal } from './ImagePreviewModal';
 
 export const Content = () => {
   const { selectedDemosite } = useDemositeStore();
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string>('');
+  const [selectedImageTitle, setSelectedImageTitle] = useState<string>('');
+
+  const handleImageClick = (imageUrl: string, title?: string) => {
+    const fullUrl = imageUrl.startsWith('http')
+      ? imageUrl
+      : `http://${imageUrl}`;
+    setSelectedImageUrl(fullUrl);
+    setSelectedImageTitle(title || 'Image Preview');
+    setPreviewModalOpen(true);
+  };
+
+  const handleClosePreview = () => {
+    setPreviewModalOpen(false);
+    setSelectedImageUrl('');
+    setSelectedImageTitle('');
+  };
 
   if (!selectedDemosite) {
     return (
@@ -26,17 +45,32 @@ export const Content = () => {
             borderRadius: '12px',
             overflow: 'hidden',
             backgroundColor: '#F3F4F6',
-            backgroundImage: `url("${selectedDemosite.header}")` || 'none',
+            backgroundImage: selectedDemosite.header
+              ? `url("http://${selectedDemosite.header}")`
+              : 'none',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             position: 'relative',
+            cursor: selectedDemosite.header ? 'pointer' : 'default',
+            boxShadow:
+              '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            transition: 'all 0.2s ease-in-out',
+            '&:hover': {
+              transform: selectedDemosite.header ? 'translateY(-2px)' : 'none',
+              boxShadow: selectedDemosite.header
+                ? '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+                : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            },
           }}
+          onClick={() =>
+            selectedDemosite.header &&
+            handleImageClick(selectedDemosite.header, selectedDemosite.title)
+          }
         />
       </Box>
 
       {/* Description Section */}
       <Box sx={{ mb: 4 }}>
-        {/* Default description paragraphs as shown in the design */}
         <Typography
           variant="body1"
           sx={{
@@ -52,50 +86,65 @@ export const Content = () => {
       </Box>
 
       {/* Documentation Section */}
-      <Box sx={{ mb: 4 }}>
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 'bold',
-            mb: 3,
-            color: '#1F2937',
-            fontSize: '24px',
-          }}
-        >
-          Documentation
-        </Typography>
+      {selectedDemosite.photos && selectedDemosite.photos.length > 0 && (
+        <Box sx={{ mb: 4 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 'bold',
+              mb: 3,
+              color: '#1F2937',
+              fontSize: '24px',
+            }}
+          >
+            Documentation
+          </Typography>
 
-        {/* Documentation Images Grid */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 2,
-            maxWidth: '600px',
-          }}
-        >
-          {/* Use placeholder mountain/village images similar to the design */}
-          {selectedDemosite.photos.map((imageUrl, index) => (
-            <Box
-              key={index}
-              sx={{
-                borderRadius: '12px',
-                overflow: 'hidden',
-                aspectRatio: '4/3',
-                position: 'relative',
-                backgroundImage: `url(${imageUrl})` || 'none',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                cursor: 'pointer',
-                transition: 'transform 0.2s ease-in-out',
-                '&:hover': {
-                  transform: 'scale(1.02)',
-                },
-              }}
-            />
-          ))}
+          {/* Documentation Images Grid */}
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: 2,
+            }}
+          >
+            {selectedDemosite.photos.map((imageUrl, index) => (
+              <Box
+                key={index}
+                sx={{
+                  borderRadius: '12px',
+                  overflow: 'hidden',
+                  aspectRatio: '4/3',
+                  position: 'relative',
+                  backgroundImage: `url(http://${imageUrl})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  cursor: 'pointer',
+                  boxShadow:
+                    '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow:
+                      '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                  },
+                }}
+                onClick={() =>
+                  handleImageClick(imageUrl, `Documentation Image ${index + 1}`)
+                }
+              />
+            ))}
+          </Box>
         </Box>
-      </Box>
+      )}
+
+      {/* Image Preview Modal */}
+      <ImagePreviewModal
+        open={previewModalOpen}
+        onClose={handleClosePreview}
+        imageUrl={selectedImageUrl}
+        title={selectedImageTitle}
+      />
     </Box>
   );
 };
