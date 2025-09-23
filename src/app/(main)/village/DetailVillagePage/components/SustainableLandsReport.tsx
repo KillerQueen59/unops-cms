@@ -28,7 +28,6 @@ import {
 import {
   CreateMonthlyDataRequest,
   MonthlyData,
-  UnsustainableLandData,
 } from '@/services/villageService';
 import { ConfirmationModal } from '@/components';
 
@@ -307,15 +306,6 @@ const SustainableLandsReport = ({
                 }}
               >
                 {item.month}
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: '#6B7280',
-                  fontSize: '14px',
-                }}
-              >
-                {item.date}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>

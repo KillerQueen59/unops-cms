@@ -40,6 +40,8 @@ export const DetailVillagePage = () => {
     setActiveTab(newValue);
   };
 
+  console.log('selectedVillage', selectedVillage);
+
   const villageData = selectedVillage || {
     id: '',
     villageName: 'Unknown Village',

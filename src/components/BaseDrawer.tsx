@@ -121,7 +121,6 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
   const [open, setOpen] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const pathname = usePathname();
-  const { user } = useAuthStatus();
 
   const handleUserMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -331,16 +330,18 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
         <List>
           {navigationItems.map((item) => (
             <Box key={item.section}>
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  padding: 2,
-                  color: theme.palette.text.secondary,
-                  fontWeight: 300,
-                }}
-              >
-                {item.section}
-              </Typography>
+              {open && (
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    padding: 2,
+                    color: theme.palette.text.secondary,
+                    fontWeight: 300,
+                  }}
+                >
+                  {item.section}
+                </Typography>
+              )}
               {item.items.map((subItem) => (
                 <ListItem
                   key={subItem.text}

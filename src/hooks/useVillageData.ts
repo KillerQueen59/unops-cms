@@ -6,6 +6,7 @@ import {
   CreateMonthlyDataRequest,
   CreateIncomeRequest,
   PaginationParams,
+  CreateBulkIncomeRequest,
 } from '@/services/villageService';
 import { VillageData } from '@/types/village';
 import toast from 'react-hot-toast';
@@ -176,7 +177,7 @@ export const useAddIncomeTrackingData = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateIncomeRequest) =>
+    mutationFn: (data: CreateBulkIncomeRequest) =>
       villageService.addIncomeTrackingData(data),
     onSuccess: () => {
       queryClient.invalidateQueries({

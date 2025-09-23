@@ -8,30 +8,48 @@ import {
   Button,
   Box,
   Typography,
-  TextField,
-  IconButton,
   Select,
   MenuItem,
   FormControl,
   InputLabel,
   Alert,
-  InputAdornment,
+  IconButton,
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
+import { DynamicIncomeList } from './DynamicIncomeList';
+import { Villager } from '@/services/villagerService';
+import toast from 'react-hot-toast';
+
+interface IncomeEntry {
+  id: string;
+  villager: Villager | null;
+  amount: number | '';
+}
 
 interface IncomeModalProps {
   open: boolean;
   onClose: () => void;
-  onSave: (data: { month: string; year: string; amount: number }) => void;
+  onSave: (data: {
+    month: string;
+    year: string;
+    entries: Array<{
+      villagerId: string;
+      villagerName: string;
+      amount: number;
+    }>;
+  }) => void;
   existingData?: {
     id?: number;
     month: string;
     year: string;
-    amount: number;
+    entries?: IncomeEntry[];
   };
-  existingEntries: Array<{ month: string; year: string }>;
+  existingEntries: Array<{ month: string; year: string; villagerId?: string }>;
   isEdit?: boolean;
+  villageId: string;
+  parentMonth?: string;
+  parentYear?: string;
 }
 
 export const IncomeModal = ({
@@ -41,11 +59,23 @@ export const IncomeModal = ({
   existingData,
   existingEntries,
   isEdit = false,
+  villageId,
+  parentMonth,
+  parentYear,
 }: IncomeModalProps) => {
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
-  const [amount, setAmount] = useState<number | ''>('');
+  const [incomeEntries, setIncomeEntries] = useState<IncomeEntry[]>([]);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (parentMonth) {
+      setSelectedMonth(parentMonth);
+    }
+    if (parentYear) {
+      setSelectedYear(parentYear);
+    }
+  }, [parentMonth, parentYear]);
 
   const months = [
     'January',
@@ -66,46 +96,86 @@ export const IncomeModal = ({
   const years = Array.from({ length: 10 }, (_, i) => currentYear - i + 1);
 
   useEffect(() => {
+    if (parentMonth && parentYear) {
+      return;
+    }
     if (existingData && isEdit) {
       setSelectedMonth(existingData.month);
       setSelectedYear(existingData.year);
-      setAmount(existingData.amount);
+      setIncomeEntries(existingData.entries || []);
     } else {
       setSelectedMonth('');
       setSelectedYear('');
-      setAmount('');
+      setIncomeEntries([]);
     }
     setError('');
-  }, [existingData, isEdit, open]);
+  }, [existingData, isEdit, open, parentMonth, parentYear]);
 
   const handleSave = () => {
-    if (!selectedMonth || !selectedYear || amount === '') {
-      setError('Please fill in all fields');
+    if (!selectedMonth || !selectedYear) {
+      setError('Please select month and year');
       return;
     }
 
-    const isDuplicate = existingEntries.some((entry) => {
-      const isSameMonthYear =
-        entry.month === selectedMonth && entry.year === selectedYear;
-      if (isEdit && existingData) {
-        const [existingMonth, existingYear] = existingData.month.split(' ');
-        return (
-          isSameMonthYear &&
-          !(existingMonth === selectedMonth && existingYear === selectedYear)
-        );
-      }
-      return isSameMonthYear;
+    // Validate income entries
+    const validEntries = incomeEntries.filter(
+      (entry) =>
+        entry.villager && entry.amount !== '' && Number(entry.amount) > 0
+    );
+
+    if (validEntries.length === 0) {
+      setError('Please add at least one valid income entry');
+      return;
+    }
+
+    // Check for duplicate villagers in the same entry
+    const villagerIds = validEntries.map((entry) => entry.villager!._id);
+    const uniqueVillagerIds = new Set(villagerIds);
+
+    if (villagerIds.length !== uniqueVillagerIds.size) {
+      setError(
+        'Cannot add multiple entries for the same villager in one submission'
+      );
+      return;
+    }
+
+    // Check for existing entries (same month, year, and villager combination)
+    const duplicates = validEntries.some((entry) => {
+      return existingEntries.some((existing) => {
+        const isSameMonthYear =
+          existing.month === selectedMonth && existing.year === selectedYear;
+        const isSameVillager = existing.villagerId === entry.villager!._id;
+
+        if (isEdit && existingData) {
+          const [existingMonth, existingYear] = existingData.month.split(' ');
+          return (
+            isSameMonthYear &&
+            isSameVillager &&
+            !(existingMonth === selectedMonth && existingYear === selectedYear)
+          );
+        }
+        return isSameMonthYear && isSameVillager;
+      });
     });
 
-    if (isDuplicate) {
-      setError('Entry for this month and year has already been recorded.');
+    if (duplicates) {
+      toast.error(
+        'Some entries already exist for the selected month and year.'
+      );
       return;
     }
+
+    // Prepare data for saving
+    const formattedEntries = validEntries.map((entry) => ({
+      villagerId: entry.villager!._id,
+      villagerName: entry.villager!.name,
+      amount: Number(entry.amount),
+    }));
 
     onSave({
       month: selectedMonth,
       year: selectedYear,
-      amount: Number(amount),
+      entries: formattedEntries,
     });
 
     handleClose();
@@ -114,32 +184,26 @@ export const IncomeModal = ({
   const handleClose = () => {
     setSelectedMonth('');
     setSelectedYear('');
-    setAmount('');
+    setIncomeEntries([]);
     setError('');
     onClose();
   };
 
-  const formatNumber = (value: string) => {
-    // Remove non-numeric characters except decimal point
-    const numericValue = value.replace(/[^0-9]/g, '');
-    return numericValue;
-  };
-
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = formatNumber(e.target.value);
-    setAmount(value === '' ? '' : Number(value));
+  const handleEntriesChange = (entries: IncomeEntry[]) => {
+    setIncomeEntries(entries);
   };
 
   return (
     <Dialog
       open={open}
       onClose={handleClose}
-      maxWidth="sm"
+      maxWidth="md"
       fullWidth
       PaperProps={{
         sx: {
           borderRadius: '16px',
           padding: '8px',
+          maxHeight: '90vh',
         },
       }}
     >
@@ -163,21 +227,25 @@ export const IncomeModal = ({
         </Box>
       </DialogTitle>
 
-      <DialogContent sx={{ padding: '24px' }}>
+      <DialogContent
+        sx={{ padding: '24px', maxHeight: '60vh', overflowY: 'auto' }}
+      >
         {error && (
-          <Alert severity="error" sx={{ mb: 2, borderRadius: '8px' }}>
+          <Alert severity="error" sx={{ mb: 3, borderRadius: '8px' }}>
             {error}
           </Alert>
         )}
 
-        <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-          <FormControl fullWidth>
+        {/* Month and Year Selection */}
+        <Box sx={{ display: 'flex', gap: 2, mb: 3, mt: 2 }}>
+          <FormControl fullWidth disabled={parentMonth !== undefined}>
             <InputLabel>Month</InputLabel>
             <Select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
               label="Month"
               sx={{ borderRadius: '12px' }}
+              disabled={parentMonth !== undefined}
             >
               {months.map((month) => (
                 <MenuItem key={month} value={month}>
@@ -187,13 +255,14 @@ export const IncomeModal = ({
             </Select>
           </FormControl>
 
-          <FormControl fullWidth>
+          <FormControl fullWidth disabled={parentYear !== undefined}>
             <InputLabel>Year</InputLabel>
             <Select
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
               label="Year"
               sx={{ borderRadius: '12px' }}
+              disabled={parentYear !== undefined}
             >
               {years.map((year) => (
                 <MenuItem key={year} value={year.toString()}>
@@ -204,23 +273,11 @@ export const IncomeModal = ({
           </FormControl>
         </Box>
 
-        <TextField
-          fullWidth
-          label="Income Amount"
-          type="text"
-          value={amount === '' ? '' : amount.toLocaleString('id-ID')}
-          onChange={handleAmountChange}
-          placeholder="Input income amount..."
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">IDR</InputAdornment>
-            ),
-          }}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: '12px',
-            },
-          }}
+        {/* Dynamic Income Entries List */}
+        <DynamicIncomeList
+          villageId={villageId}
+          onEntriesChange={handleEntriesChange}
+          initialEntries={incomeEntries}
         />
       </DialogContent>
 
@@ -239,24 +296,28 @@ export const IncomeModal = ({
         <Button
           onClick={handleSave}
           variant="contained"
-          disabled={!selectedMonth || !selectedYear || amount === ''}
+          disabled={
+            !selectedMonth ||
+            !selectedYear ||
+            incomeEntries.length === 0 ||
+            incomeEntries.filter(
+              (entry) =>
+                entry.villager === null ||
+                entry.amount === '' ||
+                Number(entry.amount) <= 0
+            ).length > 0
+          }
           sx={{
             borderRadius: '12px',
             minWidth: 120,
             height: 48,
-            backgroundColor:
-              selectedMonth && selectedYear && amount !== ''
-                ? '#3B82F6'
-                : '#D1D5DB',
+            backgroundColor: '#3B82F6',
             '&:hover': {
-              backgroundColor:
-                selectedMonth && selectedYear && amount !== ''
-                  ? '#2563EB'
-                  : '#D1D5DB',
+              backgroundColor: '#2563EB',
             },
           }}
         >
-          {isEdit ? 'Update Data' : 'Add New Data'}
+          {isEdit ? 'Update Entries' : 'Add Entries'}
         </Button>
       </DialogActions>
     </Dialog>

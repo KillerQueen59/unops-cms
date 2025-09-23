@@ -66,7 +66,9 @@ export const SustainableLandsModal = ({
 
   useEffect(() => {
     if (existingData && isEdit) {
-      const [monthName, yearStr] = existingData.month.split(' ');
+      const monthName = existingData.month;
+      const yearStr = existingData.year;
+
       setSelectedMonth(monthName);
       setSelectedYear(yearStr);
       setCount(existingData.count);
@@ -160,7 +162,7 @@ export const SustainableLandsModal = ({
           </Alert>
         )}
 
-        <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+        <Box sx={{ display: 'flex', gap: 2, mb: 3, mt: 2 }}>
           <FormControl fullWidth>
             <InputLabel>Month</InputLabel>
             <Select

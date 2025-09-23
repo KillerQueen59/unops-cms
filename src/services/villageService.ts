@@ -72,9 +72,13 @@ export interface IncomeApiResponse {
   totalData: number;
 }
 
+export interface CreateBulkIncomeRequest {
+  datas: CreateIncomeRequest[];
+}
+
 export interface CreateIncomeRequest {
-  villageId: string;
-  month: string; // Format: "MM-YYYY"
+  villagerId: string;
+  month: string;
   income: number;
 }
 
@@ -98,7 +102,10 @@ interface VillageApiResponse {
       longitude: number;
       latitude: number;
       name: string;
-      category?: string;
+      category?: {
+        id: string;
+        name: string;
+      };
       startLandManaged?: number;
       endLandManaged?: number;
       startCarbonEmission?: number;
@@ -124,8 +131,11 @@ const transformVillageFromAPI = (
     id: apiVillage._id,
     villageName: apiVillage.name || '',
     villageCode: apiVillage.id || '',
-    villageCategory: apiVillage.category || '',
-    totalPopulation: 0, // Default value since not in API response yet
+    villageCategory: {
+      id: apiVillage.category?.id || '',
+      name: apiVillage.category?.name || '',
+    },
+    totalPopulation: 0,
     villageLat: apiVillage.latitude || 0,
     villageLng: apiVillage.longitude || 0,
     landManageStart: apiVillage.startLandManaged || 0,
@@ -295,7 +305,7 @@ export const villageService = {
   },
 
   async addIncomeTrackingData(
-    data: CreateIncomeRequest
+    data: CreateBulkIncomeRequest
   ): Promise<IncomeTrackingData> {
     return await apiClient.post<IncomeTrackingData>('/village/income', data);
   },
@@ -313,31 +323,4 @@ export const villageService = {
   async deleteIncomeTrackingData(incomeId: string): Promise<void> {
     await apiClient.delete(`/village/income/${incomeId}`);
   },
-};
-
-// Helper function to transform UI data to API format
-export const transformUIVillageForAPI = (
-  village: Partial<VillageData>
-): UpdateVillageData => {
-  return {
-    id: village.villageCode || '',
-    name: village.villageName || '',
-    category: village.villageCategory || '',
-    latitude: village.villageLat?.toString() || '0',
-    longitude: village.villageLng?.toString() || '0',
-    startLandManaged: village.landManageStart || 0,
-    endLandManaged: village.landManageEnd,
-    startCarbonEmission: village.carbonEmisionStart || 0,
-    endCarbonEmission: village.carbonEmisionEnd,
-    potency: village.potency || '',
-    climateIssue: village.climateIssue || '',
-    sourceEconomy: village.mainSourceOfEconomy || '',
-    srnStatus: village.srnStatus || '',
-    // Category specific fields
-    startIncome: village.incomesStart,
-    endIncome: village.incomesEnd,
-    seedCapital: village.seedCapital,
-
-    categoryId: village.villageCategory || '',
-  };
 };
