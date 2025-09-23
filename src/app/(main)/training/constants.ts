@@ -1,9 +1,12 @@
-export enum TraininType {
+export enum TrainingType {
   Livelihood = 'livelihood',
   AdaptationMitigation = 'adaptationMitigation',
 }
 
 export const trainingTypeOptions = [
-  { value: TraininType.AdaptationMitigation, label: 'Adaptation & Mitigation' },
-  { value: TraininType.Livelihood, label: 'Livelihood' },
+  {
+    value: TrainingType.AdaptationMitigation,
+    label: 'Adaptation & Mitigation',
+  },
+  { value: TrainingType.Livelihood, label: 'Livelihood' },
 ];

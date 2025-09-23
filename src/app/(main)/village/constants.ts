@@ -1,4 +1,9 @@
 export enum VillageCategory {
+  Category1 = 'category1',
+  Category2 = 'category2',
+}
+
+export enum VillageCategoryLabel {
   Category1 = 'Category 1',
   Category2 = 'Category 2',
 }

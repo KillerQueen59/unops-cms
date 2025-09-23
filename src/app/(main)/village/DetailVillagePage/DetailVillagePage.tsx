@@ -44,7 +44,10 @@ export const DetailVillagePage = () => {
     id: '',
     villageName: 'Unknown Village',
     villageCode: 'N/A',
-    villageCategory: 'N/A',
+    villageCategory: {
+      id: '',
+      name: 'N/A',
+    },
     totalPopulation: 0,
     villageLat: 0,
     villageLng: 0,

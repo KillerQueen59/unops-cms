@@ -22,6 +22,7 @@ import { AddUserPage } from './AddUserPage/AddUserPage';
 import { DetailUserPage } from './DetailUserPage/DetailUserPage';
 import { User as UserType } from '@/types/user';
 import { PageEnum } from '@/constants/page';
+import { ConfirmationModal } from '@/components';
 
 export default function UserPage() {
   const { state, action } = useUserPageImpl();
@@ -32,12 +33,12 @@ export default function UserPage() {
     error,
     isLoading,
     columns,
-    totalUsers,
     page,
     totalItems,
     currentPage,
     pageSize,
-    isLoadingUser,
+    showDeleteModal,
+    selectedUser,
   } = state;
 
   const {
@@ -46,6 +47,8 @@ export default function UserPage() {
     setSearchQuery,
     handlePageChange,
     handlePageSizeChange,
+    handleDeleteConfirm,
+    handleDeleteCancel,
   } = action;
 
   if (error) {
@@ -57,7 +60,7 @@ export default function UserPage() {
   }
 
   // Route to different pages based on current page state
-  if (page === PageEnum.ADD) {
+  if (page === PageEnum.ADD || page === PageEnum.EDIT) {
     return <AddUserPage />;
   }
 
@@ -175,7 +178,7 @@ export default function UserPage() {
         </Box>
       </Box>
 
-      {isLoading || isLoadingUser ? (
+      {isLoading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
           <CircularProgress />
         </Box>
@@ -201,6 +204,18 @@ export default function UserPage() {
           loading={isLoading}
         />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        open={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onSecondaryButtonClick={handleDeleteCancel}
+        onPrimaryButtonClick={handleDeleteConfirm}
+        title="Delete User?"
+        message={`Are you sure you want to delete "${selectedUser?.email}"? This action cannot be undone.`}
+        primaryButtonText={'Delete'}
+        secondaryButtonText="Cancel"
+      />
     </Paper>
   );
 }

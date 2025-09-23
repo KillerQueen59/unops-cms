@@ -13,7 +13,11 @@ import {
   Select,
 } from '@mui/material';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
-import { PROVINCE_NAME, southSumatraRegencies } from '../../constants';
+import {
+  PROVINCE_NAME,
+  southSumatraRegencies,
+  VillageCategory,
+} from '../../constants';
 import { useEffect, useState } from 'react';
 import { getVillageOptions } from '../../helper';
 import { MapPicker } from '@/components/MapPicker';
@@ -545,7 +549,7 @@ export const Form = ({
               />
             </Box>
 
-            {watch('villageCategory') === 'Category 1' && (
+            {watch('villageCategory') === VillageCategory.Category1 && (
               <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', mb: 3 }}>
                 <ControlledFieldContainer
                   label="Household Income Start"
@@ -596,7 +600,7 @@ export const Form = ({
                 required
               />
               {/* Seed Capital - only for Category 2 */}
-              {watch('villageCategory') === 'Category 2' && (
+              {watch('villageCategory') === VillageCategory.Category2 && (
                 <ControlledFieldContainer
                   label="Seed Capital"
                   name="seedCapital"

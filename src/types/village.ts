@@ -2,7 +2,7 @@ export interface VillageData {
   id: string;
   villageName: string;
   villageCode: string;
-  villageCategory: string;
+  villageCategory: VillageCategory;
   totalPopulation: number;
   villageLat: number;
   villageLng: number;
@@ -24,6 +24,11 @@ export interface VillageData {
   seedCapital?: number;
 
   categoryName?: string;
+}
+
+export interface VillageCategory {
+  id: string;
+  name: string;
 }
 
 export interface VillagePerMonth {

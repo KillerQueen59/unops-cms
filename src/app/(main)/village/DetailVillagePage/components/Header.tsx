@@ -4,8 +4,11 @@ import { VillageData } from '@/types/village';
 import { Box, Button, IconButton, Typography } from '@mui/material';
 import { CaretLeftIcon } from '@phosphor-icons/react';
 import { getRegencyName } from '../../helper';
-import { PROVINCE_NAME, VillageCategory } from '../../constants';
-import { CategoryEnum } from '@/constants/category';
+import {
+  PROVINCE_NAME,
+  VillageCategory,
+  VillageCategoryLabel,
+} from '../../constants';
 import { TrashIcon } from '@phosphor-icons/react/dist/ssr';
 import { EditIcon } from 'lucide-react';
 
@@ -75,9 +78,9 @@ export const Header = ({
               fontWeight: 500,
             }}
           >
-            {villageData.villageCategory === CategoryEnum.CATEGORY_1
-              ? VillageCategory.Category1
-              : VillageCategory.Category2}
+            {villageData.villageCategory.name === VillageCategory.Category2
+              ? VillageCategoryLabel.Category2
+              : VillageCategoryLabel.Category1}
           </Box>
         </Box>
       </Box>
@@ -302,7 +305,7 @@ export const Header = ({
           px: 2,
         }}
       >
-        {villageData.villageCategory === CategoryEnum.CATEGORY_1 ? (
+        {villageData.villageCategory.name === VillageCategory.Category1 ? (
           <>
             <Box>
               <Typography

@@ -186,49 +186,43 @@ export const userService = {
     }
   },
 
-  async createUser(userData: CreateUserData): Promise<User> {
+  async createUser(userData: CreateUserData): Promise<{
+    status: boolean;
+    message: string;
+  }> {
     try {
       const response = await apiClient.post<CreateUserApiResponse>(
         '/register',
         userData
       );
 
-      if (response.status && response.data?.user) {
-        return {
-          id: response.data.user._id,
-          name: response.data.user.name,
-          email: response.data.user.email,
-          role: (response.data.user.role as UserRole) || UserRole.ADMIN,
-          status: UserStatus.ACTIVE,
-          lastLogin: 'Never',
-          createdAt: new Date(response.data.user.createdAt)
-            .toISOString()
-            .split('T')[0],
-          createdBy: 'System',
-          lastModified: new Date(response.data.user.createdAt)
-            .toISOString()
-            .split('T')[0],
-          modifiedBy: 'System',
-        };
-      }
-      throw new Error('Failed to create user');
+      return {
+        status: response.status,
+        message: response.message,
+      };
     } catch (error) {
       console.error('Failed to create user:', error);
       throw error;
     }
   },
 
-  async updateUser(userData: UpdateUserData): Promise<User> {
+  async updateUser(userData: UpdateUserData): Promise<{
+    status: boolean;
+    message: string;
+  }> {
     try {
       const response = await apiClient.put<SingleUserApiResponse>(
         `/user/${userData.id}`,
-        userData
+        {
+          name: userData.name,
+          email: userData.email,
+        }
       );
 
-      if (response.status && response.data) {
-        return transformSingleUserFromAPI(response.data);
-      }
-      throw new Error('Failed to update user');
+      return {
+        status: response.status,
+        message: response.message,
+      };
     } catch (error) {
       console.error('Failed to update user:', error);
       throw error;
@@ -243,21 +237,4 @@ export const userService = {
       throw error;
     }
   },
-
-  // Mock function for user history since it's not in the API yet
-  async getUserHistory(userId: string): Promise<UserHistoryLog[]> {
-    // This would be replaced with actual API call when available
-    return [];
-  },
-};
-
-// Helper function to transform UI data to API format
-export const transformUIUserForAPI = (user: Partial<User>): UpdateUserData => {
-  return {
-    id: user.id || '',
-    name: user.name,
-    email: user.email,
-    role: user.role,
-    status: user.status,
-  };
 };

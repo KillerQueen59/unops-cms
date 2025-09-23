@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useUserStore } from '@/stores/userStore';
 import { User } from '@/types/user';
-import { useUsers, useDeleteUser, useUser } from '@/hooks/useUserData';
+import { useUsers, useDeleteUser } from '@/hooks/useUserData';
 import { createUserColumns } from './UserColumn';
 
 export const useUserPageImpl = () => {
@@ -19,8 +19,8 @@ export const useUserPageImpl = () => {
   // Local state for pagination and selected user
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [isEdit, setIsEdit] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Use pagination parameters
   const {
@@ -39,14 +39,6 @@ export const useUserPageImpl = () => {
   const totalItems = usersResponse?.totalData || 0;
   const totalPages = usersResponse?.totalPages || 0;
 
-  // Only fetch user detail when a user is selected
-  const { data: userDetail, isLoading: isLoadingUser } = useUser(
-    selectedUserId,
-    {
-      enabled: !!selectedUserId,
-    }
-  );
-
   const deleteMutation = useDeleteUser();
 
   // Ensure users is always an array
@@ -57,27 +49,6 @@ export const useUserPageImpl = () => {
     setCurrentPage(1);
   }, [searchQuery]);
 
-  // Handle user detail navigation
-  useEffect(() => {
-    if (userDetail && selectedUserId && !isLoadingUser) {
-      if (isEdit) {
-        navigateToEdit(userDetail);
-      } else {
-        navigateToDetail(userDetail);
-      }
-
-      setSelectedUserId(null);
-      setIsEdit(false);
-    }
-  }, [
-    userDetail,
-    selectedUserId,
-    isLoadingUser,
-    navigateToDetail,
-    isEdit,
-    navigateToEdit,
-  ]);
-
   // Pagination handlers
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -85,7 +56,7 @@ export const useUserPageImpl = () => {
 
   const handlePageSizeChange = (newPageSize: number) => {
     setPageSize(newPageSize);
-    setCurrentPage(1); // Reset to first page when changing page size
+    setCurrentPage(1);
   };
 
   const handleAddNew = () => {
@@ -93,22 +64,16 @@ export const useUserPageImpl = () => {
   };
 
   const handleView = (user: User) => {
-    setSelectedUserId(user.id);
+    navigateToDetail(user);
   };
 
   const handleEdit = (user: User) => {
-    setIsEdit(true);
-    setSelectedUserId(user.id);
+    navigateToEdit(user);
   };
 
-  const handleDelete = async (user: User) => {
-    if (window.confirm(`Are you sure you want to delete "${user.name}"?`)) {
-      try {
-        await deleteMutation.mutateAsync(user.id);
-      } catch (error) {
-        console.error('Delete failed:', error);
-      }
-    }
+  const handleDelete = (user: User) => {
+    setSelectedUser(user);
+    setShowDeleteModal(true);
   };
 
   const handleOpenFilter = () => {
@@ -127,10 +92,27 @@ export const useUserPageImpl = () => {
     setIsFilterModalOpen(false);
   };
 
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setSelectedUser(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (selectedUser) {
+      try {
+        await deleteMutation.mutateAsync(selectedUser.id);
+        setShowDeleteModal(false);
+        setSelectedUser(null);
+      } catch (error) {
+        console.error('Delete failed:', error);
+      }
+    }
+  };
+
   const columns = createUserColumns({
-    onView: handleView,
-    onEdit: handleEdit,
     onDelete: handleDelete,
+    onEdit: handleEdit,
+    onView: handleView,
   });
 
   const state = {
@@ -142,12 +124,13 @@ export const useUserPageImpl = () => {
     isFilterModalOpen,
     totalUsers: totalItems,
     page,
-    isLoadingUser,
     // Pagination state
     totalItems,
     totalPages,
     currentPage,
     pageSize,
+    showDeleteModal,
+    selectedUser,
   };
 
   const action = {
@@ -163,6 +146,8 @@ export const useUserPageImpl = () => {
     // Pagination actions
     handlePageChange,
     handlePageSizeChange,
+    handleDeleteConfirm,
+    handleDeleteCancel,
   };
 
   return { state, action };

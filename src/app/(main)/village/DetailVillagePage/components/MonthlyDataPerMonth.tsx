@@ -1,8 +1,8 @@
 import { Paper } from '@mui/material';
 import { useVillageStore } from '@/stores/villageStore';
-import { CategoryEnum } from '@/constants/category';
 import SustainableLandsReport from './SustainableLandsReport';
 import IncomeReport from './IncomeReport';
+import { VillageCategory } from '../../constants';
 
 export const MonthlyDataPerMonth = ({
   searchTerm,
@@ -15,7 +15,7 @@ export const MonthlyDataPerMonth = ({
 }) => {
   const { selectedVillage } = useVillageStore();
 
-  const villageCategory = selectedVillage?.villageCategory;
+  const villageCategory = selectedVillage?.villageCategory.name;
 
   return (
     <Paper
@@ -26,12 +26,12 @@ export const MonthlyDataPerMonth = ({
         padding: '28px',
       }}
     >
-      {villageCategory === CategoryEnum.CATEGORY_1 ? (
+      {villageCategory === VillageCategory.Category1 ? (
         <SustainableLandsReport
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
         />
-      ) : villageCategory === CategoryEnum.CATEGORY_2 ? (
+      ) : villageCategory === VillageCategory.Category2 ? (
         <IncomeReport searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       ) : null}
     </Paper>

@@ -13,8 +13,6 @@ import {
   CreateVillageData,
   UpdateVillageData,
 } from '@/services/villageService';
-import { VillageCategory } from '../constants';
-import { CategoryEnum } from '@/constants/category';
 import toast from 'react-hot-toast';
 
 export const useAddVillagePageImpl = () => {
@@ -35,6 +33,8 @@ export const useAddVillagePageImpl = () => {
   const updateVillageMutation = useUpdateVillage();
   const deleteVillageMutation = useDeleteVillage();
 
+  console.log('selectedVillage?.villageCategory', selectedVillage);
+
   const {
     control,
     handleSubmit,
@@ -48,7 +48,7 @@ export const useAddVillagePageImpl = () => {
       villageName: selectedVillage?.villageName || '',
       villageCode: selectedVillage?.villageCode || '',
       villageCategory:
-        selectedVillage?.villageCategory || selectedCategory || '',
+        selectedVillage?.villageCategory?.name || selectedCategory || '',
       villageLat: selectedVillage?.villageLat || 0,
       villageLng: selectedVillage?.villageLng || 0,
       landManageStart: selectedVillage?.landManageStart?.toString() || '0',
@@ -113,7 +113,7 @@ export const useAddVillagePageImpl = () => {
       reset({
         villageName: selectedVillage.villageName || '',
         villageCode: selectedVillage.villageCode || '',
-        villageCategory: selectedVillage.villageCategory || '',
+        villageCategory: selectedVillage.villageCategory?.name || '',
         villageLat: selectedVillage.villageLat || 0,
         villageLng: selectedVillage.villageLng || 0,
         landManageStart: selectedVillage.landManageStart?.toString() || '',
@@ -218,10 +218,7 @@ export const useAddVillagePageImpl = () => {
         startIncome: data.incomesStart ? Number(data.incomesStart) : undefined,
         endIncome: data.incomesEnd ? Number(data.incomesEnd) : undefined,
         seedCapital: data.seedCapital ? Number(data.seedCapital) : undefined,
-        categoryId:
-          data.villageCategory === VillageCategory.Category1
-            ? CategoryEnum.CATEGORY_1
-            : CategoryEnum.CATEGORY_2,
+        categoryId: data.villageCategory,
       };
 
       if (isEditMode && selectedVillage) {

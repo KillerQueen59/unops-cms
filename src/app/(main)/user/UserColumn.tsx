@@ -6,17 +6,16 @@ import {
   PencilIcon,
   TrashIcon,
 } from '@phosphor-icons/react';
-
 interface UserColumnProps {
-  onView?: (user: User) => void;
-  onEdit?: (user: User) => void;
   onDelete?: (user: User) => void;
+  onEdit?: (user: User) => void;
+  onView?: (user: User) => void;
 }
 
 export const createUserColumns = ({
-  onView,
-  onEdit,
   onDelete,
+  onEdit,
+  onView,
 }: UserColumnProps): ColumnDef<User>[] => [
   {
     accessorKey: 'email',
@@ -58,40 +57,13 @@ export const createUserColumns = ({
       />
     ),
   },
-  {
-    accessorKey: 'lastLogin',
-    header: 'Last Login',
-    cell: ({ row }) => (
-      <Box>
-        <Typography variant="body2" sx={{ color: '#6B7280', fontSize: '14px' }}>
-          {row.original.lastLogin === 'Never'
-            ? 'Never'
-            : new Date(row.original.lastLogin).toLocaleDateString('en-US', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              })}
-        </Typography>
-        {row.original.lastLogin !== 'Never' && (
-          <Typography
-            variant="caption"
-            sx={{ color: '#9CA3AF', fontSize: '12px' }}
-          >
-            {new Date(row.original.lastLogin).toLocaleTimeString('en-US', {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
-          </Typography>
-        )}
-      </Box>
-    ),
-  },
+
   {
     id: 'actions',
     header: 'Action',
     cell: ({ row }) => (
       <Box sx={{ display: 'flex', gap: 1 }}>
-        {/* <IconButton
+        <IconButton
           size="small"
           onClick={() => onView?.(row.original)}
           sx={{
@@ -126,10 +98,14 @@ export const createUserColumns = ({
           }}
         >
           <PencilIcon size={16} />
-        </IconButton> */}
+        </IconButton>
         <IconButton
           size="small"
-          onClick={() => onDelete?.(row.original)}
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            onDelete?.(row.original);
+          }}
           sx={{
             border: '1.5px solid #FEE2E2',
             borderRadius: '8px',

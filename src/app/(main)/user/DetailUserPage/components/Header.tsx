@@ -1,96 +1,164 @@
 'use client';
 
-import React from 'react';
-import { Box, Typography, Button, Chip } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import { useUserStore } from '@/stores/userStore';
-import { UserRole, UserStatus } from '@/types/user';
+import React, { useState } from 'react';
+import { Box, Typography, Button, IconButton } from '@mui/material';
+import { CaretLeftIcon, TrashIcon } from '@phosphor-icons/react';
+import { EditIcon } from 'lucide-react';
+import { BreadcrumbItem, useUserStore } from '@/stores/userStore';
+import { CustomBreadcrumbs } from '@/components';
+import { User } from '@/types/user';
 
-export const Header = () => {
-  const { selectedUser, navigateToEdit } = useUserStore();
-
-  if (!selectedUser) return null;
-
-  const handleEdit = () => {
-    navigateToEdit(selectedUser);
-  };
-
-  const handleDelete = () => {
-    // TODO: Implement delete functionality
-  };
-
-  const getRoleColor = (role: UserRole) => {
-    switch (role) {
-      case UserRole.SUPER_ADMIN:
-        return 'error';
-      case UserRole.ADMIN:
-        return 'warning';
-      case UserRole.USER:
-        return 'default';
-      default:
-        return 'default';
-    }
-  };
-
-  const getStatusColor = (status: UserStatus) => {
-    switch (status) {
-      case UserStatus.ACTIVE:
-        return 'success';
-      case UserStatus.INACTIVE:
-        return 'default';
-      default:
-        return 'default';
-    }
-  };
-
+export const Header = ({
+  breadcrumbs,
+  userData,
+  handleBack,
+  handleDelete,
+  handleEdit,
+}: {
+  breadcrumbs: BreadcrumbItem[];
+  userData: User;
+  handleBack: () => void;
+  handleDelete: () => void;
+  handleEdit: () => void;
+}) => {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        mb: 2,
-      }}
-    >
-      <Box>
-        <Typography variant="h4" component="h1" gutterBottom>
-          {selectedUser.name}
-        </Typography>
-        <Typography variant="body1" color="text.secondary" gutterBottom>
-          {selectedUser.email}
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-          <Chip
-            label={selectedUser.role}
-            color={getRoleColor(selectedUser.role)}
-            size="small"
-          />
-          <Chip
-            label={selectedUser.status}
-            color={getStatusColor(selectedUser.status)}
-            size="small"
-            variant="outlined"
-          />
+    <Box>
+      <Box sx={{ mb: 3 }}>
+        <CustomBreadcrumbs breadcrumbs={breadcrumbs} />
+      </Box>
+
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          mb: 4,
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+          }}
+        >
+          <IconButton
+            onClick={handleBack}
+            sx={{
+              border: '1px solid #0092D1',
+              borderRadius: '12px',
+              width: 48,
+              height: 48,
+              color: '#0092D1',
+            }}
+          >
+            <CaretLeftIcon />
+          </IconButton>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 'bold',
+              color: '#374151',
+            }}
+          >
+            {userData.name}
+          </Typography>
         </Box>
       </Box>
 
-      <Box sx={{ display: 'flex', gap: 1 }}>
+      {/* User Info Grid */}
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: 4,
+          mb: 4,
+          px: 2,
+        }}
+      >
+        <Box>
+          <Typography
+            variant="body2"
+            sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
+          >
+            Email
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
+          >
+            {userData.email}
+          </Typography>
+        </Box>
+
+        <Box>
+          <Typography
+            variant="body2"
+            sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
+          >
+            Name
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
+          >
+            {userData.name}
+          </Typography>
+        </Box>
+
+        <Box>
+          <Typography
+            variant="body2"
+            sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
+          >
+            Role
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
+          >
+            {userData.role}
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* Action Buttons */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          gap: 2,
+          mb: 4,
+          px: 2,
+        }}
+      >
         <Button
-          variant="contained"
-          startIcon={<EditIcon />}
-          onClick={handleEdit}
-          size="small"
+          variant="outlined"
+          color="error"
+          startIcon={<TrashIcon />}
+          onClick={handleDelete}
+          sx={{
+            borderRadius: '12px',
+            width: '180px',
+            minHeight: '50px',
+            px: 3,
+          }}
         >
-          Edit
+          Delete
         </Button>
         <Button
           variant="outlined"
-          startIcon={<DeleteIcon />}
-          onClick={handleDelete}
-          size="small"
-          color="error"
+          color="primary"
+          startIcon={<EditIcon />}
+          onClick={handleEdit}
+          sx={{
+            borderRadius: '12px',
+            width: '180px',
+            minHeight: '50px',
+            px: 3,
+          }}
         >
-          Delete
+          Edit
         </Button>
       </Box>
     </Box>

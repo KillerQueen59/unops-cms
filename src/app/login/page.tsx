@@ -198,6 +198,7 @@ export default function LoginPage() {
                 <TextField
                   {...field}
                   fullWidth
+                  type={showPassword ? 'text' : 'password'}
                   label="Password"
                   margin="normal"
                   error={!!errors.password}

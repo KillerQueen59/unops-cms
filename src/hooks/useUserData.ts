@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { User, UserHistoryLog } from '@/types/user';
+import { User } from '@/types/user';
 import { UserFormData } from '@/types/userForm';
 import {
   userService,
   CreateUserData,
   UpdateUserData,
   PaginationParams,
-  transformUIUserForAPI,
 } from '@/services/userService';
 import { PaginatedResponse } from '@/types/common';
 import toast from 'react-hot-toast';
@@ -52,14 +51,6 @@ export const useUser = (id: string | null, options?: { enabled?: boolean }) => {
     queryKey: userKeys.detail(id),
     queryFn: () => userService.getUserById(id!),
     enabled: enabled && !!id,
-  });
-};
-
-export const useUserHistory = (userId: string) => {
-  return useQuery({
-    queryKey: userKeys.history(userId),
-    queryFn: () => userService.getUserHistory(userId),
-    enabled: !!userId,
   });
 };
 

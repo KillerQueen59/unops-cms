@@ -6,6 +6,7 @@ import {
   PencilIcon,
   TrashIcon,
 } from '@phosphor-icons/react';
+import { trainingTypeOptions } from './constants';
 
 interface TrainingColumnProps {
   onView?: (data: TrainingData) => void;
@@ -25,6 +26,16 @@ export const createTrainingColumns = ({
   {
     accessorKey: 'trainingType',
     header: 'Training Type',
+    cell: ({ row }) => {
+      const trainingType = trainingTypeOptions.find(
+        (option) => option.value === row.original.trainingType
+      );
+      return (
+        <span className="capitalize">
+          {trainingType?.label || trainingType?.value}
+        </span>
+      );
+    },
   },
   {
     accessorKey: 'date',
