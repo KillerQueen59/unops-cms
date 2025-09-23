@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { numericString, scoreString } from './commonForm';
+import { numericString } from './commonForm';
 
 export const trainingFormSchema = z.object({
   // Detail Training
@@ -18,8 +18,8 @@ export const trainingFormSchema = z.object({
   widow: numericString('Number of widows is required'),
 
   // Training Assessment (scores should be 0-100)
-  pretest: scoreString('Pre-test score is required'),
-  posttest: scoreString('Post-test score is required'),
+  pretest: numericString('Pre-test score is required'),
+  posttest: numericString('Post-test score is required'),
 
   // Stakeholders Involved
   ngo: numericString('Number of NGOs is required'),

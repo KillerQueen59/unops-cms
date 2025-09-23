@@ -24,9 +24,10 @@ import {
   UsersIcon,
 } from '@phosphor-icons/react';
 import { usePathname } from 'next/navigation';
-import { SolarRoofIcon } from '@phosphor-icons/react/dist/ssr';
+import { GearIcon, SolarRoofIcon } from '@phosphor-icons/react/dist/ssr';
 import { logout } from '@/lib/api';
 import { useAuthStatus } from '@/hooks/useAuth';
+import { SettingsIcon } from 'lucide-react';
 
 const drawerWidth = 240;
 
@@ -215,6 +216,18 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
             />
           ),
           href: '/user',
+        },
+        {
+          text: 'Global Config',
+          icon: <GearIcon size={20} />,
+          activeIcon: (
+            <GearIcon
+              size={20}
+              color={theme.palette.primary.main}
+              weight="fill"
+            />
+          ),
+          href: '/global-config',
         },
       ],
     },

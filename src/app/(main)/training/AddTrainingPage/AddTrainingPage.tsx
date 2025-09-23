@@ -6,7 +6,11 @@ import { useAddTrainingPageImpl } from './useAddTrainingPageImpl';
 import { Header } from './components/Header';
 import { Form } from './components/Form';
 
-export const AddTrainingPage = () => {
+export const AddTrainingPage = ({
+  trainingOptions,
+}: {
+  trainingOptions: { label: string; value: string; category: string }[];
+}) => {
   const { state, action } = useAddTrainingPageImpl();
   const {
     control,
@@ -52,6 +56,7 @@ export const AddTrainingPage = () => {
           villageOptions={villageOptions}
           setValue={setValue}
           watch={watch}
+          trainingOptions={trainingOptions}
         />
       </Box>
 

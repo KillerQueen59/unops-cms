@@ -27,6 +27,7 @@ export const Form = ({
   handleFormSubmit,
   handleBack,
   watch,
+  trainingOptions,
 }: {
   control: Control<TrainingFormData>;
   errors: FieldErrors<TrainingFormData>;
@@ -38,8 +39,10 @@ export const Form = ({
   handleFormSubmit: () => void;
   handleBack: () => void;
   watch: (field: keyof TrainingFormData) => any;
+  trainingOptions: { label: string; value: string; category: string }[];
 }) => {
   const selectedVillage = watch('villageId');
+  const selectedCategory = watch('trainingType');
   return (
     <form
       onSubmit={(e) => {
@@ -98,15 +101,44 @@ export const Form = ({
                 />
               </ControlledFieldContainer>
 
-              {/* TODO: Change to Select */}
               <ControlledFieldContainer
                 label="Training Name"
                 name="trainingName"
                 control={control}
-                placeholder="Input training name..."
                 required
                 error={errors.trainingName}
-              />
+              >
+                <Controller
+                  name="trainingName"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControl fullWidth error={!!errors.trainingType}>
+                      <Select
+                        {...field}
+                        displayEmpty
+                        sx={{
+                          borderRadius: '12px',
+                        }}
+                      >
+                        <MenuItem value="" disabled>
+                          <span style={{ color: '#9CA3AF' }}>
+                            Choose training name...
+                          </span>
+                        </MenuItem>
+                        {trainingOptions
+                          .filter(
+                            (option) => option.category === selectedCategory
+                          )
+                          .map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                              {option.label}
+                            </MenuItem>
+                          ))}
+                      </Select>
+                    </FormControl>
+                  )}
+                />
+              </ControlledFieldContainer>
             </Box>
 
             <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>

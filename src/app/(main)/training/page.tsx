@@ -40,7 +40,11 @@ const TrainingPage = () => {
     showDeleteModal,
     trainingToDelete,
     isDeleting,
+    trainingOptions,
+    trainingAssessmentThreshold,
   } = state;
+
+  console.log('Rerendering TrainingPage', trainingAssessmentThreshold);
 
   const {
     handleAddNew,
@@ -65,7 +69,7 @@ const TrainingPage = () => {
   }
 
   if (page === PageEnum.ADD) {
-    return <AddTrainingPage />;
+    return <AddTrainingPage trainingOptions={trainingOptions} />;
   }
 
   return (

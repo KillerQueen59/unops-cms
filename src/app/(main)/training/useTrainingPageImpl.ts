@@ -8,6 +8,12 @@ import {
 } from '@/hooks/useTrainingData';
 import { createTrainingColumns } from './TrainingColumn';
 import { PageEnum } from '@/constants/page';
+import {
+  useAssessmentThreshold,
+  useTrainingAdaptationMitigation,
+  useTrainingLivelihood,
+} from '@/hooks/useGlobalConfigData';
+import { TrainingType } from './constants';
 
 export const useTrainingPageImpl = () => {
   const {
@@ -31,6 +37,36 @@ export const useTrainingPageImpl = () => {
   const [selectedTrainingId, setSelectedTrainingId] = useState<string | null>(
     null
   );
+
+  const trainingAdaptationMitigation = useTrainingAdaptationMitigation();
+  const trainingLivelihood = useTrainingLivelihood();
+  const trainingAssessmentThreshold = useAssessmentThreshold();
+
+  const trainingOptions = useMemo(() => {
+    const options: { label: string; value: string; category: string }[] = [];
+
+    if (trainingLivelihood?.data?.value) {
+      (trainingLivelihood.data.value as string[]).forEach((item: string) => {
+        options.push({
+          label: item.trim(),
+          value: item.trim(),
+          category: TrainingType.Livelihood,
+        });
+      });
+    }
+    if (trainingAdaptationMitigation?.data?.value) {
+      (trainingAdaptationMitigation.data.value as string[]).forEach(
+        (item: string) => {
+          options.push({
+            label: item.trim(),
+            value: item.trim(),
+            category: TrainingType.AdaptationMitigation,
+          });
+        }
+      );
+    }
+    return options;
+  }, [trainingLivelihood.data, trainingAdaptationMitigation.data]);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -184,6 +220,8 @@ export const useTrainingPageImpl = () => {
     currentPage,
     pageSize,
     isFilterModalOpen,
+    trainingOptions,
+    trainingAssessmentThreshold: trainingAssessmentThreshold.data?.value || 0,
   };
 
   const action = {
