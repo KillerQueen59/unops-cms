@@ -5,7 +5,7 @@ import {
   UpdateActivityData,
   ActivityListParams,
 } from '@/services/activityService';
-import { ActivityData } from '@/types/activity';
+import { ActivityData, UnifiedFile } from '@/types/activity';
 import toast from 'react-hot-toast';
 import { PaginatedResponse } from '@/types/common';
 
@@ -97,7 +97,7 @@ export const useUpdateActivity = () => {
     }: {
       activityId: string;
       activityData: UpdateActivityData;
-      files?: File[];
+      files?: UnifiedFile[];
     }) => activityService.updateActivity(activityId, activityData, files),
     onSuccess: (updatedActivity, { activityId }) => {
       queryClient.invalidateQueries({ queryKey: activityKeys.lists() });

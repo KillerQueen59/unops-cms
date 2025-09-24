@@ -25,9 +25,13 @@ import {
   TextAreaFieldContainer,
 } from '@/components';
 import { DemositeType } from '@/types/demosite';
-import { DemositeFormData } from '@/types/demositeForm';
+import {
+  DemositeEditFormData,
+  demositeEditFormSchema,
+} from '@/types/demositeForm';
 import { useDemositeStore, DemositePageEnum } from '@/stores/demositeStore';
 import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdateDemosite } from '@/hooks/useDemositeData';
 import { UpdateDemositeData } from '@/services/demositeService';
 import toast from 'react-hot-toast';
@@ -52,16 +56,16 @@ export const Form = ({
     formState: { errors, isSubmitting },
     setValue,
     watch,
-    register,
     reset,
-  } = useForm<DemositeFormData>({
+  } = useForm<DemositeEditFormData>({
+    resolver: zodResolver(demositeEditFormSchema),
     defaultValues: {
       title: '',
       type: DemositeType.LocalHeroes,
       name: '',
       story: '',
-      link: '',
-      header: undefined as unknown as File,
+      link: undefined,
+      header: undefined,
       photos: [],
     },
   });
@@ -74,8 +78,8 @@ export const Form = ({
         type: selectedDemosite.type || DemositeType.LocalHeroes,
         name: selectedDemosite.name || '',
         story: selectedDemosite.story || '',
-        link: selectedDemosite.link || '',
-        header: undefined as unknown as File,
+        link: selectedDemosite.link || undefined,
+        header: undefined,
         photos: [],
       });
 
@@ -89,35 +93,19 @@ export const Form = ({
     }
   }, [selectedDemosite, reset]);
 
-  // Register header field with validation
-  register('header', {
-    validate: (file) => {
-      // For edit mode, header is optional if there's an existing one
-      if (!file && !selectedDemosite?.photos?.[0]) {
-        return 'Header photo is required';
-      }
-      if (file) {
-        if (
-          typeof file !== 'object' ||
-          !file.name ||
-          !file.type ||
-          !file.size
-        ) {
-          return 'Invalid header photo';
-        }
-        const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-        if (!validTypes.includes(file.type))
-          return 'Header photo must be JPG or PNG';
-        if (file.size > 5 * 1024 * 1024)
-          return 'Header photo must be less than 5MB';
-      }
-      return true;
-    },
-  });
-
   const name = watch('name');
   const type = watch('type');
   const updateMutation = useUpdateDemosite();
+
+  // Display validation errors
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      const firstError = Object.values(errors)[0];
+      if (firstError?.message) {
+        toast.error(firstError.message);
+      }
+    }
+  }, [errors]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent<HTMLDivElement>, isHeaderDrop = false) => {
@@ -265,7 +253,7 @@ export const Form = ({
     updateBreadcrumbs(DemositePageEnum.LIST);
   };
 
-  const onSubmit = async (data: DemositeFormData) => {
+  const onSubmit = async (data: DemositeEditFormData) => {
     if (!selectedDemosite) return;
 
     try {
@@ -276,7 +264,7 @@ export const Form = ({
 
       const form: UpdateDemositeData = {
         id: selectedDemosite.id,
-        header: data.header,
+        header: data.header || undefined,
         title: data.title,
         type: data.type === DemositeType.LocalHeroes ? 'hero' : 'location',
         name: data.name,
@@ -300,7 +288,7 @@ export const Form = ({
 
   const handleSubmitForm = (e: React.FormEvent) => {
     e.preventDefault();
-    handleSubmit((data) => {
+    handleSubmit(() => {
       setShowModalConfirm(true);
     })();
   };

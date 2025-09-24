@@ -22,6 +22,7 @@ export const DetailUserPage = () => {
     name: '',
     email: '',
     role: UserRole.USER,
+    roleName: '',
     status: UserStatus.ACTIVE,
     lastLogin: '',
     createdAt: '',

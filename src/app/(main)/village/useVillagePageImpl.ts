@@ -50,8 +50,6 @@ export const useVillagePageImpl = () => {
     [filters, villageCategories]
   );
 
-  console.log('apiFilters:', apiFilters, villageCategories);
-
   // Use pagination parameters
   const {
     data: villagesResponse,
@@ -138,7 +136,9 @@ export const useVillagePageImpl = () => {
   };
 
   const handleCategorySelect = (category: string) => {
-    setSelectedCategory(category);
+    setSelectedCategory(
+      villageCategories?.find((cat) => cat.name === category)?._id || category
+    );
     setPage(PageEnum.ADD);
     updateBreadcrumbs(PageEnum.ADD);
     setShowCategoryModal(false);

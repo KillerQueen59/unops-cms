@@ -186,7 +186,9 @@ export const useAddActivityPageImpl = () => {
         // Create new training
         await createActivityMutation.mutateAsync({
           activityData: createActivityData,
-          files: data.files as File[],
+          files: data.files.filter(
+            (file): file is File => file instanceof File
+          ),
         });
       }
 

@@ -121,8 +121,8 @@ export default function VillagePage() {
     return <DetailVillagePage />;
   }
 
-  if (page === PageEnum.ADD) {
-    return <AddVillagePage />;
+  if (page === PageEnum.ADD && villageCategories) {
+    return <AddVillagePage villageCategories={villageCategories} />;
   }
 
   return (

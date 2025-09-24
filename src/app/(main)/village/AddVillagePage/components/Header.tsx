@@ -1,7 +1,7 @@
 import { CustomBreadcrumbs } from '@/components';
 import { BreadcrumbItem } from '@/types/common';
-import { Box, IconButton, Typography, Button } from '@mui/material';
-import { CaretLeftIcon, TrashIcon } from '@phosphor-icons/react';
+import { Box, IconButton, Typography } from '@mui/material';
+import { CaretLeftIcon } from '@phosphor-icons/react';
 
 export const Header = ({
   breadcrumbs,

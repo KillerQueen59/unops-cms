@@ -24,8 +24,8 @@ export const createActivityColumns = ({
     header: 'Activity Name',
   },
   {
-    accessorKey: 'activityCategory',
-    header: 'Category',
+    accessorKey: 'villageId',
+    header: 'Village ID',
   },
   {
     accessorKey: 'startDate',

@@ -6,7 +6,11 @@ import { useAddVillagePageImpl } from './useAddVillagePageImpl';
 import { Header } from './components/Header';
 import { Form } from './components/Form';
 
-export const AddVillagePage = () => {
+export const AddVillagePage = ({
+  villageCategories,
+}: {
+  villageCategories: { _id: string; name: string }[];
+}) => {
   const { state, action } = useAddVillagePageImpl();
   const {
     control,
@@ -54,6 +58,7 @@ export const AddVillagePage = () => {
           watch={watch}
           isEditMode={isEditMode}
           selectedData={selectedVillage}
+          villageCategories={villageCategories}
         />
       </Box>
 

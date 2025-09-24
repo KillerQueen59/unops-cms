@@ -13,8 +13,15 @@ export interface CreateDemositeData {
   photos?: File[];
 }
 
-export interface UpdateDemositeData extends CreateDemositeData {
+export interface UpdateDemositeData {
   id: string;
+  header?: File;
+  title: string;
+  type: 'hero' | 'location';
+  name: string;
+  story: string;
+  link?: string;
+  photos?: File[];
 }
 
 // Query parameters for getting demosites

@@ -17,6 +17,7 @@ import {
   PROVINCE_NAME,
   southSumatraRegencies,
   VillageCategory,
+  VillageCategoryLabel,
 } from '../../constants';
 import { useEffect, useState } from 'react';
 import { getVillageOptions } from '../../helper';
@@ -36,6 +37,7 @@ export const Form = ({
   watch,
   isEditMode,
   selectedData,
+  villageCategories,
 }: {
   control: Control<VillageFormData>;
   errors: FieldErrors<VillageFormData>;
@@ -47,6 +49,7 @@ export const Form = ({
   watch: (field: keyof VillageFormData) => any;
   isEditMode: boolean;
   selectedData: VillageData | null;
+  villageCategories: { _id: string; name: string }[];
 }) => {
   const villageCode = selectedData?.villageCode || '';
 
@@ -182,9 +185,16 @@ export const Form = ({
                     <TextField
                       {...params}
                       placeholder="Search regency/city..."
+                      error={!!errors.villageCode && !selectedRegency}
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           borderRadius: '12px',
+                          '& fieldset': {
+                            borderColor:
+                              !!errors.villageCode && !selectedRegency
+                                ? '#EF4444'
+                                : undefined,
+                          },
                         },
                       }}
                     />
@@ -209,6 +219,18 @@ export const Form = ({
                     },
                   }}
                 />
+                {!!errors.villageCode && !selectedRegency && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: '#EF4444',
+                      mt: 1,
+                      display: 'block',
+                    }}
+                  >
+                    Please select a regency/city
+                  </Typography>
+                )}
               </Box>
             </Box>
 
@@ -259,6 +281,14 @@ export const Form = ({
                           backgroundColor: !selectedRegency
                             ? '#f9fafb'
                             : '#fff',
+                          '& fieldset': {
+                            borderColor:
+                              !!errors.villageCode &&
+                              selectedRegency &&
+                              !selectedVillage
+                                ? '#EF4444'
+                                : undefined,
+                          },
                         },
                       }}
                     />
@@ -286,6 +316,20 @@ export const Form = ({
                     },
                   }}
                 />
+                {!!errors.villageCode &&
+                  selectedRegency &&
+                  !selectedVillage && (
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: '#EF4444',
+                        mt: 1,
+                        display: 'block',
+                      }}
+                    >
+                      Please select a village
+                    </Typography>
+                  )}
               </Box>
 
               <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
@@ -401,7 +445,13 @@ export const Form = ({
                       {...field}
                       fullWidth
                       disabled
-                      value={selectedCategory || field.value || ''}
+                      value={
+                        villageCategories.find(
+                          (cat) => cat._id === selectedCategory
+                        )?.name === VillageCategory.Category1
+                          ? VillageCategoryLabel.Category1
+                          : VillageCategoryLabel.Category2
+                      }
                       sx={{
                         backgroundColor: '#f9fafb',
                         '& .MuiOutlinedInput-root': {

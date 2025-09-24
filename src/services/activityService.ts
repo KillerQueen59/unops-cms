@@ -1,6 +1,11 @@
 import { apiClient } from '@/lib/api';
 import { PaginatedResponse } from '@/types/common';
-import { ActivityData, ApiFile } from '@/types/activity';
+import {
+  ActivityData,
+  ApiFile,
+  UnifiedFile,
+  isApiFile,
+} from '@/types/activity';
 
 // Activity API interfaces based on the curl commands
 export interface Activity {
@@ -202,13 +207,22 @@ export const activityService = {
   async updateActivity(
     activityId: string,
     activityData: UpdateActivityData,
-    files?: File[]
+    files?: UnifiedFile[]
   ): Promise<{
     status: boolean;
     message: string;
   }> {
+    // Separate existing files from new files
+    const existingFiles = files?.filter(isApiFile) || [];
+    const newFiles =
+      files?.filter((file): file is File => !isApiFile(file)) || [];
+
     // Use FormData for consistency with API (since it supports file uploads)
-    const formData = createActivityFormData(activityData, files);
+    const formData = createActivityFormData(
+      activityData,
+      newFiles,
+      existingFiles
+    );
     const response = await apiClient.put<SingleActivityApiResponse>(
       `/village/activity/${activityId}`,
       formData
@@ -228,7 +242,8 @@ export const activityService = {
 // Helper function to create FormData for activity creation/update
 export const createActivityFormData = (
   data: CreateActivityData | UpdateActivityData,
-  files?: File[]
+  files?: File[],
+  existingFiles?: ApiFile[]
 ): FormData => {
   const formData = new FormData();
   // Add activity data fields
@@ -245,8 +260,15 @@ export const createActivityFormData = (
   if (data.percentage !== undefined)
     formData.append('percentage', data.percentage.toString());
 
-  // Add files if provided
-  if (files) {
+  // Add existing files (URLs only) for updates
+  if (existingFiles && existingFiles.length > 0) {
+    existingFiles.forEach((file) => {
+      formData.append('existingFiles', file.url);
+    });
+  }
+
+  // Add new files if provided
+  if (files && files.length > 0) {
     files.forEach((file) => {
       formData.append('files', file);
     });

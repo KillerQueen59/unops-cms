@@ -154,54 +154,58 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
           ),
           href: '/training',
         },
-        {
-          text: 'Village',
-          icon: <SolarRoofIcon size={20} />,
-          activeIcon: (
-            <SolarRoofIcon
-              size={20}
-              color={theme.palette.primary.main}
-              weight="fill"
-            />
-          ),
-          href: '/village',
-        },
-        {
-          text: 'Activity',
-          icon: <PuzzlePieceIcon size={20} />,
-          activeIcon: (
-            <PuzzlePieceIcon
-              size={20}
-              color={theme.palette.primary.main}
-              weight="fill"
-            />
-          ),
-          href: '/activity',
-        },
-        {
-          text: 'Demosite',
-          icon: <FarmIcon size={20} />,
-          activeIcon: (
-            <FarmIcon
-              size={20}
-              color={theme.palette.primary.main}
-              weight="fill"
-            />
-          ),
-          href: '/demosite',
-        },
-        {
-          text: 'Data',
-          icon: <DownloadIcon size={20} />,
-          activeIcon: (
-            <DownloadIcon
-              size={20}
-              color={theme.palette.primary.main}
-              weight="fill"
-            />
-          ),
-          href: '/data',
-        },
+        ...(role === 'admin'
+          ? []
+          : [
+              {
+                text: 'Village',
+                icon: <SolarRoofIcon size={20} />,
+                activeIcon: (
+                  <SolarRoofIcon
+                    size={20}
+                    color={theme.palette.primary.main}
+                    weight="fill"
+                  />
+                ),
+                href: '/village',
+              },
+              {
+                text: 'Activity',
+                icon: <PuzzlePieceIcon size={20} />,
+                activeIcon: (
+                  <PuzzlePieceIcon
+                    size={20}
+                    color={theme.palette.primary.main}
+                    weight="fill"
+                  />
+                ),
+                href: '/activity',
+              },
+              {
+                text: 'Demosite',
+                icon: <FarmIcon size={20} />,
+                activeIcon: (
+                  <FarmIcon
+                    size={20}
+                    color={theme.palette.primary.main}
+                    weight="fill"
+                  />
+                ),
+                href: '/demosite',
+              },
+              {
+                text: 'Data',
+                icon: <DownloadIcon size={20} />,
+                activeIcon: (
+                  <DownloadIcon
+                    size={20}
+                    color={theme.palette.primary.main}
+                    weight="fill"
+                  />
+                ),
+                href: '/data',
+              },
+            ]),
       ],
     },
     ...(role === 'admin'

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import {
   Box,
@@ -25,9 +25,10 @@ import {
   TextAreaFieldContainer,
 } from '@/components';
 import { DemositeType } from '@/types/demosite';
-import { DemositeFormData } from '@/types/demositeForm';
+import { DemositeFormData, demositeFormSchema } from '@/types/demositeForm';
 import { useDemositeStore, DemositePageEnum } from '@/stores/demositeStore';
 import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateDemosite } from '@/hooks/useDemositeData';
 import { CreateDemositeData } from '@/services/demositeService';
 import toast from 'react-hot-toast';
@@ -51,43 +52,31 @@ export const Form = ({
     formState: { errors, isSubmitting },
     setValue,
     watch,
-    register,
   } = useForm<DemositeFormData>({
+    resolver: zodResolver(demositeFormSchema),
     defaultValues: {
       title: '',
       type: DemositeType.LocalHeroes,
       name: '',
       story: '',
-      link: '',
+      link: undefined,
       header: undefined as unknown as File,
       photos: [],
-    },
-  });
-
-  // Register header field with validation
-  register('header', {
-    required: 'Header photo is required',
-    validate: (file) => {
-      if (
-        !file ||
-        typeof file !== 'object' ||
-        !file.name ||
-        !file.type ||
-        !file.size
-      ) {
-        return 'Header photo is required';
-      }
-      const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-      if (!validTypes.includes(file.type))
-        return 'Header photo must be JPG or PNG';
-      if (file.size > 5 * 1024 * 1024)
-        return 'Header photo must be less than 5MB';
-      return true;
     },
   });
   const name = watch('name');
   const type = watch('type');
   const createMutation = useCreateDemosite();
+
+  // Display validation errors
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      const firstError = Object.values(errors)[0];
+      if (firstError?.message) {
+        toast.error(firstError.message);
+      }
+    }
+  }, [errors]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent<HTMLDivElement>, isHeaderDrop = false) => {
@@ -253,9 +242,13 @@ export const Form = ({
     setShowModalConfirm(false);
     handleSubmit(onSubmit)();
   };
-  const handleSubmitForm = (e: { preventDefault: () => void }) => {
+
+  const handleSubmitForm = (e: React.FormEvent) => {
     e.preventDefault();
-    setShowModalConfirm(true);
+    // Use handleSubmit to validate first, then show modal if valid
+    handleSubmit(() => {
+      setShowModalConfirm(true);
+    })();
   };
 
   const handleSubmitCancel = () => {

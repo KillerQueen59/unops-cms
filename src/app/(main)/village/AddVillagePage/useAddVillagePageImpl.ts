@@ -33,8 +33,6 @@ export const useAddVillagePageImpl = () => {
   const updateVillageMutation = useUpdateVillage();
   const deleteVillageMutation = useDeleteVillage();
 
-  console.log('selectedVillage?.villageCategory', selectedVillage);
-
   const {
     control,
     handleSubmit,
