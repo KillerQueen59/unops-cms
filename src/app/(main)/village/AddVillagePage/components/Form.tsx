@@ -19,7 +19,7 @@ import {
   VillageCategory,
   VillageCategoryLabel,
 } from '../../constants';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getVillageOptions } from '../../helper';
 import { MapPicker } from '@/components/MapPicker';
 import southSumatraOnly from '@/hooks/sumatra-only';
@@ -38,6 +38,7 @@ export const Form = ({
   isEditMode,
   selectedData,
   villageCategories,
+  validateLocation,
 }: {
   control: Control<VillageFormData>;
   errors: FieldErrors<VillageFormData>;
@@ -50,8 +51,12 @@ export const Form = ({
   isEditMode: boolean;
   selectedData: VillageData | null;
   villageCategories: { _id: string; name: string }[];
+  validateLocation: (lat: number, lng: number) => void;
 }) => {
   const villageCode = selectedData?.villageCode || '';
+  const villageCategory = useMemo(() => {
+    return villageCategories.find((cat) => cat._id === selectedCategory)?.name;
+  }, [selectedCategory, villageCategories]);
 
   const [selectedRegency, setSelectedRegency] = useState<string>('');
   const [selectedVillage, setSelectedVillage] = useState<string>('');
@@ -505,10 +510,12 @@ export const Form = ({
                           onCoordinateSelect={(lat, lng) => {
                             latField.onChange(lat);
                             lngField.onChange(lng);
+                            validateLocation(lat, lng);
                           }}
                           disabled={isSubmitting}
                           provinceGeojson={southSumatraOnly}
                           regencyCode={selectedRegency}
+                          error={!!errors.villageLat || !!errors.villageLng}
                         />
                       )}
                     />
@@ -559,6 +566,18 @@ export const Form = ({
                     </FormControl>
                   )}
                 />
+                {!!errors.srnStatus && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: '#EF4444',
+                      mt: 1,
+                      display: 'block',
+                    }}
+                  >
+                    SRN status is required
+                  </Typography>
+                )}
               </ControlledFieldContainer>
             </Box>
 
@@ -599,7 +618,7 @@ export const Form = ({
               />
             </Box>
 
-            {watch('villageCategory') === VillageCategory.Category1 && (
+            {villageCategory === VillageCategory.Category1 && (
               <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', mb: 3 }}>
                 <ControlledFieldContainer
                   label="Household Income Start"
@@ -650,7 +669,7 @@ export const Form = ({
                 required
               />
               {/* Seed Capital - only for Category 2 */}
-              {watch('villageCategory') === VillageCategory.Category2 && (
+              {villageCategory === VillageCategory.Category2 && (
                 <ControlledFieldContainer
                   label="Seed Capital"
                   name="seedCapital"

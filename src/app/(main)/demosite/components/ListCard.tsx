@@ -20,7 +20,7 @@ export const ListCard = ({
   // Ensure we have a valid image URL or fall back to placeholder
   const imageUrl =
     demosite.header && demosite.header.trim() !== ''
-      ? `http://${demosite.header}`
+      ? `${demosite.header}`
       : placeholderUrl;
 
   return (

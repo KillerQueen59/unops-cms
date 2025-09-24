@@ -37,12 +37,7 @@ export const useDataPageImpl = () => {
       return filters.area;
     }
 
-    // Otherwise, use the groupBy for legacy toggle button functionality
-    if (isGrouped && groupBy !== 'other') {
-      return groupBy;
-    }
-
-    return undefined;
+    return '';
   };
 
   // Use pagination parameters

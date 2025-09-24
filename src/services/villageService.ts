@@ -103,7 +103,7 @@ interface VillageApiResponse {
       latitude: number;
       name: string;
       category?: {
-        id: string;
+        _id: string;
         name: string;
       };
       startLandManaged?: number;
@@ -132,7 +132,7 @@ const transformVillageFromAPI = (
     villageName: apiVillage.name || '',
     villageCode: apiVillage.id || '',
     villageCategory: {
-      id: apiVillage.category?.id || '',
+      id: apiVillage.category?._id || '',
       name: apiVillage.category?.name || '',
     },
     totalPopulation: 0,

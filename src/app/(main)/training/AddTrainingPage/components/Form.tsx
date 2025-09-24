@@ -99,6 +99,18 @@ export const Form = ({
                     </FormControl>
                   )}
                 />
+                {!!errors.trainingType && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: '#EF4444',
+                      mt: 1,
+                      display: 'block',
+                    }}
+                  >
+                    Please select a training type
+                  </Typography>
+                )}
               </ControlledFieldContainer>
 
               <ControlledFieldContainer
@@ -138,6 +150,18 @@ export const Form = ({
                     </FormControl>
                   )}
                 />
+                {!!errors.trainingName && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: '#EF4444',
+                      mt: 1,
+                      display: 'block',
+                    }}
+                  >
+                    Please select a training name
+                  </Typography>
+                )}
               </ControlledFieldContainer>
             </Box>
 
@@ -168,7 +192,15 @@ export const Form = ({
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           borderRadius: '12px',
-                          backgroundColor: '#fff',
+                          backgroundColor: !selectedVillage
+                            ? '#f9fafb'
+                            : '#fff',
+                          '& fieldset': {
+                            borderColor:
+                              !!errors.villageId && !selectedVillage
+                                ? '#EF4444'
+                                : undefined,
+                          },
                         },
                       }}
                     />
@@ -192,6 +224,18 @@ export const Form = ({
                     },
                   }}
                 />
+                {!!errors.villageId && !selectedVillage && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: '#EF4444',
+                      mt: 1,
+                      display: 'block',
+                    }}
+                  >
+                    Please select a village
+                  </Typography>
+                )}
               </ControlledFieldContainer>
               <ControlledFieldContainer
                 label="Date"
@@ -228,6 +272,7 @@ export const Form = ({
               control={control}
               placeholder="Input total male participants..."
               error={errors.male}
+              required
             />
 
             <ControlledFieldContainer
@@ -236,6 +281,7 @@ export const Form = ({
               control={control}
               placeholder="Input total female participants..."
               error={errors.female}
+              required
             />
           </Box>
           <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', mb: 3 }}>
@@ -245,6 +291,7 @@ export const Form = ({
               control={control}
               placeholder="Input total elderly participants..."
               error={errors.elderly}
+              required
             />
 
             <ControlledFieldContainer
@@ -253,6 +300,7 @@ export const Form = ({
               control={control}
               placeholder="Input total youth participants..."
               error={errors.youth}
+              required
             />
           </Box>
 
@@ -263,6 +311,7 @@ export const Form = ({
               control={control}
               placeholder="Input total disability participants..."
               error={errors.disability}
+              required
             />
 
             <ControlledFieldContainer
@@ -271,6 +320,7 @@ export const Form = ({
               control={control}
               placeholder="Input total widow participants..."
               error={errors.widow}
+              required
             />
           </Box>
         </Box>
@@ -301,6 +351,7 @@ export const Form = ({
                   control={control}
                   placeholder="Input total pretest participant...."
                   error={errors.pretest}
+                  required
                 />
                 <ControlledFieldContainer
                   label="Post-Test"
@@ -308,6 +359,7 @@ export const Form = ({
                   control={control}
                   placeholder="Input total posttest participant...."
                   error={errors.posttest}
+                  required
                 />
               </Box>
             </Box>
@@ -336,6 +388,7 @@ export const Form = ({
               control={control}
               placeholder="Input total government participants..."
               error={errors.government}
+              required
             />
 
             <ControlledFieldContainer
@@ -344,6 +397,7 @@ export const Form = ({
               control={control}
               placeholder="Input total academics participants..."
               error={errors.academics}
+              required
             />
           </Box>
           <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', mb: 3 }}>
@@ -353,6 +407,7 @@ export const Form = ({
               control={control}
               placeholder="Input total private sector participants..."
               error={errors.privateSector}
+              required
             />
 
             <ControlledFieldContainer
@@ -361,6 +416,7 @@ export const Form = ({
               control={control}
               placeholder="Input total local community participants..."
               error={errors.localCommunity}
+              required
             />
           </Box>
 
@@ -371,6 +427,7 @@ export const Form = ({
               control={control}
               placeholder="Input total NGO participants..."
               error={errors.ngo}
+              required
             />
 
             <ControlledFieldContainer
@@ -379,6 +436,7 @@ export const Form = ({
               control={control}
               placeholder="Input total others participants..."
               error={errors.others}
+              required
             />
           </Box>
         </Box>

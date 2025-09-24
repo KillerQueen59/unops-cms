@@ -5,6 +5,7 @@ import { Box, IconButton, Typography, Chip, Button } from '@mui/material';
 import { CaretLeftIcon } from '@phosphor-icons/react';
 import { TrashIcon } from '@phosphor-icons/react/dist/ssr';
 import { EditIcon } from 'lucide-react';
+import { trainingTypeOptions } from '../../constants';
 export const Header = ({
   breadcrumbs,
   trainingData,
@@ -108,7 +109,9 @@ export const Header = ({
             variant="body1"
             sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
           >
-            {trainingData.trainingType}
+            {trainingTypeOptions.find(
+              (option) => option.value === trainingData.trainingType
+            )?.label || 'N/A'}
           </Typography>
         </Box>
 

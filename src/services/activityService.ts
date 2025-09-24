@@ -37,7 +37,6 @@ export interface CreateActivityData {
   status: 'not yet' | 'ongoing' | 'completed';
   type: 'training' | 'workshop' | 'demosite';
   percentage: number;
-  category?: string;
 }
 
 export interface UpdateActivityData {
@@ -49,7 +48,6 @@ export interface UpdateActivityData {
   status?: 'not yet' | 'ongoing' | 'completed';
   type?: 'training' | 'workshop' | 'demosite';
   percentage?: number;
-  category?: string;
 }
 
 // Pagination interfaces
@@ -254,16 +252,14 @@ export const createActivityFormData = (
   if (data.end_date) formData.append('end_date', data.end_date);
   if (data.status) formData.append('status', data.status);
   if (data.type) formData.append('type', data.type);
-  if (data.category) {
-    formData.append('category', 'capacity_building'); //DUMMY
-  }
+
   if (data.percentage !== undefined)
     formData.append('percentage', data.percentage.toString());
 
   // Add existing files (URLs only) for updates
   if (existingFiles && existingFiles.length > 0) {
     existingFiles.forEach((file) => {
-      formData.append('existingFiles', file.url);
+      formData.append('existingFileUrls', file.url);
     });
   }
 
@@ -273,8 +269,6 @@ export const createActivityFormData = (
       formData.append('files', file);
     });
   }
-
-  console.log('formData', formData);
 
   return formData;
 };

@@ -51,9 +51,29 @@ export const useDemositePageImpl = () => {
   } = useDemosites(apiFilters);
 
   // Extract demosites and pagination info from response
-  const demosites = demositesResponse?.data || [];
-  const totalItems = demositesResponse?.totalData || 0;
-  const totalPages = demositesResponse?.totalPages || 0;
+  // Filter demosites locally by search query (title)
+  const filteredDemosites = useMemo(() => {
+    const allDemosites = demositesResponse?.data || [];
+    if (!searchQuery.trim()) {
+      return allDemosites;
+    }
+    return allDemosites.filter((demosite) =>
+      demosite.title.toLowerCase().includes(searchQuery.toLowerCase().trim())
+    );
+  }, [demositesResponse?.data, searchQuery]);
+
+  // Calculate pagination for filtered results
+  const totalItems = filteredDemosites.length;
+  const totalPages = Math.ceil(totalItems / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedDemosites = filteredDemosites.slice(startIndex, endIndex);
+
+  // Use paginated demosites for display
+  const demosites = paginatedDemosites;
+
+  // Ensure demosites is always an array
+  const safeDemosites = Array.isArray(demosites) ? demosites : [];
 
   // Only fetch demosite detail when a demosite is selected
   const { data: demositeDetail, isLoading: isLoadingDemosite } = useDemosite(
@@ -64,9 +84,6 @@ export const useDemositePageImpl = () => {
   );
 
   const deleteDemositeMutation = useDeleteDemosite();
-
-  // Ensure demosites is always an array
-  const safeDemosites = Array.isArray(demosites) ? demosites : [];
 
   // Reset page when search query changes
   useEffect(() => {

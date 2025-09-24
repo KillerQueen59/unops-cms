@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import Image from 'next/image';
+import NextImage from 'next/image';
 import {
   Box,
   Button,
@@ -17,14 +17,13 @@ import {
   Autocomplete,
   TextField,
 } from '@mui/material';
-import { Delete as DeleteIcon } from '@mui/icons-material';
-import { File } from '@phosphor-icons/react';
+import { File as FileIcon, Trash } from '@phosphor-icons/react';
 import {
   ConfirmationModal,
   ControlledFieldContainer,
   TextAreaFieldContainer,
 } from '@/components';
-import { DemositeType } from '@/types/demosite';
+import { DemositeType, DemositeData } from '@/types/demosite';
 import {
   DemositeEditFormData,
   demositeEditFormSchema,
@@ -36,16 +35,24 @@ import { useUpdateDemosite } from '@/hooks/useDemositeData';
 import { UpdateDemositeData } from '@/services/demositeService';
 import toast from 'react-hot-toast';
 
+interface ExistingPhoto {
+  url: string;
+  isExisting: true;
+}
+
+type UnifiedPhoto = File | ExistingPhoto;
+
 export const Form = ({
   villageOptions,
   isLoading,
+  demositeData,
 }: {
   villageOptions: { label: string; value: string }[];
   isLoading: boolean;
+  demositeData?: DemositeData;
 }) => {
-  const { selectedDemosite, setPage, updateBreadcrumbs } = useDemositeStore();
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
+  const { setPage, updateBreadcrumbs } = useDemositeStore();
+  const [allPhotos, setAllPhotos] = useState<UnifiedPhoto[]>([]);
   const [headerPhoto, setHeaderPhoto] = useState<File | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [showModalConfirm, setShowModalConfirm] = useState(false);
@@ -72,30 +79,66 @@ export const Form = ({
 
   // Populate form with existing data
   useEffect(() => {
-    if (selectedDemosite) {
+    if (demositeData) {
       reset({
-        title: selectedDemosite.title || '',
-        type: selectedDemosite.type || DemositeType.LocalHeroes,
-        name: selectedDemosite.name || '',
-        story: selectedDemosite.story || '',
-        link: selectedDemosite.link || undefined,
+        title: demositeData.title || '',
+        type: demositeData.type || DemositeType.LocalHeroes,
+        name: demositeData.name || '',
+        story: demositeData.story || '',
+        link: demositeData.link || undefined,
         header: undefined,
         photos: [],
       });
 
       // Load existing documentation photos (excluding header photo)
-      if (selectedDemosite.photos && selectedDemosite.photos.length > 1) {
-        const existingPhotoUrls = selectedDemosite.photos.slice(1);
-        setExistingPhotos(existingPhotoUrls);
+      if (demositeData.photos && demositeData.photos.length > 0) {
+        const existingPhotoObjects: ExistingPhoto[] = demositeData.photos.map(
+          (url: string) => ({
+            url,
+            isExisting: true,
+          })
+        );
+
+        setAllPhotos(existingPhotoObjects);
       } else {
-        setExistingPhotos([]);
+        console.log('No existing photos found');
+        setAllPhotos([]);
       }
     }
-  }, [selectedDemosite, reset]);
+  }, [demositeData, reset]);
 
   const name = watch('name');
   const type = watch('type');
   const updateMutation = useUpdateDemosite();
+
+  // Helper functions for unified photo handling
+  const isExistingPhoto = (photo: UnifiedPhoto): photo is ExistingPhoto => {
+    return 'isExisting' in photo && photo.isExisting === true;
+  };
+  const getPhotoTitle = (photo: UnifiedPhoto, index: number): string => {
+    return isExistingPhoto(photo)
+      ? `Documentation Photo ${index + 1}`
+      : photo.name;
+  };
+
+  const getPhotoId = (photo: UnifiedPhoto, index: number): string => {
+    if (isExistingPhoto(photo)) {
+      return photo.url;
+    } else {
+      return `${photo.name}-${photo.lastModified}-${index}`;
+    }
+  };
+
+  // Sync photos with form whenever allPhotos changes
+  useEffect(() => {
+    const newPhotos = allPhotos.filter(
+      (photo): photo is File => !isExistingPhoto(photo)
+    );
+
+    console.log('newPhotos', newPhotos);
+
+    setValue('photos', newPhotos, { shouldValidate: true });
+  }, [allPhotos, setValue]);
 
   // Display validation errors
   useEffect(() => {
@@ -140,11 +183,10 @@ export const Form = ({
           return validTypes.includes(file.type) && file.size <= maxSize;
         });
 
-        setUploadedFiles((prev) => [...prev, ...validFiles]);
-        setValue('photos', [...uploadedFiles, ...validFiles]);
+        setAllPhotos((prev) => [...prev, ...validFiles]);
       }
     },
-    [setValue, uploadedFiles]
+    [setValue]
   );
 
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -156,6 +198,8 @@ export const Form = ({
     e.preventDefault();
     setIsDragOver(false);
   }, []);
+
+  console.log('errors', errors);
 
   const handleFileInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -189,30 +233,16 @@ export const Form = ({
             return validTypes.includes(file.type) && file.size <= maxSize;
           });
 
-          setUploadedFiles((prev) => [...prev, ...validFiles]);
-          setValue('photos', [...uploadedFiles, ...validFiles]);
+          setAllPhotos((prev) => [...prev, ...validFiles]);
         }
       }
     },
-    [setValue, uploadedFiles, setHeaderPhoto]
+    [setValue, setHeaderPhoto]
   );
 
-  const removeFile = useCallback(
-    (index: number) => {
-      const newFiles = uploadedFiles.filter((_, i) => i !== index);
-      setUploadedFiles(newFiles);
-      setValue('photos', newFiles);
-    },
-    [uploadedFiles, setValue]
-  );
-
-  const removeExistingPhoto = useCallback(
-    (index: number) => {
-      const newExistingPhotos = existingPhotos.filter((_, i) => i !== index);
-      setExistingPhotos(newExistingPhotos);
-    },
-    [existingPhotos]
-  );
+  const removePhoto = useCallback((index: number) => {
+    setAllPhotos((prev) => prev.filter((_, i) => i !== index));
+  }, []);
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
@@ -224,13 +254,13 @@ export const Form = ({
 
   const getFileIcon = (fileType: string) => {
     if (fileType.includes('image')) {
-      return <File size={24} color="#F59E0B" weight="fill" />;
+      return <FileIcon size={24} color="#F59E0B" weight="fill" />;
     } else if (fileType.includes('pdf')) {
-      return <File size={24} color="#EF4444" weight="fill" />;
+      return <FileIcon size={24} color="#EF4444" weight="fill" />;
     } else if (fileType.includes('word') || fileType.includes('document')) {
-      return <File size={24} color="#3B82F6" weight="fill" />;
+      return <FileIcon size={24} color="#3B82F6" weight="fill" />;
     }
-    return <File size={24} color="#6B7280" weight="fill" />;
+    return <FileIcon size={24} color="#6B7280" weight="fill" />;
   };
 
   const formatDate = (date: Date) => {
@@ -254,24 +284,34 @@ export const Form = ({
   };
 
   const onSubmit = async (data: DemositeEditFormData) => {
-    if (!selectedDemosite) return;
+    if (!demositeData) return;
 
     try {
-      const allPhotos = [...data.photos];
-      const existingPhotoFiles = existingPhotos.map((photoUrl) => {
-        return photoUrl as unknown as File;
+      // Separate existing photos (URLs) from new photos (Files)
+      const existingPhotoUrls: string[] = [];
+      const newPhotoFiles: File[] = [];
+
+      allPhotos.forEach((photo: UnifiedPhoto) => {
+        if (isExistingPhoto(photo)) {
+          existingPhotoUrls.push(photo.url);
+        } else {
+          newPhotoFiles.push(photo);
+        }
       });
 
       const form: UpdateDemositeData = {
-        id: selectedDemosite.id,
+        id: demositeData.id,
         header: data.header || undefined,
         title: data.title,
         type: data.type === DemositeType.LocalHeroes ? 'hero' : 'location',
         name: data.name,
         story: data.story,
         link: data.link,
-        photos: [...existingPhotoFiles, ...allPhotos],
+        photos: newPhotoFiles,
+        existingPhotoUrls,
       };
+      console.log('form data to submit', allPhotos, newPhotoFiles);
+
       await updateMutation.mutateAsync({ demositeData: form });
       handleBack();
     } catch (error) {
@@ -288,6 +328,13 @@ export const Form = ({
 
   const handleSubmitForm = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const totalPhotos = allPhotos.length;
+    if (totalPhotos === 0) {
+      toast.error('At least one photo is required');
+      return;
+    }
+
     handleSubmit(() => {
       setShowModalConfirm(true);
     })();
@@ -327,7 +374,7 @@ export const Form = ({
             </Typography>
 
             {/* Existing Header Photo Preview */}
-            {selectedDemosite?.header && !headerPhoto && (
+            {demositeData?.header && !headerPhoto && (
               <Box sx={{ mb: 2 }}>
                 <Typography
                   variant="body2"
@@ -350,7 +397,7 @@ export const Form = ({
                     sx={{
                       width: '100%',
                       height: '100%',
-                      backgroundImage: `url(http://${selectedDemosite.header})`,
+                      backgroundImage: `url(${demositeData.header})`,
                       backgroundSize: 'cover',
                       backgroundPosition: 'center',
                     }}
@@ -404,7 +451,7 @@ export const Form = ({
                 onChange={handleFileInput}
                 style={{ display: 'none' }}
               />
-              <Image
+              <NextImage
                 src="/cloud.svg"
                 alt="Upload"
                 width={64}
@@ -416,7 +463,7 @@ export const Form = ({
                 color={isDragOver ? '#0EA5E9' : '#6B7280'}
                 sx={{ mb: 1 }}
               >
-                {selectedDemosite?.header
+                {demositeData?.header
                   ? 'Drag and drop or browse to replace header photo'
                   : 'Drag and drop or browse your file here'}
               </Typography>
@@ -449,7 +496,7 @@ export const Form = ({
                     gap: 2,
                   }}
                 >
-                  <File size={24} color="#F59E0B" weight="fill" />
+                  <FileIcon size={24} color="#F59E0B" weight="fill" />
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
                       {headerPhoto.name}
@@ -467,7 +514,7 @@ export const Form = ({
                     size="small"
                     sx={{ color: '#EF4444' }}
                   >
-                    <DeleteIcon fontSize="small" />
+                    <Trash size={16} />
                   </IconButton>
                 </Box>
               </Box>
@@ -610,20 +657,20 @@ export const Form = ({
               Documentation
             </Typography>
 
-            {/* Show existing photos with preview */}
-            {existingPhotos.length > 0 && (
+            {/* Show all photos with unified handling */}
+            {allPhotos.length > 0 && (
               <Box sx={{ mb: 3 }}>
                 <Typography
                   variant="body2"
                   color="text.secondary"
                   sx={{ mb: 2 }}
                 >
-                  Current Documentation Photos:
+                  Documentation Photos:
                 </Typography>
                 <List sx={{ bgcolor: 'background.paper', borderRadius: 2 }}>
-                  {existingPhotos.map((photoUrl, index) => (
+                  {allPhotos.map((photo, index) => (
                     <ListItem
-                      key={`existing-${index}`}
+                      key={getPhotoId(photo, index)}
                       sx={{
                         border: '1px solid #E5E7EB',
                         borderRadius: '8px',
@@ -632,18 +679,24 @@ export const Form = ({
                         alignItems: 'center',
                       }}
                     >
-                      <ListItemIcon sx={{ minWidth: 60 }}>
-                        <Box
-                          sx={{
-                            width: 48,
-                            height: 48,
-                            borderRadius: '6px',
-                            backgroundImage: `url(http://${photoUrl})`,
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center',
-                            border: '1px solid #E5E7EB',
-                          }}
-                        />
+                      <ListItemIcon
+                        sx={{ minWidth: isExistingPhoto(photo) ? 60 : 40 }}
+                      >
+                        {isExistingPhoto(photo) ? (
+                          <Box
+                            sx={{
+                              width: 48,
+                              height: 48,
+                              borderRadius: '6px',
+                              backgroundImage: `url(${photo.url})`,
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'center',
+                              border: '1px solid #E5E7EB',
+                            }}
+                          />
+                        ) : (
+                          getFileIcon(photo.type)
+                        )}
                       </ListItemIcon>
                       <ListItemText
                         primary={
@@ -651,74 +704,23 @@ export const Form = ({
                             variant="body2"
                             sx={{ fontWeight: 'medium' }}
                           >
-                            Documentation Photo {index + 1}
+                            {getPhotoTitle(photo, index)}
                           </Typography>
                         }
                         secondary={
                           <Typography variant="caption" color="text.secondary">
-                            Existing image
+                            {isExistingPhoto(photo)
+                              ? 'Existing image'
+                              : `New Image `}
                           </Typography>
                         }
                       />
                       <IconButton
-                        onClick={() => removeExistingPhoto(index)}
+                        onClick={() => removePhoto(index)}
                         size="small"
                         sx={{ color: '#EF4444' }}
                       >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </ListItem>
-                  ))}
-                </List>
-              </Box>
-            )}
-
-            {/* Show uploaded files list */}
-            {uploadedFiles.length > 0 && (
-              <Box sx={{ mb: 3 }}>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mb: 2 }}
-                >
-                  New Documentation Photos:
-                </Typography>
-                <List sx={{ bgcolor: 'background.paper', borderRadius: 2 }}>
-                  {uploadedFiles.map((file, index) => (
-                    <ListItem
-                      key={`new-${index}`}
-                      sx={{
-                        border: '1px solid #E5E7EB',
-                        borderRadius: '8px',
-                        mb: 1,
-                        '&:last-child': { mb: 0 },
-                      }}
-                    >
-                      <ListItemIcon sx={{ minWidth: 40 }}>
-                        {getFileIcon(file.type)}
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={
-                          <Typography
-                            variant="body2"
-                            sx={{ fontWeight: 'medium' }}
-                          >
-                            {file.name}
-                          </Typography>
-                        }
-                        secondary={
-                          <Typography variant="caption" color="text.secondary">
-                            {formatFileSize(file.size)} •{' '}
-                            {formatDate(new Date())}
-                          </Typography>
-                        }
-                      />
-                      <IconButton
-                        onClick={() => removeFile(index)}
-                        size="small"
-                        sx={{ color: '#EF4444' }}
-                      >
-                        <DeleteIcon fontSize="small" />
+                        <Trash size={16} />
                       </IconButton>
                     </ListItem>
                   ))}
@@ -756,7 +758,7 @@ export const Form = ({
                 onChange={handleFileInput}
                 style={{ display: 'none' }}
               />
-              <Image
+              <NextImage
                 src="/cloud.svg"
                 alt="Upload"
                 width={64}

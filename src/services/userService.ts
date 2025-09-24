@@ -1,21 +1,20 @@
 import { apiClient } from '@/lib/api';
 import { PaginatedResponse } from '@/types/common';
-import { User, UserRole, UserStatus, UserHistoryLog } from '@/types/user';
+import { User, UserRole, UserStatus } from '@/types/user';
 
 // User API interfaces
 export interface CreateUserData {
   email: string;
   password: string;
   name: string;
-  role?: UserRole;
+  roleId?: string;
 }
 
 export interface UpdateUserData {
   id: string;
   name?: string;
   email?: string;
-  role?: UserRole;
-  status?: UserStatus;
+  roleId?: string;
 }
 
 // Pagination interfaces
@@ -240,6 +239,28 @@ export const userService = {
       await apiClient.delete(`/user/${id}`);
     } catch (error) {
       console.error('Failed to delete user:', error);
+      throw error;
+    }
+  },
+
+  async changePassword(id: string, password: string): Promise<{
+    status: boolean;
+    message: string;
+  }> {
+    try {
+      const response = await apiClient.patch<{
+        status: boolean;
+        message: string;
+      }>(`/user/${id}/password`, {
+        password
+      });
+
+      return {
+        status: response.status,
+        message: response.message,
+      };
+    } catch (error) {
+      console.error('Failed to change password:', error);
       throw error;
     }
   },

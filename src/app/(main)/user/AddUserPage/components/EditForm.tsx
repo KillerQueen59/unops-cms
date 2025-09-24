@@ -4,10 +4,17 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UserUpdateData, userUpdateSchema } from '@/types/userForm';
 import { User } from '@/types/user';
+import { Role } from '@/types/role';
 import { useUpdateUser } from '@/hooks/useUserData';
 import { useUserStore } from '@/stores/userStore';
 
-export const EditForm = ({ selectedUser }: { selectedUser: User }) => {
+interface EditFormProps {
+  selectedUser: User;
+  roles: Role[];
+  rolesLoading: boolean;
+}
+
+export const EditForm = ({ selectedUser }: EditFormProps) => {
   const { navigateToList } = useUserStore();
   const updateUserMutation = useUpdateUser();
 

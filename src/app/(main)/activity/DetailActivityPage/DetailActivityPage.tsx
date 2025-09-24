@@ -117,9 +117,7 @@ export const DetailActivityPage = () => {
           title: file.title,
           documentName: file.title,
           fileName: file.title,
-          fileUrl: file.url.startsWith('http')
-            ? file.url
-            : `http://${file.url}`,
+          fileUrl: file.url.startsWith('http') ? file.url : `${file.url}`,
           mimetype: file.mimetype,
           areaId: '', // Add required fields with default values
           updatedAt: new Date().toISOString(),

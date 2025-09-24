@@ -11,7 +11,7 @@ export const AddVillagePage = ({
 }: {
   villageCategories: { _id: string; name: string }[];
 }) => {
-  const { state, action } = useAddVillagePageImpl();
+  const { state, action } = useAddVillagePageImpl(villageCategories);
   const {
     control,
     isEditMode,
@@ -36,6 +36,7 @@ export const AddVillagePage = ({
     handleDeleteCancel,
     setValue,
     watch,
+    validateLocation,
   } = action;
 
   return (
@@ -59,6 +60,7 @@ export const AddVillagePage = ({
           isEditMode={isEditMode}
           selectedData={selectedVillage}
           villageCategories={villageCategories}
+          validateLocation={validateLocation}
         />
       </Box>
 

@@ -31,10 +31,9 @@ interface MapPickerProps {
   onCoordinateSelect: (lat: number, lng: number) => void;
   disabled?: boolean;
 
-  /** NEW: Sumsel province + regency polygons */
   provinceGeojson?: FeatureCollection<Polygon | MultiPolygon>;
-  /** NEW: selected regency code (e.g., "16.07") */
   regencyCode?: string;
+  error: boolean;
 }
 
 const { BaseLayer } = LayersControl;
@@ -90,8 +89,8 @@ export const MapPicker: React.FC<MapPickerProps> = ({
   disabled = false,
   provinceGeojson,
   regencyCode,
+  error = false,
 }) => {
-  // 👉 If no latitude/longitude passed, compute from provinceGeojson
   const defaultCenter = useMemo<[number, number]>(() => {
     if (provinceGeojson) {
       try {
@@ -180,9 +179,12 @@ export const MapPicker: React.FC<MapPickerProps> = ({
             : latitude != null && longitude != null
               ? '#374151'
               : '#9CA3AF',
-          borderColor: disabled ? '#e5e7eb' : '#d1d5db',
+          borderColor: disabled ? '#e5e7eb' : error ? '#EF4444' : '#d1d5db',
           backgroundColor: disabled ? '#f9fafb' : '#fff',
-          '&:hover': { borderColor: '#6B7280', backgroundColor: '#f9fafb' },
+          '&:hover': {
+            borderColor: disabled ? '#e5e7eb' : !error ? '#EF4444' : '#6B7280',
+            backgroundColor: '#f9fafb',
+          },
         }}
       >
         <Box

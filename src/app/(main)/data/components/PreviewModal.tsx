@@ -13,6 +13,7 @@ import {
 } from '@mui/icons-material';
 import toast from 'react-hot-toast';
 import { DataFile } from '@/types/data';
+import { southSumatraRegencies } from '../../village/constants';
 
 interface PreviewModalProps {
   open: boolean;
@@ -63,7 +64,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
       ? file.fileUrl.replace('https://', 'http://')
       : file.fileUrl.startsWith('http')
         ? file.fileUrl
-        : `http://${file.fileUrl}`;
+        : `${file.fileUrl}`;
 
     if (file.mimetype.startsWith('image/')) {
       return (
@@ -213,9 +214,6 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
               </Typography>
 
               <Typography variant="body2" sx={{ color: '#6B7280', mb: 1 }}>
-                <strong>File Name:</strong> {getFileName()}
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#6B7280', mb: 1 }}>
                 <strong>Created:</strong>{' '}
                 {new Date(file.createdAt).toLocaleDateString('id-ID', {
                   day: 'numeric',
@@ -223,14 +221,23 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
                   year: 'numeric',
                 })}
               </Typography>
-              {file.uploadedBy && (
-                <Typography variant="body2" sx={{ color: '#6B7280', mb: 1 }}>
-                  <strong>Uploaded by:</strong> {file.uploadedBy}
-                </Typography>
-              )}
-              {file.description && (
+              <Typography variant="body2" sx={{ color: '#6B7280', mb: 1 }}>
+                <strong>File Type:</strong>{' '}
+                {file.mimetype.split('/')[1]?.toUpperCase()}{' '}
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#6B7280', mb: 1 }}>
+                <strong>Type :</strong>{' '}
+                {file.areaId === ''
+                  ? 'Other'
+                  : southSumatraRegencies.find((reg) => reg.code == file.areaId)
+                      ?.name || 'Other'}
+              </Typography>
+              {file.link && (
                 <Typography variant="body2" sx={{ color: '#6B7280' }}>
-                  <strong>Description:</strong> {file.description}
+                  <strong>Link:</strong>{' '}
+                  <a href={file.link} target="_blank" rel="noopener noreferrer">
+                    {file.link}
+                  </a>
                 </Typography>
               )}
             </Box>

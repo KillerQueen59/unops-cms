@@ -14,7 +14,7 @@ import {
   useTrainingLivelihood,
 } from '@/hooks/useGlobalConfigData';
 import { TrainingType } from './constants';
-import { useVillages } from '@/hooks/useVillageData';
+import { useGlobalVillages } from '@/hooks/useGlobalVillages';
 
 export const useTrainingPageImpl = () => {
   const {
@@ -110,15 +110,8 @@ export const useTrainingPageImpl = () => {
   // Ensure trainings is always an array
   const safeTrainings = Array.isArray(trainings) ? trainings : [];
 
-  // fetch village
-  const { data: villagesResponse, isLoading: isLoadingVillages } =
-    useVillages();
-  const villages = villagesResponse?.data || [];
-
-  const villageOptions = villages.map((village) => ({
-    label: village.villageName,
-    value: village.villageCode,
-  }));
+  // fetch village options from global store
+  const { villageOptions, isLoading: isLoadingVillages } = useGlobalVillages();
 
   // Reset page when search query changes
   useEffect(() => {
@@ -211,6 +204,7 @@ export const useTrainingPageImpl = () => {
     onView: handleView,
     onEdit: handleEdit,
     onDelete: handleDelete,
+    villageOptions,
   });
 
   const state = {

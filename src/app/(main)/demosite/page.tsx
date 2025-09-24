@@ -68,7 +68,7 @@ export default function DemositePage() {
   const { removeFilter, clearFilters } = useDemositeStore();
 
   const getFilterLabel = (filterType: string, filterValue: string) => {
-    return `${filterType}: ${filterValue}`;
+    return `Type: ${filterValue === 'hero' ? 'Local Heroes' : 'Story of Village'}`;
   };
 
   // Helper function to remove individual filter

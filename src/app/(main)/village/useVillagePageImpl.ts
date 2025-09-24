@@ -105,8 +105,10 @@ export const useVillagePageImpl = () => {
     if (villageDetail && selectedVillageId && !isLoadingVillage) {
       if (isEdit) {
         navigateToEdit(villageDetail);
+        setSelectedCategory(villageDetail.villageCategory.id);
       } else {
         navigateToDetail(villageDetail);
+        setSelectedCategory(villageDetail.villageCategory.id);
       }
 
       setSelectedVillageId(null);

@@ -72,7 +72,7 @@ export const useFileDownload = () => {
     try {
       const fullUrl = file.fileUrl.startsWith('http')
         ? file.fileUrl
-        : `http://${file.fileUrl}`;
+        : `${file.fileUrl}`;
 
       // Try direct download first
       const response = await fetch(fullUrl, {

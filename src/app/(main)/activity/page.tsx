@@ -63,6 +63,11 @@ export default function ActivityPage() {
         return `Category: ${filterValue}`;
       case 'status':
         return `Status: ${filterValue}`;
+      case 'village':
+        return `Village: ${
+          villageOptions.find((v) => v.value === filterValue)?.label ||
+          `${filterValue}`
+        }`;
       case 'startDate':
         return `Start Date: ${new Date(filterValue).toLocaleDateString()}`;
       case 'endDate':

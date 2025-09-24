@@ -4,6 +4,11 @@ import { ActivityData } from '@/types/activity';
 import { Box, Button, Chip, IconButton, Typography } from '@mui/material';
 import { CaretLeftIcon, TrashIcon } from '@phosphor-icons/react';
 import { EditIcon } from 'lucide-react';
+import {
+  VillageCategory,
+  VillageCategoryLabel,
+} from '@/app/(main)/village/constants';
+import dayjs from 'dayjs';
 
 export const Header = ({
   breadcrumbs,
@@ -154,7 +159,9 @@ export const Header = ({
             variant="body1"
             sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
           >
-            {category}
+            {category === VillageCategory.Category1
+              ? VillageCategoryLabel.Category1
+              : VillageCategoryLabel.Category2}
           </Typography>
         </Box>
 
@@ -184,7 +191,7 @@ export const Header = ({
             variant="body1"
             sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
           >
-            {activityData.startDate}
+            {dayjs(activityData.startDate).format('DD MMM YYYY')}
           </Typography>
         </Box>
 
@@ -199,7 +206,7 @@ export const Header = ({
             variant="body1"
             sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
           >
-            {activityData.endDate}
+            {dayjs(activityData.endDate).format('DD MMM YYYY')}
           </Typography>
         </Box>
 

@@ -21,6 +21,7 @@ import { useAuthStatus } from '@/hooks/useAuth';
 import { login } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { useGlobalVillages } from '@/hooks/useGlobalVillages';
 
 // Login form schema
 const loginSchema = z.object({
@@ -45,6 +46,8 @@ export default function LoginPage() {
   const handleMouseDownPassword = (event: { preventDefault: () => void }) => {
     event.preventDefault();
   };
+
+  const { setForceFetch } = useGlobalVillages();
 
   const {
     control,
@@ -72,6 +75,9 @@ export default function LoginPage() {
     try {
       // Use the login function from api.ts
       await login(data.email, data.password);
+
+      // Force fetch villages data on successful login
+      setForceFetch(true);
 
       toast.success('Login successful!');
       router.push('/training');

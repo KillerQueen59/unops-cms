@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Box, Typography, Button, IconButton } from '@mui/material';
 import { CaretLeftIcon, TrashIcon } from '@phosphor-icons/react';
-import { EditIcon } from 'lucide-react';
-import { BreadcrumbItem, useUserStore } from '@/stores/userStore';
+import { EditIcon, Key } from 'lucide-react';
+import { BreadcrumbItem } from '@/stores/userStore';
 import { CustomBreadcrumbs } from '@/components';
 import { User } from '@/types/user';
 
@@ -14,12 +14,14 @@ export const Header = ({
   handleBack,
   handleDelete,
   handleEdit,
+  handleChangePassword,
 }: {
   breadcrumbs: BreadcrumbItem[];
   userData: User;
   handleBack: () => void;
   handleDelete: () => void;
   handleEdit: () => void;
+  handleChangePassword: () => void;
 }) => {
   return (
     <Box>
@@ -132,6 +134,20 @@ export const Header = ({
           px: 2,
         }}
       >
+        <Button
+          variant="outlined"
+          color="info"
+          startIcon={<Key />}
+          onClick={handleChangePassword}
+          sx={{
+            borderRadius: '12px',
+            width: '180px',
+            minHeight: '50px',
+            px: 3,
+          }}
+        >
+          Change Password
+        </Button>
         <Button
           variant="outlined"
           color="error"

@@ -10,6 +10,7 @@ import {
 } from '@/services/userService';
 import { PaginatedResponse } from '@/types/common';
 import toast from 'react-hot-toast';
+import { Role } from '@/types/role';
 
 // Query Keys
 export const userKeys = {
@@ -29,7 +30,7 @@ export const useUsers = (params?: PaginationParams) => {
       try {
         const result = await userService.getUsers(params);
         return result;
-      } catch (error) {
+      } catch {
         toast.error('Failed to fetch users');
         return {
           data: [],
@@ -60,11 +61,18 @@ export const useCreateUser = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ userData }: { userData: UserFormData }) => {
+    mutationFn: ({
+      userData,
+      roles,
+    }: {
+      userData: UserFormData;
+      roles: Role[];
+    }) => {
       const createData: CreateUserData = {
         name: userData.name,
         email: userData.email,
-        password: userData.password || 'defaultPassword123', // You might want to handle this differently
+        password: userData.password,
+        roleId: roles.find((role) => role.name === userData.role)?.id || '',
       };
       return userService.createUser(createData);
     },
@@ -93,8 +101,7 @@ export const useUpdateUser = () => {
         id,
         name: userData.name,
         email: userData.email,
-        role: userData.role,
-        status: userData.status,
+        roleId: userData.role,
       };
       return userService.updateUser(updateData);
     },
@@ -121,6 +128,19 @@ export const useDeleteUser = () => {
     },
     onError: (error: any) => {
       toast.error(error?.message || 'Failed to delete user');
+    },
+  });
+};
+
+export const useChangePassword = () => {
+  return useMutation({
+    mutationFn: ({ id, password }: { id: string; password: string }) =>
+      userService.changePassword(id, password),
+    onSuccess: () => {
+      toast.success('Password changed successfully');
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || 'Failed to change password');
     },
   });
 };

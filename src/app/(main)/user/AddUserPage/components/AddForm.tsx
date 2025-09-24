@@ -12,11 +12,17 @@ import {
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UserFormData, userFormSchema } from '@/types/userForm';
-import { UserRole } from '@/types/user';
+import { Role } from '@/types/role';
 import { useCreateUser } from '@/hooks/useUserData';
 import { useUserStore } from '@/stores/userStore';
+import { UserRole } from '@/types/user';
 
-export const AddForm = () => {
+interface AddFormProps {
+  roles: Role[];
+  rolesLoading: boolean;
+}
+
+export const AddForm = ({ roles }: AddFormProps) => {
   const { navigateToList } = useUserStore();
   const createUserMutation = useCreateUser();
 
@@ -30,7 +36,7 @@ export const AddForm = () => {
     defaultValues: {
       name: '',
       email: '',
-      role: UserRole.ADMIN,
+      role: UserRole.ADMIN.toLowerCase(),
       password: '',
       confirmPassword: '',
     },
@@ -40,6 +46,7 @@ export const AddForm = () => {
     try {
       await createUserMutation.mutateAsync({
         userData: data,
+        roles: roles,
       });
       navigateToList();
     } catch (error) {
@@ -119,51 +126,6 @@ export const AddForm = () => {
               )}
             />
           </Box>
-        </Box>
-
-        {/* Role Row */}
-        <Box sx={{ display: 'flex', gap: 3, mb: 3 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography
-              variant="subtitle1"
-              sx={{ mb: 1, fontWeight: 'medium' }}
-            >
-              Role
-            </Typography>
-            <Controller
-              name="role"
-              control={control}
-              render={({ field }) => (
-                <FormControl fullWidth error={!!errors.role}>
-                  <Select
-                    {...field}
-                    displayEmpty
-                    sx={{
-                      borderRadius: '8px',
-                    }}
-                  >
-                    <MenuItem value="" disabled>
-                      Choose role...
-                    </MenuItem>
-                    <MenuItem value={UserRole.SUPER_ADMIN}>
-                      Super Admin
-                    </MenuItem>
-                    <MenuItem value={UserRole.ADMIN}>Admin</MenuItem>
-                  </Select>
-                  {errors.role && (
-                    <Typography
-                      variant="caption"
-                      color="error"
-                      sx={{ mt: 0.5 }}
-                    >
-                      {errors.role.message}
-                    </Typography>
-                  )}
-                </FormControl>
-              )}
-            />
-          </Box>
-          <Box sx={{ flex: 1 }}></Box> {/* Empty space for layout */}
         </Box>
 
         {/* Password Row */}

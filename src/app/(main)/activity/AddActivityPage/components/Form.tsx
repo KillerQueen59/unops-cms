@@ -73,6 +73,7 @@ export const Form = ({
 
   const [isDragOver, setIsDragOver] = useState(false);
   const selectedVillage = watch('villageId');
+
   const currentStatus = watch('status');
   const startDate = watch('startDate');
   const endDate = watch('endDate');
@@ -300,10 +301,6 @@ export const Form = ({
               }
               onChange={(event, newValue) => {
                 setValue('villageId', newValue?.value || '');
-                const category = newValue?.category || '';
-                if (category) {
-                  setValue('category', category);
-                }
               }}
               disabled={isLoadingVillage}
               renderInput={(params) => (
@@ -313,7 +310,13 @@ export const Form = ({
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       borderRadius: '12px',
-                      backgroundColor: '#fff',
+                      backgroundColor: !selectedVillage ? '#f9fafb' : '#fff',
+                      '& fieldset': {
+                        borderColor:
+                          !!errors.villageId && !selectedVillage
+                            ? '#EF4444'
+                            : undefined,
+                      },
                     },
                   }}
                 />
@@ -337,6 +340,18 @@ export const Form = ({
                 },
               }}
             />
+            {!!errors.villageId && !selectedVillage && (
+              <Typography
+                variant="caption"
+                sx={{
+                  color: '#EF4444',
+                  mt: 1,
+                  display: 'block',
+                }}
+              >
+                Please select a village
+              </Typography>
+            )}
           </ControlledFieldContainer>
         </Box>
 

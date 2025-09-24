@@ -281,9 +281,18 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                   onChange={(e) =>
                     handleLocalFilterChange('startDate', e.target.value)
                   }
+                  onClick={(e) => {
+                    const input = e.currentTarget.querySelector(
+                      'input[type="date"]'
+                    ) as HTMLInputElement;
+                    if (input) {
+                      input.showPicker();
+                    }
+                  }}
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       borderRadius: '8px',
+                      cursor: 'pointer',
                     },
                     '& .MuiOutlinedInput-notchedOutline': {
                       borderColor: '#D1D5DB',
@@ -291,6 +300,9 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                   }}
                   InputLabelProps={{
                     shrink: true,
+                  }}
+                  inputProps={{
+                    style: { cursor: 'pointer' },
                   }}
                 />
               </Box>
@@ -313,9 +325,18 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                   onChange={(e) =>
                     handleLocalFilterChange('endDate', e.target.value)
                   }
+                  onClick={(e) => {
+                    const input = e.currentTarget.querySelector(
+                      'input[type="date"]'
+                    ) as HTMLInputElement;
+                    if (input) {
+                      input.showPicker();
+                    }
+                  }}
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       borderRadius: '8px',
+                      cursor: 'pointer',
                     },
                     '& .MuiOutlinedInput-notchedOutline': {
                       borderColor: '#D1D5DB',
@@ -323,6 +344,9 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                   }}
                   InputLabelProps={{
                     shrink: true,
+                  }}
+                  inputProps={{
+                    style: { cursor: 'pointer' },
                   }}
                 />
               </Box>

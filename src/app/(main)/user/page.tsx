@@ -10,11 +10,7 @@ import {
   CircularProgress,
   Alert,
 } from '@mui/material';
-import {
-  Search as SearchIcon,
-  Add as AddIcon,
-  TuneOutlined,
-} from '@mui/icons-material';
+import { Search as SearchIcon, Add as AddIcon } from '@mui/icons-material';
 import React from 'react';
 import DataTable from '@/components/DataTable/DataTable';
 import { useUserPageImpl } from './useUserPageImpl';
@@ -23,9 +19,13 @@ import { DetailUserPage } from './DetailUserPage/DetailUserPage';
 import { User as UserType } from '@/types/user';
 import { PageEnum } from '@/constants/page';
 import { ConfirmationModal } from '@/components';
+import { useAllRoles } from '@/hooks/useRoleData';
 
 export default function UserPage() {
   const { state, action } = useUserPageImpl();
+
+  // Fetch roles for AddUserPage
+  const { data: roles = [], isLoading: rolesLoading } = useAllRoles();
 
   const {
     searchQuery,
@@ -43,7 +43,6 @@ export default function UserPage() {
 
   const {
     handleAddNew,
-    handleOpenFilter,
     setSearchQuery,
     handlePageChange,
     handlePageSizeChange,
@@ -61,7 +60,7 @@ export default function UserPage() {
 
   // Route to different pages based on current page state
   if (page === PageEnum.ADD || page === PageEnum.EDIT) {
-    return <AddUserPage />;
+    return <AddUserPage roles={roles} rolesLoading={rolesLoading} />;
   }
 
   if (page === PageEnum.DETAIL) {

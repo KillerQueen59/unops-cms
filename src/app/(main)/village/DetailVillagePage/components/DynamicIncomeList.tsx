@@ -8,7 +8,6 @@ import {
   Autocomplete,
   Button,
   IconButton,
-  InputAdornment,
   CircularProgress,
   Chip,
 } from '@mui/material';
@@ -143,6 +142,7 @@ export const DynamicIncomeList = ({
   };
 
   const handleAmountChange = (entryId: string, value: string) => {
+    // Immediate update without debouncing to prevent maximum call stack
     const formattedValue = formatNumber(value);
     updateEntry(entryId, {
       amount: formattedValue === '' ? '' : Number(formattedValue),
@@ -269,7 +269,7 @@ export const DynamicIncomeList = ({
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {entries.map((entry, index) => (
+        {entries.map((entry) => (
           <Box
             key={entry.id}
             sx={{
@@ -478,7 +478,7 @@ export const DynamicIncomeList = ({
                 placeholder="Enter amount..."
                 currency="IDR"
                 locale="id-ID"
-                debounceDelay={300}
+                debounceDelay={0}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     borderRadius: '8px',

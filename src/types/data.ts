@@ -7,6 +7,7 @@ export interface DataFile extends Record<string, unknown> {
   updatedAt: string;
   createdAt: string;
   file?: File;
+  link?: string;
   documentName?: string;
   fileName?: string;
   fileSize?: number;

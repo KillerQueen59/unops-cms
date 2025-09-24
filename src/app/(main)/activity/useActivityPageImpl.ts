@@ -11,7 +11,7 @@ import {
 import { ActivityData } from '@/types/activity';
 import toast from 'react-hot-toast';
 import { PageEnum } from '@/constants/page';
-import { useVillages } from '@/hooks/useVillageData';
+import { useGlobalVillages } from '@/hooks/useGlobalVillages';
 
 export const useActivityPageImpl = () => {
   const {
@@ -60,14 +60,8 @@ export const useActivityPageImpl = () => {
     error,
   } = useActivities(apiFilters);
 
-  const { data: villagesResponse, isLoading: isLoadingVillages } =
-    useVillages();
-  const villages = villagesResponse?.data || [];
-
-  const villageOptions = villages.map((village) => ({
-    label: village.villageName,
-    value: village.villageCode,
-  }));
+  // fetch village options from global store
+  const { villageOptions, isLoading: isLoadingVillages } = useGlobalVillages();
 
   // Extract activities and pagination info from response
   const activities = activitiesResponse?.data || [];
@@ -177,6 +171,7 @@ export const useActivityPageImpl = () => {
     onView: handleView,
     onEdit: handleEdit,
     onDelete: handleDelete,
+    villageOptions,
   });
 
   const state = {

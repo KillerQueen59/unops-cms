@@ -141,7 +141,7 @@ const EditIncomeModal = ({
             label="Income Amount"
             currency="IDR"
             locale="id-ID"
-            debounceDelay={300}
+            debounceDelay={0}
             fullWidth
           />
         </Box>

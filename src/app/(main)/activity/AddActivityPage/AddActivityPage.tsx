@@ -1,7 +1,7 @@
 'use client';
 
 import { ConfirmationModal } from '@/components';
-import { Paper, Box } from '@mui/material';
+import { Paper, Box, CircularProgress, Typography } from '@mui/material';
 import { Header } from './components/Header';
 import { Form } from './components/Form';
 import { useAddActivityPageImpl } from './useAddActivityPageImpl';
@@ -19,6 +19,8 @@ export const AddActivityPage = () => {
     villageOptions,
     isLoadingVillages,
     selectedActivity,
+    isLoadingActivity,
+    activityError,
   } = state;
 
   const {
@@ -31,6 +33,38 @@ export const AddActivityPage = () => {
     watch,
     setValue,
   } = action;
+
+  // Handle loading state when fetching activity details
+  if (isLoadingActivity) {
+    return (
+      <Paper sx={{ width: '100%', overflow: 'hidden', borderRadius: '16px' }}>
+        <Box sx={{ padding: '28px', textAlign: 'center' }}>
+          <CircularProgress />
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
+            Loading activity details...
+          </Typography>
+        </Box>
+      </Paper>
+    );
+  }
+
+  // Handle error state when fetching activity details
+  if (activityError && isEditMode) {
+    return (
+      <Paper sx={{ width: '100%', overflow: 'hidden', borderRadius: '16px' }}>
+        <Box sx={{ padding: '28px', textAlign: 'center' }}>
+          <Typography variant="h6" color="error" sx={{ mb: 2 }}>
+            Error loading activity
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {activityError instanceof Error
+              ? activityError.message
+              : 'Unknown error occurred'}
+          </Typography>
+        </Box>
+      </Paper>
+    );
+  }
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden', borderRadius: '16px' }}>

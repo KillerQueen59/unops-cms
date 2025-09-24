@@ -10,9 +10,7 @@ export const Content = () => {
   const [selectedImageTitle, setSelectedImageTitle] = useState<string>('');
 
   const handleImageClick = (imageUrl: string, title?: string) => {
-    const fullUrl = imageUrl.startsWith('http')
-      ? imageUrl
-      : `http://${imageUrl}`;
+    const fullUrl = imageUrl.startsWith('http') ? imageUrl : `${imageUrl}`;
     setSelectedImageUrl(fullUrl);
     setSelectedImageTitle(title || 'Image Preview');
     setPreviewModalOpen(true);
@@ -46,7 +44,7 @@ export const Content = () => {
             overflow: 'hidden',
             backgroundColor: '#F3F4F6',
             backgroundImage: selectedDemosite.header
-              ? `url("http://${selectedDemosite.header}")`
+              ? `url("${selectedDemosite.header}")`
               : 'none',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
@@ -116,7 +114,7 @@ export const Content = () => {
                   overflow: 'hidden',
                   aspectRatio: '4/3',
                   position: 'relative',
-                  backgroundImage: `url(http://${imageUrl})`,
+                  backgroundImage: `url(${imageUrl})`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   cursor: 'pointer',

@@ -48,7 +48,6 @@ export const activityFormSchema = z
         (val) => Number.isInteger(Number(val)),
         'Percentage must be a whole number'
       ),
-    category: z.string().optional(),
 
     files: z.array(z.any()),
   })

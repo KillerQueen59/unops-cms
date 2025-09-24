@@ -1,8 +1,12 @@
 'use client';
 
 import { PageEnum } from '@/constants/page';
-import { useCreateActivity, useUpdateActivity } from '@/hooks/useActivityData';
-import { useVillages } from '@/hooks/useVillageData';
+import {
+  useCreateActivity,
+  useUpdateActivity,
+  useActivity,
+} from '@/hooks/useActivityData';
+import { useGlobalVillages } from '@/hooks/useGlobalVillages';
 import {
   CreateActivityData,
   UpdateActivityData,
@@ -23,9 +27,19 @@ export const useAddActivityPageImpl = () => {
   const createActivityMutation = useCreateActivity();
   const updateActivityMutation = useUpdateActivity();
 
-  // fetch village
-  const { data: villagesResponse, isLoading, error } = useVillages();
-  const villages = villagesResponse?.data || [];
+  // Fetch detailed activity data by ID when editing
+  const activityId = selectedActivity?.id || null;
+  const {
+    data: detailedActivity,
+    isLoading: isLoadingActivity,
+    error: activityError,
+  } = useActivity(activityId, { enabled: !!activityId });
+
+  // Use detailed data if available, fallback to store data
+  const activityData = detailedActivity || selectedActivity;
+
+  // fetch village options from global store
+  const { villages, isLoading } = useGlobalVillages();
 
   const villageOptions = villages.map((village) => ({
     label: village.villageName,
@@ -58,16 +72,15 @@ export const useAddActivityPageImpl = () => {
   } = useForm<ActivityFormData>({
     resolver: zodResolver(activityFormSchema),
     defaultValues: {
-      activityName: selectedActivity?.activityName || '',
-      villageId: selectedActivity?.villageId || '',
-      category: selectedActivity?.category || '',
-      description: selectedActivity?.description || '',
-      startDate: formatDateForInput(selectedActivity?.startDate),
-      endDate: formatDateForInput(selectedActivity?.endDate),
-      status: selectedActivity?.status || 'not yet',
-      percentage: selectedActivity?.percentage || '',
-      type: selectedActivity?.type || undefined,
-      files: selectedActivity?.files ? selectedActivity?.files : [],
+      activityName: activityData?.activityName || '',
+      villageId: activityData?.villageId || '',
+      description: activityData?.description || '',
+      startDate: formatDateForInput(activityData?.startDate),
+      endDate: formatDateForInput(activityData?.endDate),
+      status: activityData?.status || 'not yet',
+      percentage: activityData?.percentage || '',
+      type: activityData?.type || 'workshop',
+      files: activityData?.files ? activityData?.files : [],
     },
   });
 
@@ -95,23 +108,23 @@ export const useAddActivityPageImpl = () => {
     updateBreadcrumbs(PageEnum.ADD);
   }, [updateBreadcrumbs]);
 
-  const isEditMode = !!selectedActivity;
+  const isEditMode = !!activityData;
 
   useEffect(() => {
-    if (selectedActivity) {
+    if (activityData) {
       reset({
-        activityName: selectedActivity.activityName || '',
-        villageId: selectedActivity.villageId || '',
-        description: selectedActivity.description || '',
-        startDate: formatDateForInput(selectedActivity.startDate),
-        endDate: formatDateForInput(selectedActivity.endDate),
-        status: selectedActivity.status || 'inactive',
-        percentage: selectedActivity.percentage || '',
-        type: selectedActivity.type || undefined,
-        files: selectedActivity.files ? selectedActivity.files : [],
+        activityName: activityData.activityName || '',
+        villageId: activityData.villageId || '',
+        description: activityData.description || '',
+        startDate: formatDateForInput(activityData.startDate),
+        endDate: formatDateForInput(activityData.endDate),
+        status: activityData.status || 'inactive',
+        percentage: activityData.percentage || '',
+        type: activityData.type || 'workshop',
+        files: activityData.files ? activityData.files : [],
       });
     }
-  }, [selectedActivity, reset]);
+  }, [activityData, reset]);
 
   const handleBack = () => {
     if (hasUnsavedChanges()) {
@@ -152,7 +165,7 @@ export const useAddActivityPageImpl = () => {
     try {
       setSubmitError(null);
 
-      if (isEditMode && selectedActivity?.id) {
+      if (isEditMode && activityData?.id) {
         const updateData: UpdateActivityData = {
           name: data.activityName,
           villageId: data.villageId,
@@ -162,12 +175,11 @@ export const useAddActivityPageImpl = () => {
           status: data.status,
           percentage: Number(data.percentage),
           type: data.type,
-          category: data.category,
         };
 
         await updateActivityMutation.mutateAsync({
           activityData: updateData,
-          activityId: selectedActivity.id,
+          activityId: activityData.id,
           files: data.files,
         });
       } else {
@@ -180,7 +192,6 @@ export const useAddActivityPageImpl = () => {
           status: data.status,
           percentage: Number(data.percentage),
           type: data.type,
-          category: data.category,
         };
 
         // Create new training
@@ -212,7 +223,9 @@ export const useAddActivityPageImpl = () => {
     villageOptions,
     isLoadingVillages: isLoading,
     submitError,
-    selectedActivity,
+    selectedActivity: activityData,
+    isLoadingActivity,
+    activityError,
   };
 
   const action = {

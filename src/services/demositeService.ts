@@ -22,6 +22,7 @@ export interface UpdateDemositeData {
   story: string;
   link?: string;
   photos?: File[];
+  existingPhotoUrls?: string[];
 }
 
 // Query parameters for getting demosites
@@ -192,6 +193,13 @@ export const createDemositeFormData = (
   if (data.photos) {
     data.photos.forEach((photo) => {
       formData.append('photos', photo);
+    });
+  }
+
+  // Add existing photo URLs for updates
+  if ('existingPhotoUrls' in data && data.existingPhotoUrls) {
+    data.existingPhotoUrls.forEach((url) => {
+      formData.append('existingPhotoUrls', url);
     });
   }
 

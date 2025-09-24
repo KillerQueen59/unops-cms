@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE_URL = 'http://unops-api-dudw4t-af60f1-31-97-222-225.traefik.me';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 // Token management - uses localStorage for persistence
 const TOKEN_STORAGE_KEY = 'auth_token';
@@ -149,6 +149,14 @@ class ApiClient {
     const body = data instanceof FormData ? data : JSON.stringify(data);
     return this.request<T>(endpoint, {
       method: 'PUT',
+      body: data ? body : undefined,
+    });
+  }
+
+  async patch<T>(endpoint: string, data?: unknown): Promise<T> {
+    const body = data instanceof FormData ? data : JSON.stringify(data);
+    return this.request<T>(endpoint, {
+      method: 'PATCH',
       body: data ? body : undefined,
     });
   }

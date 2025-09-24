@@ -1,6 +1,6 @@
 import { PageEnum } from '@/constants/page';
 import { useVillageStore } from '@/stores/villageStore';
-import { VillageFormData, villageFormSchema } from '@/types/villageForm';
+import { VillageFormData, createVillageFormSchema } from '@/types/villageForm';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -15,7 +15,9 @@ import {
 } from '@/services/villageService';
 import toast from 'react-hot-toast';
 
-export const useAddVillagePageImpl = () => {
+export const useAddVillagePageImpl = (
+  villageCategories: { _id: string; name: string }[]
+) => {
   const {
     updateBreadcrumbs,
     setPage,
@@ -40,19 +42,20 @@ export const useAddVillagePageImpl = () => {
     reset,
     formState: { errors, isSubmitting },
     setValue,
+    setError,
+    clearErrors,
   } = useForm<VillageFormData>({
-    resolver: zodResolver(villageFormSchema),
+    resolver: zodResolver(createVillageFormSchema(villageCategories)),
     defaultValues: {
       villageName: selectedVillage?.villageName || '',
       villageCode: selectedVillage?.villageCode || '',
       villageCategory:
-        selectedVillage?.villageCategory?.name || selectedCategory || '',
+        selectedVillage?.villageCategory?.id || selectedCategory || '',
       villageLat: selectedVillage?.villageLat || 0,
       villageLng: selectedVillage?.villageLng || 0,
-      landManageStart: selectedVillage?.landManageStart?.toString() || '0',
+      landManageStart: selectedVillage?.landManageStart?.toString() || '',
       landManageEnd: selectedVillage?.landManageEnd?.toString() || '',
-      carbonEmisionStart:
-        selectedVillage?.carbonEmisionStart?.toString() || '0',
+      carbonEmisionStart: selectedVillage?.carbonEmisionStart?.toString() || '',
       carbonEmisionEnd: selectedVillage?.carbonEmisionEnd?.toString() || '',
       potency: selectedVillage?.potency || '',
       climateIssue: selectedVillage?.climateIssue || '',
@@ -111,7 +114,7 @@ export const useAddVillagePageImpl = () => {
       reset({
         villageName: selectedVillage.villageName || '',
         villageCode: selectedVillage.villageCode || '',
-        villageCategory: selectedVillage.villageCategory?.name || '',
+        villageCategory: selectedVillage.villageCategory?.id || '',
         villageLat: selectedVillage.villageLat || 0,
         villageLng: selectedVillage.villageLng || 0,
         landManageStart: selectedVillage.landManageStart?.toString() || '',
@@ -157,7 +160,17 @@ export const useAddVillagePageImpl = () => {
     setShowLeaveModal(false);
   };
 
-  const handleFormSubmit = handleSubmit(() => {
+  const handleFormSubmit = handleSubmit((data) => {
+    // Custom validation for village location
+    if (data.villageLat === 0 && data.villageLng === 0) {
+      setError('villageLat', {
+        type: 'manual',
+        message:
+          'Village location must be selected (cannot be 0.000000, 0.000000)',
+      });
+      return;
+    }
+
     setShowSubmitModal(true);
   });
 
@@ -216,7 +229,7 @@ export const useAddVillagePageImpl = () => {
         startIncome: data.incomesStart ? Number(data.incomesStart) : undefined,
         endIncome: data.incomesEnd ? Number(data.incomesEnd) : undefined,
         seedCapital: data.seedCapital ? Number(data.seedCapital) : undefined,
-        categoryId: data.villageCategory,
+        categoryId: selectedCategory ?? '',
       };
 
       if (isEditMode && selectedVillage) {
@@ -224,7 +237,7 @@ export const useAddVillagePageImpl = () => {
         await updateVillageMutation.mutateAsync({
           villageData: {
             ...villageData,
-            id: selectedVillage.id,
+            id: selectedVillage.villageCode,
           } as UpdateVillageData,
         });
       } else {
@@ -272,6 +285,11 @@ export const useAddVillagePageImpl = () => {
     hasUnsavedChanges,
     setValue,
     watch,
+    validateLocation: (lat: number, lng: number) => {
+      if (lat !== 0 || lng !== 0) {
+        clearErrors('villageLat');
+      }
+    },
   };
 
   return {

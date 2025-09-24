@@ -6,8 +6,14 @@ import { Header } from './components/Header';
 import { Form } from './components/Form';
 import { useUserStore } from '@/stores/userStore';
 import { PageEnum } from '@/constants/page';
+import { Role } from '@/types/role';
 
-export const AddUserPage = () => {
+interface AddUserPageProps {
+  roles: Role[];
+  rolesLoading: boolean;
+}
+
+export const AddUserPage = ({ roles, rolesLoading }: AddUserPageProps) => {
   const {
     breadcrumbs,
     navigateToList,
@@ -44,7 +50,12 @@ export const AddUserPage = () => {
         />
       </Box>
       <Box sx={{ padding: '28px' }}>
-        <Form isEditMode={isEditMode} selectedUser={selectedUser} />
+        <Form
+          isEditMode={isEditMode}
+          selectedUser={selectedUser}
+          roles={roles}
+          rolesLoading={rolesLoading}
+        />
       </Box>
     </Paper>
   );

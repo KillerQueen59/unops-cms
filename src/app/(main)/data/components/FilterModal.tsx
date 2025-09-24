@@ -54,8 +54,14 @@ export const FilterModal: React.FC<FilterModalProps> = ({ open, onClose }) => {
   const handleApplyFilter = () => {
     const filtersToApply = {
       ...filters,
-      area: type === 'regency' ? localFilters.area : 'others',
+      area:
+        type === 'regency'
+          ? localFilters.area === ''
+            ? '16'
+            : localFilters.area
+          : 'others',
     };
+
     setFilters(filtersToApply);
     onClose();
   };
@@ -68,20 +74,6 @@ export const FilterModal: React.FC<FilterModalProps> = ({ open, onClose }) => {
     setType('');
     setLocalFilters(clearedFilters);
     clearFilters();
-  };
-
-  const handleLocalFilterChange = (field: string, value: string) => {
-    // Update local state only
-    setLocalFilters((prev) => {
-      const newFilters = { ...prev, [field]: value };
-
-      // Clear area when type changes from regency to others
-      if (field === 'type' && value !== 'regency') {
-        newFilters.area = '';
-      }
-
-      return newFilters;
-    });
   };
 
   const handleRegencyChange = (regencyCode: string) => {

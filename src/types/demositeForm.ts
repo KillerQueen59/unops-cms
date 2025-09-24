@@ -117,21 +117,18 @@ export const demositeEditFormSchema = z.object({
       'Please enter a valid URL (e.g., https://example.com)'
     ),
 
-  photos: z
-    .array(
-      z
-        .instanceof(File)
-        .refine(
-          (file) => file.size <= MAX_FILE_SIZE,
-          'Each file must be less than 5MB'
-        )
-        .refine(
-          (file) => isValidDocumentFile(file),
-          'Files must be JPG, PNG, PDF, or Word documents'
-        )
-    )
-    .min(1, 'At least one photo is required')
-    .max(10, 'Maximum 10 photos allowed'),
+  photos: z.array(
+    z
+      .instanceof(File)
+      .refine(
+        (file) => file.size <= MAX_FILE_SIZE,
+        'Each file must be less than 5MB'
+      )
+      .refine(
+        (file) => isValidDocumentFile(file),
+        'Files must be JPG, PNG, PDF, or Word documents'
+      )
+  ),
 });
 
 export type DemositeFormData = z.infer<typeof demositeFormSchema>;

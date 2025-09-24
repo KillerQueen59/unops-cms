@@ -28,6 +28,7 @@ import { PreviewModal } from './components/PreviewModal';
 import { FilterModal } from './components/FilterModal'; // Import the FilterModal
 import { ConfirmationModal } from '@/components';
 import { useDataStore } from '@/stores/dataStore';
+import { southSumatraRegencies } from '../village/constants';
 
 export default function DataPage() {
   const { state, action } = useDataPageImpl();
@@ -73,7 +74,15 @@ export default function DataPage() {
     if (filters.area === 'others') {
       labels.push({ key: 'area', label: 'Others' });
     } else {
-      labels.push({ key: 'area', label: `Area: ${filters.area}` });
+      labels.push({
+        key: 'area',
+        label: `Area: ${
+          filters.area === '16'
+            ? 'South Sumatera'
+            : southSumatraRegencies.find((r) => r.code === filters.area)
+                ?.name || filters.area
+        }`,
+      });
     }
 
     return labels;

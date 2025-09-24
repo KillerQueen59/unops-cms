@@ -12,12 +12,14 @@ interface TrainingColumnProps {
   onView?: (data: TrainingData) => void;
   onEdit?: (data: TrainingData) => void;
   onDelete?: (data: TrainingData) => void;
+  villageOptions?: { label: string; value: string }[];
 }
 
 export const createTrainingColumns = ({
   onView,
   onEdit,
   onDelete,
+  villageOptions,
 }: TrainingColumnProps): ColumnDef<TrainingData, unknown>[] => [
   {
     accessorKey: 'trainingName',
@@ -43,7 +45,17 @@ export const createTrainingColumns = ({
   },
   {
     accessorKey: 'village',
-    header: 'Village',
+    header: 'Village Id',
+  },
+  {
+    accessorKey: 'villageName',
+    header: 'Village Name',
+    cell: ({ row }) => {
+      const village = villageOptions?.find(
+        (option) => option.value === row.original.village
+      );
+      return <span>{village ? village.label : 'N/A'}</span>;
+    },
   },
   {
     id: 'actions',

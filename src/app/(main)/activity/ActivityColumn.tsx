@@ -12,16 +12,28 @@ interface ActivityColumnProps {
   onView?: (data: ActivityData) => void;
   onEdit?: (data: ActivityData) => void;
   onDelete?: (data: ActivityData) => void;
+  villageOptions?: { label: string; value: string }[];
 }
 
 export const createActivityColumns = ({
   onView,
   onEdit,
   onDelete,
+  villageOptions,
 }: ActivityColumnProps): ColumnDef<ActivityData, unknown>[] => [
   {
     accessorKey: 'activityName',
     header: 'Activity Name',
+  },
+  {
+    accessorKey: 'villageName',
+    header: 'Village Name',
+    cell: ({ row }) => {
+      const villageId = row.original.villageId;
+      return (
+        villageOptions?.find((v) => v.value === villageId)?.label || villageId
+      );
+    },
   },
   {
     accessorKey: 'villageId',

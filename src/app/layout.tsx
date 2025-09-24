@@ -6,9 +6,9 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import InitColorSchemeScript from '@mui/material/InitColorSchemeScript';
 import theme from '@/theme';
-import BaseLayout from '@/components/BaseLayout';
 import { ReactQueryProvider } from '@/providers';
 import { AuthProvider } from '@/providers/AuthProvider';
+import { GlobalDataProvider } from '@/providers/GlobalDataProvider';
 import { Toaster } from 'react-hot-toast';
 
 export default function RootLayout(props: { children: React.ReactNode }) {
@@ -20,14 +20,16 @@ export default function RootLayout(props: { children: React.ReactNode }) {
       <body>
         <ReactQueryProvider>
           <AuthProvider>
-            <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-              <ThemeProvider theme={theme}>
-                <Toaster />
-                {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-                <CssBaseline />
-                {props.children}
-              </ThemeProvider>
-            </AppRouterCacheProvider>
+            <GlobalDataProvider>
+              <AppRouterCacheProvider options={{ enableCssLayer: true }}>
+                <ThemeProvider theme={theme}>
+                  <Toaster />
+                  {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
+                  <CssBaseline />
+                  {props.children}
+                </ThemeProvider>
+              </AppRouterCacheProvider>
+            </GlobalDataProvider>
           </AuthProvider>
         </ReactQueryProvider>
       </body>
