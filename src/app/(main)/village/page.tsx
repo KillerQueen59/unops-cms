@@ -10,9 +10,15 @@ import {
   Button,
   CircularProgress,
   Alert,
+  Chip,
 } from '@mui/material';
 import { ConfirmationModal } from '@/components';
-import { Search as SearchIcon, Add as AddIcon } from '@mui/icons-material';
+import {
+  Search as SearchIcon,
+  Add as AddIcon,
+  Close as CloseIcon,
+  TuneOutlined,
+} from '@mui/icons-material';
 import React from 'react';
 import { useVillagePageImpl } from './useVillagePageImpl';
 import { AddVillagePage } from './AddVillagePage/AddVillagePage';
@@ -20,6 +26,13 @@ import { DetailVillagePage } from './DetailVillagePage/DetailVillagePage';
 import { CategorySelectionModal } from './components/CategorySelectionModal';
 import { VillageTable } from '@/types/village';
 import { PageEnum } from '@/constants/page';
+import { useVillageStore } from '@/stores/villageStore';
+import {
+  VillageCategory,
+  VillageCategoryLabel,
+  villageCategoryOptions,
+} from './constants';
+import { FilterModal } from './components/FilterModal';
 
 export default function VillagePage() {
   const { state, action } = useVillagePageImpl();
@@ -38,6 +51,8 @@ export default function VillagePage() {
     totalItems,
     currentPage,
     pageSize,
+    isFilterModalOpen,
+    villageCategories,
   } = state;
 
   const {
@@ -49,7 +64,50 @@ export default function VillagePage() {
     handleDeleteCancel,
     handlePageChange,
     handlePageSizeChange,
+    handleOpenFilter,
+    handleCloseFilter,
   } = action;
+
+  const { removeFilter, clearFilters } = useVillageStore();
+
+  const getFilterLabel = (filterType: string, filterValue: string) => {
+    switch (filterType) {
+      case 'categoryId':
+        return `Category: ${
+          filterValue === VillageCategory.Category1
+            ? VillageCategoryLabel.Category1
+            : VillageCategoryLabel.Category2
+        }`;
+
+      default:
+        return filterValue;
+    }
+  };
+
+  // Helper function to remove individual filter
+  const handleRemoveFilter = (filterKey: string) => {
+    removeFilter(filterKey as 'categoryId');
+  };
+
+  // Get active filters for display
+  const getActiveFilters = () => {
+    const activeFilters: Array<{ key: string; value: string; label: string }> =
+      [];
+
+    Object.entries(state.filters || {}).forEach(([key, value]) => {
+      if (value && value.trim() !== '') {
+        activeFilters.push({
+          key,
+          value,
+          label: getFilterLabel(key, value),
+        });
+      }
+    });
+
+    return activeFilters;
+  };
+
+  const activeFilters = getActiveFilters();
 
   if (error) {
     return (
@@ -130,6 +188,28 @@ export default function VillagePage() {
                 ),
               }}
             />
+            <Button
+              variant="outlined"
+              color="secondary"
+              startIcon={
+                <TuneOutlined
+                  sx={{
+                    rotate: '90deg',
+                  }}
+                />
+              }
+              onClick={handleOpenFilter}
+              sx={{
+                minWidth: 120,
+                height: 54,
+                transform: 'translateY(-2px)',
+                '&.MuiButton-root': {
+                  borderRadius: '12px',
+                },
+              }}
+            >
+              Filter
+            </Button>
           </Box>
           <Button
             variant="contained"
@@ -149,6 +229,62 @@ export default function VillagePage() {
             Add New
           </Button>
         </Box>
+        {/* Filter Chips Section */}
+        {activeFilters.length > 0 && (
+          <Box sx={{ mt: 3 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#6B7280',
+                mb: 1.5,
+                fontWeight: 500,
+              }}
+            >
+              Applied Filters:
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              {activeFilters.map((filter) => (
+                <Chip
+                  key={filter.key}
+                  label={filter.label}
+                  onDelete={() => handleRemoveFilter(filter.key)}
+                  deleteIcon={<CloseIcon />}
+                  sx={{
+                    backgroundColor: '#EEF2FF',
+                    color: '#3730A3',
+                    border: '1px solid #C7D2FE',
+                    borderRadius: '8px',
+                    '& .MuiChip-deleteIcon': {
+                      color: '#6366F1',
+                      '&:hover': {
+                        color: '#4F46E5',
+                      },
+                    },
+                    '&:hover': {
+                      backgroundColor: '#E0E7FF',
+                    },
+                  }}
+                />
+              ))}
+              {activeFilters.length > 1 && (
+                <Chip
+                  label="Clear all"
+                  onClick={() => clearFilters()}
+                  sx={{
+                    backgroundColor: '#FEF2F2',
+                    color: '#991B1B',
+                    border: '1px solid #FECACA',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      backgroundColor: '#FEE2E2',
+                    },
+                  }}
+                />
+              )}
+            </Box>
+          </Box>
+        )}
       </Box>
       {isLoading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
@@ -183,6 +319,9 @@ export default function VillagePage() {
         onClose={handleCloseCategoryModal}
         onConfirm={handleCategorySelect}
       />
+
+      {/* Filter Modal */}
+      <FilterModal open={isFilterModalOpen} onClose={handleCloseFilter} />
 
       {/* Delete Confirmation Modal */}
       <ConfirmationModal

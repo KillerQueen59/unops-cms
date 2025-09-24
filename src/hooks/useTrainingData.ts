@@ -51,6 +51,8 @@ export const useTraining = (
     queryKey: trainingKeys.detail(id),
     queryFn: () => trainingService.getTrainingById(id!),
     enabled: enabled && !!id,
+    refetchOnMount: 'always',
+    staleTime: 0,
   });
 };
 

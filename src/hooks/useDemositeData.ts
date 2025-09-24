@@ -50,6 +50,8 @@ export const useDemosite = (
     queryKey: demositeKeys.detail(id),
     queryFn: () => demositeService.getDemositeById(id!),
     enabled: enabled && !!id,
+    refetchOnMount: 'always',
+    staleTime: 0,
   });
 };
 

@@ -1,12 +1,9 @@
-// Training Filter Modal Component
-
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
   Box,
   Typography,
-  TextField,
   Button,
   IconButton,
   MenuItem,
@@ -14,35 +11,20 @@ import {
   Select,
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
-import { useTrainingStore } from '@/stores';
+import { villageCategoryOptions } from '../constants';
+import { useVillageStore } from '@/stores/villageStore';
 
 interface FilterModalProps {
   open: boolean;
   onClose: () => void;
-  trainingTypes: {
-    label: string;
-    value: string;
-  }[];
-  villages: {
-    label: string;
-    value: string;
-  }[];
 }
 
-export const FilterModal: React.FC<FilterModalProps> = ({
-  open,
-  onClose,
-  trainingTypes,
-  villages,
-}) => {
-  const { filters, setFilters, clearFilters } = useTrainingStore();
+export const FilterModal: React.FC<FilterModalProps> = ({ open, onClose }) => {
+  const { filters, setFilters, clearFilters } = useVillageStore();
 
   // Local state for form values
   const [localFilters, setLocalFilters] = useState({
-    trainingType: '',
-    village: '',
-    startDate: '',
-    endDate: '',
+    categoryId: '',
   });
 
   // Initialize local filters when modal opens or filters change
@@ -61,10 +43,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   const handleClearFilter = () => {
     // Clear both local and store filters
     const clearedFilters = {
-      trainingType: '',
-      village: '',
-      startDate: '',
-      endDate: '',
+      categoryId: '',
     };
     setLocalFilters(clearedFilters);
     clearFilters();
@@ -129,7 +108,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
 
           {/* Filter Fields */}
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            {/* Training Type and Village Row */}
+            {/* Category and Status Row */}
             <Box sx={{ display: 'flex', gap: 2 }}>
               <Box sx={{ flex: 1 }}>
                 <Typography
@@ -140,13 +119,13 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                     mb: 1,
                   }}
                 >
-                  Training Type
+                  Category
                 </Typography>
                 <FormControl fullWidth>
                   <Select
-                    value={localFilters.trainingType}
+                    value={localFilters.categoryId}
                     onChange={(e) =>
-                      handleLocalFilterChange('trainingType', e.target.value)
+                      handleLocalFilterChange('categoryId', e.target.value)
                     }
                     displayEmpty
                     sx={{
@@ -157,115 +136,13 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                     }}
                   >
                     <MenuItem value="">All</MenuItem>
-                    {trainingTypes.map((type) => (
-                      <MenuItem key={type.value} value={type.value}>
-                        {type.label}
+                    {villageCategoryOptions.map((category) => (
+                      <MenuItem key={category.value} value={category.value}>
+                        {category.label}
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
-              </Box>
-
-              <Box sx={{ flex: 1 }}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#374151',
-                    fontWeight: 500,
-                    mb: 1,
-                  }}
-                >
-                  Village
-                </Typography>
-                <FormControl fullWidth>
-                  <Select
-                    value={localFilters.village}
-                    onChange={(e) =>
-                      handleLocalFilterChange('village', e.target.value)
-                    }
-                    displayEmpty
-                    sx={{
-                      borderRadius: '8px',
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#D1D5DB',
-                      },
-                    }}
-                  >
-                    <MenuItem value="">All</MenuItem>
-                    {villages.map((village) => (
-                      <MenuItem key={village.value} value={village.value}>
-                        {village.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Box>
-            </Box>
-
-            {/* Date Range Row */}
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Box sx={{ flex: 1 }}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#374151',
-                    fontWeight: 500,
-                    mb: 1,
-                  }}
-                >
-                  Start Date
-                </Typography>
-                <TextField
-                  type="date"
-                  fullWidth
-                  value={localFilters.startDate}
-                  onChange={(e) =>
-                    handleLocalFilterChange('startDate', e.target.value)
-                  }
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '8px',
-                    },
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#D1D5DB',
-                    },
-                  }}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
-              </Box>
-
-              <Box sx={{ flex: 1 }}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#374151',
-                    fontWeight: 500,
-                    mb: 1,
-                  }}
-                >
-                  End Date
-                </Typography>
-                <TextField
-                  type="date"
-                  fullWidth
-                  value={localFilters.endDate}
-                  onChange={(e) =>
-                    handleLocalFilterChange('endDate', e.target.value)
-                  }
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '8px',
-                    },
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#D1D5DB',
-                    },
-                  }}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
               </Box>
             </Box>
           </Box>

@@ -52,8 +52,9 @@ export interface ActivityListParams {
   page?: number;
   pageSize?: number;
   search?: string;
-  status?: 'not yet' | 'ongoing' | 'completed';
-  type?: 'training' | 'workshop' | 'demosite';
+  status?: string;
+  type?: string;
+  village?: string;
   sortBy?: string;
 }
 
@@ -113,7 +114,7 @@ export const activityService = {
       if (params?.page) queryParams.append('page', params.page.toString());
       if (params?.pageSize)
         queryParams.append('pageSize', params.pageSize.toString());
-      if (params?.search) queryParams.append('search', params.search);
+      if (params?.village) queryParams.append('search', params.village);
       if (params?.status) queryParams.append('status', params.status);
       if (params?.type) queryParams.append('type', params.type);
       if (params?.sortBy) queryParams.append('sortBy', params.sortBy);

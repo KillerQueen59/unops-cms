@@ -6,7 +6,11 @@ import {
   TrashIcon,
 } from '@phosphor-icons/react';
 import { VillageData } from '@/types/village';
-import { southSumatraRegencies } from './constants';
+import {
+  southSumatraRegencies,
+  VillageCategory,
+  VillageCategoryLabel,
+} from './constants';
 
 interface VillageColumnProps {
   onView?: (data: VillageData) => void;
@@ -42,6 +46,16 @@ export const createVillageColumns = ({
           regency.code ===
           row.original.villageCode.split('.').splice(0, 2).join('.')
       )?.name || '-',
+  },
+  {
+    accessorKey: 'categoryName',
+    header: 'Village Category',
+    cell: ({ row }) =>
+      row.original.categoryName === VillageCategory.Category1
+        ? VillageCategoryLabel.Category1
+        : row.original.categoryName === VillageCategory.Category2
+          ? VillageCategoryLabel.Category2
+          : '-',
   },
   {
     id: 'actions',

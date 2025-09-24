@@ -36,6 +36,7 @@ interface UserApiResponse {
       name: string;
       email: string;
       role: string;
+      roleName: string;
       status?: string;
       lastLogin?: string;
       createdAt: string;
@@ -55,6 +56,7 @@ interface SingleUserApiResponse {
     name: string;
     email: string;
     role: string;
+    roleName: string;
     status?: string;
     lastLogin?: string;
     createdAt: string;
@@ -87,6 +89,7 @@ const transformUserFromAPI = (
     name: apiUser.name || '',
     email: apiUser.email || '',
     role: (apiUser.role as UserRole) || UserRole.ADMIN,
+    roleName: (apiUser.roleName as string) || UserRole.ADMIN,
     status: (apiUser.status as UserStatus) || UserStatus.ACTIVE,
     lastLogin: apiUser.lastLogin || 'Never',
     createdAt: apiUser.createdAt
@@ -108,6 +111,7 @@ const transformSingleUserFromAPI = (
     name: apiUser.name || '',
     email: apiUser.email || '',
     role: (apiUser.role as UserRole) || UserRole.ADMIN,
+    roleName: (apiUser.roleName as string) || UserRole.ADMIN,
     status: (apiUser.status as UserStatus) || UserStatus.ACTIVE,
     lastLogin: apiUser.lastLogin || 'Never',
     createdAt: apiUser.createdAt
@@ -137,8 +141,10 @@ export const userService = {
       const response = await apiClient.get<UserApiResponse>(url);
 
       if (response.status && response.data?.users) {
-        const users = response.data.users.map(transformUserFromAPI);
-        const totalData = response.data.totalData || users.length;
+        const users = response.data.users
+          .map(transformUserFromAPI)
+          .filter((user) => user.roleName === 'admin');
+        const totalData = users.length;
         const page = params?.page || 1;
         const pageSize = params?.pageSize || 10;
 

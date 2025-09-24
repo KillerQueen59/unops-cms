@@ -26,6 +26,13 @@ interface ActivityState {
   currentPage: number;
   itemsPerPage: number;
   isFilterModalOpen: boolean;
+  filters: {
+    status: string;
+    type: string;
+    village: string;
+    startDate: string;
+    endDate: string;
+  };
 
   // Actions
   setPage: (page: PageEnum) => void;
@@ -43,6 +50,9 @@ interface ActivityState {
   setCurrentPage: (page: number) => void;
   setItemsPerPage: (items: number) => void;
   setIsFilterModalOpen: (isOpen: boolean) => void;
+  setFilters: (filters: Partial<ActivityState['filters']>) => void;
+  clearFilters: () => void;
+  removeFilter: (filterKey: keyof ActivityState['filters']) => void;
 
   // Activity CRUD actions
   addActivity: (activity: ActivityData) => void;
@@ -69,6 +79,13 @@ const initialState = {
   isFilterModalOpen: false,
   page: PageEnum.LIST,
   breadcrumbs: [] as BreadcrumbItem[],
+  filters: {
+    status: '',
+    type: '',
+    village: '',
+    startDate: '',
+    endDate: '',
+  },
 };
 
 export const useActivityStore = create<ActivityState>()(
@@ -82,6 +99,43 @@ export const useActivityStore = create<ActivityState>()(
 
       setIsFilterModalOpen: (isOpen) =>
         set({ isFilterModalOpen: isOpen }, false, 'setIsFilterModalOpen'),
+
+      setFilters: (newFilters) => {
+        const { filters } = get();
+        set(
+          { filters: { ...filters, ...newFilters }, currentPage: 1 },
+          false,
+          'setFilters'
+        );
+      },
+
+      clearFilters: () =>
+        set(
+          {
+            filters: {
+              type: '',
+              status: '',
+              village: '',
+              startDate: '',
+              endDate: '',
+            },
+            currentPage: 1,
+          },
+          false,
+          'clearFilters'
+        ),
+
+      removeFilter: (filterKey) => {
+        const { filters } = get();
+        set(
+          {
+            filters: { ...filters, [filterKey]: '' },
+            currentPage: 1,
+          },
+          false,
+          'removeFilter'
+        );
+      },
 
       setPage: (page) => set({ page }, false, 'setPage'),
 

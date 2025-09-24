@@ -31,7 +31,7 @@ export const createUserColumns = ({
     header: 'Role',
     cell: ({ row }) => (
       <Typography variant="body2" sx={{ color: '#6B7280' }}>
-        {row.original.role}
+        {row.original.roleName}
       </Typography>
     ),
   },

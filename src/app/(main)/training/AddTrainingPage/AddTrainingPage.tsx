@@ -8,10 +8,16 @@ import { Form } from './components/Form';
 
 export const AddTrainingPage = ({
   trainingOptions,
+  trainingAssessmentThreshold,
+  villageOptions,
 }: {
   trainingOptions: { label: string; value: string; category: string }[];
+  trainingAssessmentThreshold: number | null;
+  villageOptions: { label: string; value: string }[];
 }) => {
-  const { state, action } = useAddTrainingPageImpl();
+  const { state, action } = useAddTrainingPageImpl({
+    villageOptions,
+  });
   const {
     control,
     isEditMode,
@@ -21,8 +27,7 @@ export const AddTrainingPage = ({
     isSubmitting,
     errors,
     submitError,
-    isLoadingVillages: isLoading,
-    villageOptions,
+    isLoadingTraining,
   } = state;
 
   const {
@@ -35,6 +40,10 @@ export const AddTrainingPage = ({
     setValue,
     watch,
   } = action;
+
+  if (isLoadingTraining) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden', borderRadius: '16px' }}>
@@ -50,13 +59,13 @@ export const AddTrainingPage = ({
           errors={errors}
           isSubmitting={isSubmitting}
           submitError={submitError}
-          isLoading={isLoading}
           handleFormSubmit={handleFormSubmit}
           handleBack={handleBack}
           villageOptions={villageOptions}
           setValue={setValue}
           watch={watch}
           trainingOptions={trainingOptions}
+          trainingAssessmentThreshold={trainingAssessmentThreshold}
         />
       </Box>
 

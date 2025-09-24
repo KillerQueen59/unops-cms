@@ -11,11 +11,13 @@ import {
   Button,
   CircularProgress,
   Alert,
+  Chip,
 } from '@mui/material';
 import {
   Search as SearchIcon,
   Add as AddIcon,
   TuneOutlined,
+  Close as CloseIcon,
 } from '@mui/icons-material';
 import React from 'react';
 import { AddTrainingPage } from './AddTrainingPage/AddTrainingPage';
@@ -25,6 +27,7 @@ import { FilterModal } from './components/FilterModal';
 import { PageEnum } from '@/constants/page';
 import { trainingTypeOptions } from './constants';
 import { ConfirmationModal } from '@/components';
+import { useTrainingStore } from '@/stores';
 
 const TrainingPage = () => {
   const { state, action } = useTrainingPageImpl();
@@ -42,9 +45,9 @@ const TrainingPage = () => {
     isDeleting,
     trainingOptions,
     trainingAssessmentThreshold,
+    villageOptions,
+    filters,
   } = state;
-
-  console.log('Rerendering TrainingPage', trainingAssessmentThreshold);
 
   const {
     handleAddNew,
@@ -54,6 +57,57 @@ const TrainingPage = () => {
     handleDeleteCancel,
     handleDeleteConfirm,
   } = action;
+
+  // Helper function to get filter label
+  const getFilterLabel = (filterType: string, filterValue: string) => {
+    switch (filterType) {
+      case 'trainingType':
+        const trainingType = trainingTypeOptions.find(
+          (type) => type.value === filterValue
+        );
+        return `Training Type: ${trainingType?.label || filterValue}`;
+      case 'village':
+        const village = villageOptions.find(
+          (village) => village.value === filterValue
+        );
+        return `Village: ${village?.label || filterValue}`;
+      case 'startDate':
+        return `Start Date: ${new Date(filterValue).toLocaleDateString()}`;
+      case 'endDate':
+        return `End Date: ${new Date(filterValue).toLocaleDateString()}`;
+      default:
+        return filterValue;
+    }
+  };
+
+  // You'll need to get removeFilter and clearFilters from your store
+  // Add these to your useTrainingPageImpl hook or destructure them here
+  const { removeFilter, clearFilters } = useTrainingStore();
+
+  // Helper function to remove individual filter
+  const handleRemoveFilter = (filterKey: string) => {
+    removeFilter(filterKey as keyof typeof filters);
+  };
+
+  // Get active filters for display
+  const getActiveFilters = () => {
+    const activeFilters: Array<{ key: string; value: string; label: string }> =
+      [];
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value && value.trim() !== '') {
+        activeFilters.push({
+          key,
+          value,
+          label: getFilterLabel(key, value),
+        });
+      }
+    });
+
+    return activeFilters;
+  };
+
+  const activeFilters = getActiveFilters();
 
   // Only show error if there's an actual error and we're not loading
   if (error && !isLoading) {
@@ -69,7 +123,15 @@ const TrainingPage = () => {
   }
 
   if (page === PageEnum.ADD) {
-    return <AddTrainingPage trainingOptions={trainingOptions} />;
+    return (
+      <AddTrainingPage
+        trainingOptions={trainingOptions}
+        trainingAssessmentThreshold={
+          trainingAssessmentThreshold as number | null
+        }
+        villageOptions={villageOptions}
+      />
+    );
   }
 
   return (
@@ -179,7 +241,65 @@ const TrainingPage = () => {
             Add New
           </Button>
         </Box>
+
+        {/* Filter Chips Section */}
+        {activeFilters.length > 0 && (
+          <Box sx={{ mt: 3 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#6B7280',
+                mb: 1.5,
+                fontWeight: 500,
+              }}
+            >
+              Applied Filters:
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              {activeFilters.map((filter) => (
+                <Chip
+                  key={filter.key}
+                  label={filter.label}
+                  onDelete={() => handleRemoveFilter(filter.key)}
+                  deleteIcon={<CloseIcon />}
+                  sx={{
+                    backgroundColor: '#EEF2FF',
+                    color: '#3730A3',
+                    border: '1px solid #C7D2FE',
+                    borderRadius: '8px',
+                    '& .MuiChip-deleteIcon': {
+                      color: '#6366F1',
+                      '&:hover': {
+                        color: '#4F46E5',
+                      },
+                    },
+                    '&:hover': {
+                      backgroundColor: '#E0E7FF',
+                    },
+                  }}
+                />
+              ))}
+              {activeFilters.length > 1 && (
+                <Chip
+                  label="Clear all"
+                  onClick={() => clearFilters()}
+                  sx={{
+                    backgroundColor: '#FEF2F2',
+                    color: '#991B1B',
+                    border: '1px solid #FECACA',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      backgroundColor: '#FEE2E2',
+                    },
+                  }}
+                />
+              )}
+            </Box>
+          </Box>
+        )}
       </Box>
+
       {isLoading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
           <CircularProgress />
@@ -204,8 +324,8 @@ const TrainingPage = () => {
       <FilterModal
         open={isFilterModalOpen}
         onClose={handleCloseFilter}
-        trainingTypes={trainingTypeOptions.map((option) => option.label)}
-        villages={[]}
+        trainingTypes={trainingTypeOptions}
+        villages={villageOptions}
       />
 
       {/* Delete Confirmation Modal */}

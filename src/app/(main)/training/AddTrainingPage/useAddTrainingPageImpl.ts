@@ -2,15 +2,22 @@
 import { PageEnum } from '@/constants/page';
 import { useTrainingStore } from '@/stores';
 import { TrainingFormData, trainingFormSchema } from '@/types/trainingForm';
-import { useCreateTraining, useUpdateTraining } from '@/hooks/useTrainingData';
+import {
+  useCreateTraining,
+  useTraining,
+  useUpdateTraining,
+} from '@/hooks/useTrainingData';
 import { TrainingData } from '@/types/training';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useVillages } from '@/hooks/useVillageData';
 import toast from 'react-hot-toast';
 
-export const useAddTrainingPageImpl = () => {
+export const useAddTrainingPageImpl = ({
+  villageOptions,
+}: {
+  villageOptions: { label: string; value: string }[];
+}) => {
   const { updateBreadcrumbs, setPage, selectedTraining, breadcrumbs } =
     useTrainingStore();
   const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -21,14 +28,13 @@ export const useAddTrainingPageImpl = () => {
   const createTrainingMutation = useCreateTraining();
   const updateTrainingMutation = useUpdateTraining();
 
-  // fetch village
-  const { data: villagesResponse, isLoading, error } = useVillages();
-  const villages = villagesResponse?.data || [];
-
-  const villageOptions = villages.map((village) => ({
-    label: village.villageName,
-    value: village.villageCode,
-  }));
+  // refetch detail if edit
+  const { data: trainingDetail, isLoading: isLoadingTraining } = useTraining(
+    selectedTraining?.id || null,
+    {
+      enabled: !!selectedTraining,
+    }
+  );
 
   const {
     control,
@@ -40,28 +46,28 @@ export const useAddTrainingPageImpl = () => {
   } = useForm<TrainingFormData>({
     resolver: zodResolver(trainingFormSchema),
     defaultValues: {
-      trainingName: selectedTraining?.trainingName || '',
-      trainingType: selectedTraining?.trainingType || '',
-      date: selectedTraining?.date || '',
-      village: selectedTraining?.village || '',
-      villageId: selectedTraining?.villageId || '',
+      trainingName: trainingDetail?.trainingName || '',
+      trainingType: trainingDetail?.trainingType || '',
+      date: trainingDetail?.date || '',
+      village: trainingDetail?.village || '',
+      villageId: trainingDetail?.villageId || '',
       // Number of beneficiaries
-      male: selectedTraining?.male?.toString() || '',
-      female: selectedTraining?.female?.toString() || '',
-      elderly: selectedTraining?.elderly?.toString() || '',
-      youth: selectedTraining?.youth?.toString() || '',
-      disability: selectedTraining?.disability?.toString() || '',
-      widow: selectedTraining?.widow?.toString() || '',
+      male: trainingDetail?.male?.toString() || '',
+      female: trainingDetail?.female?.toString() || '',
+      elderly: trainingDetail?.elderly?.toString() || '',
+      youth: trainingDetail?.youth?.toString() || '',
+      disability: trainingDetail?.disability?.toString() || '',
+      widow: trainingDetail?.widow?.toString() || '',
       // Training Assessment
-      pretest: selectedTraining?.pretest?.toString() || '',
-      posttest: selectedTraining?.posttest?.toString() || '',
+      pretest: trainingDetail?.pretest?.toString() || '',
+      posttest: trainingDetail?.posttest?.toString() || '',
       // Stakeholders Involved
-      ngo: selectedTraining?.ngo?.toString() || '',
-      government: selectedTraining?.government?.toString() || '',
-      privateSector: selectedTraining?.privateSector?.toString() || '',
-      academics: selectedTraining?.academics?.toString() || '',
-      localCommunity: selectedTraining?.localCommunity?.toString() || '',
-      others: selectedTraining?.others?.toString() || '',
+      ngo: trainingDetail?.ngo?.toString() || '',
+      government: trainingDetail?.government?.toString() || '',
+      privateSector: trainingDetail?.privateSector?.toString() || '',
+      academics: trainingDetail?.academics?.toString() || '',
+      localCommunity: trainingDetail?.localCommunity?.toString() || '',
+      others: trainingDetail?.others?.toString() || '',
     },
   });
 
@@ -98,33 +104,33 @@ export const useAddTrainingPageImpl = () => {
   const isEditMode = !!selectedTraining;
 
   useEffect(() => {
-    if (selectedTraining) {
+    if (trainingDetail) {
       reset({
-        trainingName: selectedTraining.trainingName || '',
-        trainingType: selectedTraining.trainingType || '',
-        date: selectedTraining.date || '',
-        village: selectedTraining.village || '',
-        villageId: selectedTraining.villageId || '',
+        trainingName: trainingDetail.trainingName || '',
+        trainingType: trainingDetail.trainingType || '',
+        date: trainingDetail.date || '',
+        village: trainingDetail.village || '',
+        villageId: trainingDetail.villageId || '',
         // Number of beneficiaries
-        male: selectedTraining.male?.toString() || '',
-        female: selectedTraining.female?.toString() || '',
-        elderly: selectedTraining.elderly?.toString() || '',
-        youth: selectedTraining.youth?.toString() || '',
-        disability: selectedTraining.disability?.toString() || '',
-        widow: selectedTraining.widow?.toString() || '',
+        male: trainingDetail.male?.toString() || '',
+        female: trainingDetail.female?.toString() || '',
+        elderly: trainingDetail.elderly?.toString() || '',
+        youth: trainingDetail.youth?.toString() || '',
+        disability: trainingDetail.disability?.toString() || '',
+        widow: trainingDetail.widow?.toString() || '',
         // Training Assessment
-        pretest: selectedTraining.pretest?.toString() || '',
-        posttest: selectedTraining.posttest?.toString() || '',
+        pretest: trainingDetail.pretest?.toString() || '',
+        posttest: trainingDetail.posttest?.toString() || '',
         // Stakeholders Involved
-        ngo: selectedTraining.ngo?.toString() || '',
-        government: selectedTraining.government?.toString() || '',
-        privateSector: selectedTraining.privateSector?.toString() || '',
-        academics: selectedTraining.academics?.toString() || '',
-        localCommunity: selectedTraining.localCommunity?.toString() || '',
-        others: selectedTraining.others?.toString() || '',
+        ngo: trainingDetail.ngo?.toString() || '',
+        government: trainingDetail.government?.toString() || '',
+        privateSector: trainingDetail.privateSector?.toString() || '',
+        academics: trainingDetail.academics?.toString() || '',
+        localCommunity: trainingDetail.localCommunity?.toString() || '',
+        others: trainingDetail.others?.toString() || '',
       });
     }
-  }, [selectedTraining, reset]);
+  }, [reset, trainingDetail]);
 
   const handleBack = () => {
     if (hasUnsavedChanges()) {
@@ -215,8 +221,9 @@ export const useAddTrainingPageImpl = () => {
 
   useEffect(() => {
     if (errors && Object.keys(errors).length > 0) {
+      const firstErrorKey = Object.keys(errors)[0] as keyof typeof errors;
       toast.error(
-        'Please fix the errors in the form: ' + JSON.stringify(errors)
+        'Please fix the errors in the form: ' + errors[firstErrorKey]?.message
       );
     }
   }, [errors]);
@@ -232,7 +239,7 @@ export const useAddTrainingPageImpl = () => {
     errors,
     submitError,
     villageOptions,
-    isLoadingVillages: isLoading,
+    isLoadingTraining,
   };
 
   const action = {

@@ -25,7 +25,7 @@ import {
 } from '@phosphor-icons/react';
 import { usePathname } from 'next/navigation';
 import { GearIcon, SolarRoofIcon } from '@phosphor-icons/react/dist/ssr';
-import { logout } from '@/lib/api';
+import { getAuthEmail, getAuthName, getAuthRole, logout } from '@/lib/api';
 import { useAuthStatus } from '@/hooks/useAuth';
 import { SettingsIcon } from 'lucide-react';
 
@@ -122,6 +122,8 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
   const [open, setOpen] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const pathname = usePathname();
+  const email = getAuthEmail() || 'User';
+  const role = getAuthRole() || 'Role';
 
   const handleUserMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -202,35 +204,39 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
         },
       ],
     },
-    {
-      section: 'Administration',
-      items: [
-        {
-          text: 'User Management',
-          icon: <UsersIcon size={20} />,
-          activeIcon: (
-            <UsersIcon
-              size={20}
-              color={theme.palette.primary.main}
-              weight="fill"
-            />
-          ),
-          href: '/user',
-        },
-        {
-          text: 'Global Config',
-          icon: <GearIcon size={20} />,
-          activeIcon: (
-            <GearIcon
-              size={20}
-              color={theme.palette.primary.main}
-              weight="fill"
-            />
-          ),
-          href: '/global-config',
-        },
-      ],
-    },
+    ...(role === 'admin'
+      ? []
+      : [
+          {
+            section: 'Administration',
+            items: [
+              {
+                text: 'User Management',
+                icon: <UsersIcon size={20} />,
+                activeIcon: (
+                  <UsersIcon
+                    size={20}
+                    color={theme.palette.primary.main}
+                    weight="fill"
+                  />
+                ),
+                href: '/user',
+              },
+              {
+                text: 'Global Config',
+                icon: <GearIcon size={20} />,
+                activeIcon: (
+                  <GearIcon
+                    size={20}
+                    color={theme.palette.primary.main}
+                    weight="fill"
+                  />
+                ),
+                href: '/global-config',
+              },
+            ],
+          },
+        ]),
   ];
 
   React.useEffect(() => {
@@ -302,16 +308,18 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
                   noWrap
                   component="div"
                   gutterBottom={false}
+                  sx={{ textAlign: 'left' }}
                 >
-                  {'Admin Name'}
+                  {email}
                 </Typography>
                 <Typography
                   variant="body2"
                   noWrap
                   component="div"
                   color="text.secondary"
+                  sx={{ textAlign: 'left' }}
                 >
-                  {'Admin Role'}
+                  {role}
                 </Typography>
               </Box>
             </Button>
@@ -436,11 +444,11 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
         sx={{
           flexGrow: 1,
           minHeight: '100vh',
-          maxWidth: '100%', // Prevent overflow
+          maxWidth: '100%',
           bgcolor: 'background.default',
           p: 2,
           backgroundColor: '#ECF2F3',
-          overflow: 'auto', // Allow scrolling if content is too tall
+          overflow: 'auto',
           boxSizing: 'border-box',
         }}
       >

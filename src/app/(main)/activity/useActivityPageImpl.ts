@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { createActivityColumns } from './ActivityColumn';
 import { useActivityStore } from '@/stores/activityStore';
 import {
@@ -9,14 +9,15 @@ import {
   useActivity,
 } from '@/hooks/useActivityData';
 import { ActivityData } from '@/types/activity';
-import { ActivityFilters } from './components/FilterModal';
 import toast from 'react-hot-toast';
 import { PageEnum } from '@/constants/page';
+import { useVillages } from '@/hooks/useVillageData';
 
 export const useActivityPageImpl = () => {
   const {
     searchQuery,
     page,
+    filters,
     isFilterModalOpen,
     setSearchQuery,
     updateBreadcrumbs,
@@ -41,16 +42,32 @@ export const useActivityPageImpl = () => {
   const [pageSize, setPageSize] = useState(10);
   const [isEdit, setIsEdit] = useState(false);
 
-  // Use pagination parameters
+  const apiFilters = useMemo(
+    () => ({
+      type: filters.type,
+      village: filters.village,
+      status: filters.status,
+      startDate: filters.startDate,
+      endDate: filters.endDate,
+    }),
+    [filters]
+  );
+
+  // Use pagination parameters with filters
   const {
     data: activitiesResponse,
     isLoading,
     error,
-  } = useActivities({
-    page: currentPage,
-    pageSize: pageSize,
-    search: searchQuery,
-  });
+  } = useActivities(apiFilters);
+
+  const { data: villagesResponse, isLoading: isLoadingVillages } =
+    useVillages();
+  const villages = villagesResponse?.data || [];
+
+  const villageOptions = villages.map((village) => ({
+    label: village.villageName,
+    value: village.villageCode,
+  }));
 
   // Extract activities and pagination info from response
   const activities = activitiesResponse?.data || [];
@@ -156,16 +173,6 @@ export const useActivityPageImpl = () => {
     setIsFilterModalOpen(false);
   };
 
-  const handleApplyFilter = (filters: ActivityFilters) => {
-    // TODO: Implement filter logic
-    console.log('Apply filters:', filters);
-  };
-
-  const handleClearFilter = () => {
-    // TODO: Implement clear filter logic
-    console.log('Clear filters');
-  };
-
   const columns = createActivityColumns({
     onView: handleView,
     onEdit: handleEdit,
@@ -189,6 +196,9 @@ export const useActivityPageImpl = () => {
     totalPages,
     currentPage,
     pageSize,
+    // Filter options and current filters
+    filters,
+    villageOptions,
   };
 
   const action = {
@@ -201,8 +211,6 @@ export const useActivityPageImpl = () => {
     setSearchQuery,
     handleOpenFilter,
     handleCloseFilter,
-    handleApplyFilter,
-    handleClearFilter,
     // Pagination actions
     handlePageChange,
     handlePageSizeChange,

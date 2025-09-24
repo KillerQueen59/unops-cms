@@ -51,6 +51,8 @@ export const useActivity = (
     queryKey: activityKeys.detail(id),
     queryFn: () => activityService.getActivityById(id!),
     enabled: enabled && !!id,
+    refetchOnMount: 'always',
+    staleTime: 0,
   });
 };
 

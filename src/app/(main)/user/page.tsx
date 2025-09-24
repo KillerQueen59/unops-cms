@@ -132,27 +132,6 @@ export default function UserPage() {
                 ),
               }}
             />
-            <Button
-              variant="outlined"
-              onClick={handleOpenFilter}
-              startIcon={<TuneOutlined />}
-              size="large"
-              sx={{
-                minWidth: 120,
-                height: 54,
-                borderColor: '#D1D5DB',
-                color: '#6B7280',
-                textTransform: 'none',
-                fontWeight: 500,
-                borderRadius: '12px',
-                '&:hover': {
-                  borderColor: '#9CA3AF',
-                  backgroundColor: '#F9FAFB',
-                },
-              }}
-            >
-              Filter
-            </Button>
           </Box>
           <Button
             variant="contained"

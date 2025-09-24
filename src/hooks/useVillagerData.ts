@@ -51,6 +51,8 @@ export const useVillager = (
     queryKey: villagerKeys.detail(id),
     queryFn: () => villagerService.getVillagerById(id!),
     enabled: enabled && !!id,
+    refetchOnMount: 'always',
+    staleTime: 0,
   });
 };
 

@@ -253,7 +253,8 @@ export const Form = ({
     setShowModalConfirm(false);
     handleSubmit(onSubmit)();
   };
-  const handleSubmitForm = () => {
+  const handleSubmitForm = (e: { preventDefault: () => void }) => {
+    e.preventDefault();
     setShowModalConfirm(true);
   };
 
@@ -404,8 +405,9 @@ export const Form = ({
               control={control}
               placeholder="Insert story..."
               required
-              rows={4}
               error={errors.story}
+              sx={{ minHeight: '100px', resize: 'vertical' }}
+              autoResize
             />
           </Box>
 

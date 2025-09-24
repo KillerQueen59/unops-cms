@@ -1,6 +1,4 @@
-'use client';
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -14,268 +12,369 @@ import {
   Select,
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
+import { useActivityStore } from '@/stores/activityStore';
 
 interface FilterModalProps {
   open: boolean;
   onClose: () => void;
-  onApplyFilter: (filters: ActivityFilters) => void;
-  onClearFilter: () => void;
-}
-
-export interface ActivityFilters {
-  category: string;
-  status: string;
-  startDate: string;
-  endDate: string;
+  villages: {
+    label: string;
+    value: string;
+  }[];
 }
 
 export const FilterModal: React.FC<FilterModalProps> = ({
   open,
   onClose,
-  onApplyFilter,
-  onClearFilter,
+  villages,
 }) => {
-  const [filters, setFilters] = useState<ActivityFilters>({
-    category: '',
+  const { filters, setFilters, clearFilters } = useActivityStore();
+
+  const statusOptions = [
+    {
+      label: 'Ongoing',
+      value: 'ongoing',
+    },
+    {
+      label: 'Completed',
+      value: 'completed',
+    },
+    {
+      label: 'Not Yet',
+      value: 'not yet',
+    },
+  ];
+  const typeOptions = [
+    {
+      label: 'Training',
+      value: 'training',
+    },
+    {
+      label: 'Demo Site',
+      value: 'demosite',
+    },
+    {
+      label: 'Workshop',
+      value: 'workshop',
+    },
+  ];
+
+  // Local state for form values
+  const [localFilters, setLocalFilters] = useState({
+    type: '',
+    village: '',
     status: '',
     startDate: '',
     endDate: '',
   });
 
-  const categoryOptions = ['Category 1', 'Category 2', 'Category 3'];
-
-  const statusOptions = ['Not Started', 'In Progress', 'Completed', 'On Hold'];
+  // Initialize local filters when modal opens or filters change
+  useEffect(() => {
+    if (open) {
+      setLocalFilters(filters);
+    }
+  }, [open, filters]);
 
   const handleApplyFilter = () => {
-    onApplyFilter(filters);
+    // Only set filters when Apply button is clicked
+    setFilters(localFilters);
     onClose();
   };
 
   const handleClearFilter = () => {
-    setFilters({
-      category: '',
+    // Clear both local and store filters
+    const clearedFilters = {
+      type: '',
+      village: '',
       status: '',
       startDate: '',
       endDate: '',
-    });
-    onClearFilter();
+    };
+    setLocalFilters(clearedFilters);
+    clearFilters();
   };
 
-  const handleFilterChange = (field: keyof ActivityFilters, value: string) => {
-    setFilters((prev) => ({ ...prev, [field]: value }));
+  const handleLocalFilterChange = (field: string, value: string) => {
+    // Update local state only
+    setLocalFilters((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleCancel = () => {
+    // Reset local filters to current store values when canceling
+    setLocalFilters(filters);
+    onClose();
   };
 
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={handleCancel}
       maxWidth="sm"
       fullWidth
       PaperProps={{
         sx: {
           borderRadius: '16px',
-          padding: '8px',
+          p: 0,
         },
       }}
     >
-      <DialogContent sx={{ padding: '32px' }}>
-        {/* Header */}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: 3,
-          }}
-        >
-          <Typography
-            variant="h6"
+      <DialogContent sx={{ p: 0 }}>
+        <Box sx={{ p: 3 }}>
+          {/* Header */}
+          <Box
             sx={{
-              fontWeight: 'bold',
-              color: '#374151',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 3,
             }}
           >
-            Filter
-          </Typography>
-          <IconButton
-            onClick={onClose}
-            sx={{
-              color: '#EF4444',
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </Box>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 'bold',
+                color: '#374151',
+              }}
+            >
+              Filter
+            </Typography>
+            <IconButton
+              onClick={handleCancel}
+              sx={{
+                color: '#6B7280',
+                '&:hover': {
+                  backgroundColor: '#F3F4F6',
+                },
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </Box>
 
-        {/* Filter Form */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {/* Category and Status Row */}
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-            <Box>
+          {/* Filter Fields */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {/* Category and Status Row */}
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: '#374151',
+                    fontWeight: 500,
+                    mb: 1,
+                  }}
+                >
+                  Status
+                </Typography>
+                <FormControl fullWidth>
+                  <Select
+                    value={localFilters.status}
+                    onChange={(e) =>
+                      handleLocalFilterChange('status', e.target.value)
+                    }
+                    displayEmpty
+                    sx={{
+                      borderRadius: '8px',
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#D1D5DB',
+                      },
+                    }}
+                  >
+                    <MenuItem value="">All</MenuItem>
+                    {statusOptions.map((status) => (
+                      <MenuItem key={status.value} value={status.value}>
+                        {status.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: '#374151',
+                    fontWeight: 500,
+                    mb: 1,
+                  }}
+                >
+                  Type
+                </Typography>
+                <FormControl fullWidth>
+                  <Select
+                    value={localFilters.type}
+                    onChange={(e) =>
+                      handleLocalFilterChange('type', e.target.value)
+                    }
+                    displayEmpty
+                    sx={{
+                      borderRadius: '8px',
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#D1D5DB',
+                      },
+                    }}
+                  >
+                    <MenuItem value="">All</MenuItem>
+                    {typeOptions.map((type) => (
+                      <MenuItem key={type.value} value={type.value}>
+                        {type.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+            </Box>
+
+            <Box sx={{ flex: 1 }}>
               <Typography
                 variant="body2"
-                sx={{ color: '#6B7280', mb: 1, fontWeight: 500 }}
+                sx={{
+                  color: '#374151',
+                  fontWeight: 500,
+                  mb: 1,
+                }}
               >
-                Category
+                Village
               </Typography>
               <FormControl fullWidth>
                 <Select
-                  value={filters.category}
+                  value={localFilters.village}
                   onChange={(e) =>
-                    handleFilterChange('category', e.target.value)
+                    handleLocalFilterChange('village', e.target.value)
                   }
                   displayEmpty
                   sx={{
                     borderRadius: '8px',
-                    '& .MuiSelect-select': {
-                      padding: '12px 16px',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#D1D5DB',
                     },
                   }}
                 >
                   <MenuItem value="">All</MenuItem>
-                  {categoryOptions.map((option) => (
-                    <MenuItem key={option} value={option}>
-                      {option}
+                  {villages.map((village) => (
+                    <MenuItem key={village.value} value={village.value}>
+                      {village.label}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Box>
 
-            <Box>
-              <Typography
-                variant="body2"
-                sx={{ color: '#6B7280', mb: 1, fontWeight: 500 }}
-              >
-                Status
-              </Typography>
-              <FormControl fullWidth>
-                <Select
-                  value={filters.status}
-                  onChange={(e) => handleFilterChange('status', e.target.value)}
-                  displayEmpty
+            {/* Date Range Row */}
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  variant="body2"
                   sx={{
-                    borderRadius: '8px',
-                    '& .MuiSelect-select': {
-                      padding: '12px 16px',
-                    },
+                    color: '#374151',
+                    fontWeight: 500,
+                    mb: 1,
                   }}
                 >
-                  <MenuItem value="">All</MenuItem>
-                  {statusOptions.map((option) => (
-                    <MenuItem key={option} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                  Start Date
+                </Typography>
+                <TextField
+                  type="date"
+                  fullWidth
+                  value={localFilters.startDate}
+                  onChange={(e) =>
+                    handleLocalFilterChange('startDate', e.target.value)
+                  }
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#D1D5DB',
+                    },
+                  }}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+              </Box>
+
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: '#374151',
+                    fontWeight: 500,
+                    mb: 1,
+                  }}
+                >
+                  End Date
+                </Typography>
+                <TextField
+                  type="date"
+                  fullWidth
+                  value={localFilters.endDate}
+                  onChange={(e) =>
+                    handleLocalFilterChange('endDate', e.target.value)
+                  }
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#D1D5DB',
+                    },
+                  }}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+              </Box>
             </Box>
           </Box>
 
-          {/* Start Date Row */}
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-            <Box>
-              <Typography
-                variant="body2"
-                sx={{ color: '#6B7280', mb: 1, fontWeight: 500 }}
-              >
-                Start Date
-              </Typography>
-              <TextField
-                type="date"
-                value={filters.startDate}
-                onChange={(e) =>
-                  handleFilterChange('startDate', e.target.value)
-                }
-                placeholder="All"
-                fullWidth
-                InputProps={{
-                  sx: {
-                    borderRadius: '8px',
-                    '& input': {
-                      padding: '12px 16px',
-                    },
-                  },
-                }}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              />
-            </Box>
-
-            <Box>
-              <Typography
-                variant="body2"
-                sx={{ color: '#6B7280', mb: 1, fontWeight: 500 }}
-              >
-                End Date
-              </Typography>
-              <TextField
-                type="date"
-                value={filters.endDate}
-                onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                placeholder="All"
-                fullWidth
-                InputProps={{
-                  sx: {
-                    borderRadius: '8px',
-                    '& input': {
-                      padding: '12px 16px',
-                    },
-                  },
-                }}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              />
-            </Box>
+          {/* Action Buttons */}
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 2,
+              mt: 4,
+              justifyContent: 'center',
+            }}
+          >
+            <Button
+              variant="outlined"
+              onClick={handleClearFilter}
+              sx={{
+                borderRadius: '8px',
+                borderColor: '#D1D5DB',
+                color: '#374151',
+                width: '50%',
+                height: 54,
+                px: 3,
+                py: 1,
+                '&:hover': {
+                  borderColor: '#9CA3AF',
+                  backgroundColor: '#F9FAFB',
+                },
+              }}
+            >
+              Clear Filter
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleApplyFilter}
+              sx={{
+                borderRadius: '8px',
+                color: 'white',
+                width: '50%',
+                height: 54,
+                px: 3,
+                py: 1,
+                '&:hover': {
+                  backgroundColor: '#2563EB',
+                },
+              }}
+            >
+              Apply Filter
+            </Button>
           </Box>
-        </Box>
-
-        {/* Action Buttons */}
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 2,
-            mt: 4,
-          }}
-        >
-          <Button
-            variant="outlined"
-            onClick={handleClearFilter}
-            sx={{
-              flex: 1,
-              borderColor: '#D1D5DB',
-              color: '#6B7280',
-              borderRadius: '8px',
-              textTransform: 'none',
-              fontWeight: 500,
-              height: '48px',
-              '&:hover': {
-                borderColor: '#9CA3AF',
-                backgroundColor: '#F9FAFB',
-              },
-            }}
-          >
-            Clear Filter
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleApplyFilter}
-            sx={{
-              flex: 1,
-              backgroundColor: '#0EA5E9',
-              borderRadius: '8px',
-              textTransform: 'none',
-              fontWeight: 500,
-              height: '48px',
-              '&:hover': {
-                backgroundColor: '#0284C7',
-              },
-            }}
-          >
-            Apply Filter
-          </Button>
         </Box>
       </DialogContent>
     </Dialog>

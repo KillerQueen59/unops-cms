@@ -21,7 +21,7 @@ export interface UpdateDemositeData extends CreateDemositeData {
 export interface DemositeQueryParams {
   page?: number;
   pageSize?: number;
-  type?: 'hero' | 'location';
+  type?: string;
   search?: string;
   sortBy?: string;
 }

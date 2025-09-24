@@ -14,6 +14,7 @@ export const useDataPageImpl = () => {
     previewFile,
     groupBy,
     isGrouped,
+    filters, // Add filters from store
     setSearchQuery,
     openUploadModal,
     closeUploadModal,
@@ -29,6 +30,21 @@ export const useDataPageImpl = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedData, setSelectedData] = useState<DataFile | null>(null);
 
+  // Determine the area filter to use
+  // Priority: filters.area (from FilterModal) > groupBy (from toggle buttons)
+  const getAreaFilter = () => {
+    if (filters.area) {
+      return filters.area;
+    }
+
+    // Otherwise, use the groupBy for legacy toggle button functionality
+    if (isGrouped && groupBy !== 'other') {
+      return groupBy;
+    }
+
+    return undefined;
+  };
+
   // Use pagination parameters
   const {
     data: documentsResponse,
@@ -38,7 +54,7 @@ export const useDataPageImpl = () => {
     page: currentPage,
     pageSize: pageSize,
     search: searchQuery,
-    area: isGrouped && groupBy !== 'other' ? groupBy : undefined,
+    area: getAreaFilter(),
   });
 
   // Extract documents and pagination info from response
@@ -48,12 +64,7 @@ export const useDataPageImpl = () => {
   const totalPages = documentsResponse?.totalPages || 0;
 
   const deleteMutation = useDeleteDocument();
-  const {
-    downloadFile,
-    downloading,
-    error: downloadError,
-    isDownloading,
-  } = useFileDownload();
+  const { downloadFile } = useFileDownload();
 
   const handleDownload = async (file: DataFile) => {
     try {
@@ -68,9 +79,10 @@ export const useDataPageImpl = () => {
     }
   };
 
+  // Reset pagination when search, grouping, or filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, groupBy, isGrouped]);
+  }, [searchQuery, groupBy, isGrouped, filters]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -117,23 +129,9 @@ export const useDataPageImpl = () => {
     onDelete: handleDelete,
   });
 
-  // Filter data based on grouping (if needed for client-side filtering)
-  const filteredData = dataFiles.filter((file) => {
-    if (!isGrouped) return true;
-
-    // Filter by selected category
-    if (groupBy === 'regency') {
-      return file.category === 'regency';
-    } else if (groupBy === 'other') {
-      return file.category === 'other';
-    }
-
-    return true;
-  });
-
   const state = {
     columns,
-    dataFiles: filteredData,
+    dataFiles,
     error,
     isLoading,
     searchQuery,

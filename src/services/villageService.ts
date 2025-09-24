@@ -226,6 +226,28 @@ export const villageService = {
     }
   },
 
+  async getVillageCategories(): Promise<
+    Array<{
+      _id: string;
+      name: string;
+    }>
+  > {
+    const response = await apiClient.get<{
+      status: boolean;
+      message: string;
+      data: {
+        villageCategories: {
+          _id: string;
+          name: string;
+        }[];
+      };
+    }>(`/village/categories`);
+    if (response.status && response.data) {
+      return response.data.villageCategories || [];
+    }
+    return [];
+  },
+
   async createVillage(villageData: CreateVillageData): Promise<VillageData> {
     return await apiClient.post<VillageData>('/village', villageData);
   },

@@ -10,21 +10,24 @@ import {
   CircularProgress,
   Alert,
   Pagination,
+  Chip,
 } from '@mui/material';
 import {
   Search as SearchIcon,
   Add as AddIcon,
   TuneOutlined,
+  Close as CloseIcon,
 } from '@mui/icons-material';
 import React from 'react';
 
 import { useDemositePageImpl } from './useDemositePageImpl';
 import { ListCard } from './components/ListCard';
-import { DemositePageEnum } from '@/stores/demositeStore';
+import { DemositePageEnum, useDemositeStore } from '@/stores/demositeStore';
 import { AddDemositePage } from './AddDemositePage/AddDemositePage';
 import { EditDemositePage } from './EditDemositePage/EditDemositePage';
 import { DetailDemositePage } from './DetailDemositePage/DetailDemositePage';
 import { ConfirmationModal } from '@/components';
+import { FilterModal } from './components/FilterModal';
 
 export default function DemositePage() {
   const { state, action } = useDemositePageImpl();
@@ -44,6 +47,8 @@ export default function DemositePage() {
     totalPages,
     currentPage,
     pageSize,
+    filters,
+    isFilterModalOpen,
   } = state;
 
   const {
@@ -56,7 +61,40 @@ export default function DemositePage() {
     setSearchQuery,
     // Pagination actions
     handlePageChange,
+    handleCloseFilter,
+    handleOpenFilter,
   } = action;
+
+  const { removeFilter, clearFilters } = useDemositeStore();
+
+  const getFilterLabel = (filterType: string, filterValue: string) => {
+    return `${filterType}: ${filterValue}`;
+  };
+
+  // Helper function to remove individual filter
+  const handleRemoveFilter = (filterKey: string) => {
+    removeFilter(filterKey as keyof typeof filters);
+  };
+
+  // Get active filters for display
+  const getActiveFilters = () => {
+    const activeFilters: Array<{ key: string; value: string; label: string }> =
+      [];
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value && value.trim() !== '') {
+        activeFilters.push({
+          key,
+          value,
+          label: getFilterLabel(key, value),
+        });
+      }
+    });
+
+    return activeFilters;
+  };
+
+  const activeFilters = getActiveFilters();
 
   if (error) {
     return (
@@ -120,9 +158,7 @@ export default function DemositePage() {
               }}
             >
               This page shows a list of demosite programs.{' '}
-              {isLoading
-                ? 'Loading...'
-                : `Showing ${startIndex} to ${endIndex} of ${totalItems} demosites`}
+              {isLoading ? 'Loading...' : `${demosites.length} demosites found`}
             </Typography>
           </Box>
         </Box>
@@ -156,34 +192,29 @@ export default function DemositePage() {
               }}
             />
 
-            <>
-              <Button
-                variant="outlined"
-                color="secondary"
-                startIcon={
-                  <TuneOutlined
-                    sx={{
-                      rotate: '90deg',
-                    }}
-                  />
-                }
-                onClick={() => {
-                  // Handle filter button click
-                }}
-                sx={{
-                  minWidth: 120,
-                  height: 54,
-                  transform: 'translateY(-2px)',
-                  '&.MuiButton-root': {
-                    borderRadius: '12px',
-                  },
-                }}
-              >
-                Filter
-              </Button>
-            </>
+            <Button
+              variant="outlined"
+              color="secondary"
+              startIcon={
+                <TuneOutlined
+                  sx={{
+                    rotate: '90deg',
+                  }}
+                />
+              }
+              onClick={handleOpenFilter}
+              sx={{
+                minWidth: 120,
+                height: 54,
+                transform: 'translateY(-2px)',
+                '&.MuiButton-root': {
+                  borderRadius: '12px',
+                },
+              }}
+            >
+              Filter
+            </Button>
           </Box>
-
           <Button
             variant="contained"
             color="primary"
@@ -191,7 +222,7 @@ export default function DemositePage() {
             startIcon={<AddIcon />}
             size="large"
             sx={{
-              minWidth: 180,
+              minWidth: 120,
               height: 54,
               transform: 'translateY(-2px)',
               '&.MuiButton-root': {
@@ -202,6 +233,63 @@ export default function DemositePage() {
             Add New
           </Button>
         </Box>
+
+        {/* Filter Chips Section */}
+        {activeFilters.length > 0 && (
+          <Box sx={{ mt: 3 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#6B7280',
+                mb: 1.5,
+                fontWeight: 500,
+              }}
+            >
+              Applied Filters:
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              {activeFilters.map((filter) => (
+                <Chip
+                  key={filter.key}
+                  label={filter.label}
+                  onDelete={() => handleRemoveFilter(filter.key)}
+                  deleteIcon={<CloseIcon />}
+                  sx={{
+                    backgroundColor: '#EEF2FF',
+                    color: '#3730A3',
+                    border: '1px solid #C7D2FE',
+                    borderRadius: '8px',
+                    '& .MuiChip-deleteIcon': {
+                      color: '#6366F1',
+                      '&:hover': {
+                        color: '#4F46E5',
+                      },
+                    },
+                    '&:hover': {
+                      backgroundColor: '#E0E7FF',
+                    },
+                  }}
+                />
+              ))}
+              {activeFilters.length > 1 && (
+                <Chip
+                  label="Clear all"
+                  onClick={() => clearFilters()}
+                  sx={{
+                    backgroundColor: '#FEF2F2',
+                    color: '#991B1B',
+                    border: '1px solid #FECACA',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      backgroundColor: '#FEE2E2',
+                    },
+                  }}
+                />
+              )}
+            </Box>
+          </Box>
+        )}
       </Box>
 
       {/* Grid Content */}
@@ -320,6 +408,9 @@ export default function DemositePage() {
         primaryButtonText={isDeleting ? 'Deleting...' : 'Delete'}
         secondaryButtonText="Cancel"
       />
+
+      {/* Filter Modal */}
+      <FilterModal open={isFilterModalOpen} onClose={handleCloseFilter} />
     </Paper>
   );
 }

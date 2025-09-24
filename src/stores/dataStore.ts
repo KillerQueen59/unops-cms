@@ -14,6 +14,10 @@ interface DataState {
   previewFile: DataFile | null;
   groupBy: 'regency' | 'other';
   isGrouped: boolean;
+  isFilterModalOpen: boolean;
+  filters: {
+    area: string;
+  };
 }
 
 interface DataActions {
@@ -27,6 +31,10 @@ interface DataActions {
   setGroupBy: (groupBy: 'regency' | 'other') => void;
   setIsGrouped: (isGrouped: boolean) => void;
   resetData: () => void;
+  setIsFilterModalOpen: (isOpen: boolean) => void;
+  setFilters: (filters: Partial<DataState['filters']>) => void;
+  clearFilters: () => void;
+  removeFilter: (filterKey: keyof DataState['filters']) => void;
 }
 
 export const useDataStore = create<DataState & DataActions>((set) => ({
@@ -39,6 +47,10 @@ export const useDataStore = create<DataState & DataActions>((set) => ({
   previewFile: null,
   groupBy: 'regency',
   isGrouped: true,
+  isFilterModalOpen: false,
+  filters: {
+    area: '',
+  },
 
   // Actions
   setSearchQuery: (query) => set({ searchQuery: query }),
@@ -60,4 +72,22 @@ export const useDataStore = create<DataState & DataActions>((set) => ({
       isPreviewModalOpen: false,
       previewFile: null,
     }),
+  setIsFilterModalOpen: (isOpen: boolean) => set({ isFilterModalOpen: isOpen }),
+  setFilters: (filters: Partial<DataState['filters']>) =>
+    set((state) => ({
+      filters: {
+        ...state.filters,
+        ...filters,
+        area: filters.area ?? state.filters.area,
+      },
+    })),
+  clearFilters: () => set({ filters: { area: '' } }),
+  removeFilter: (filterKey: keyof DataState['filters']) => {
+    set((state) => ({
+      filters: {
+        ...state.filters,
+        [filterKey]: '',
+      },
+    }));
+  },
 }));

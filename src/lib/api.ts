@@ -3,15 +3,46 @@ const API_BASE_URL = 'http://unops-api-dudw4t-af60f1-31-97-222-225.traefik.me';
 
 // Token management - uses localStorage for persistence
 const TOKEN_STORAGE_KEY = 'auth_token';
+const NAME_STORAGE_KEY = 'auth_name';
+const EMAIL_STORAGE_KEY = 'auth_email';
+const ROLE_STORAGE_KEY = 'auth_role';
 
 export const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') return null; // SSR safety
   return localStorage.getItem(TOKEN_STORAGE_KEY);
 };
 
-export const setAuthToken = (token: string): void => {
+export const getAuthName = (): string | null => {
+  if (typeof window === 'undefined') return null; // SSR safety
+  return localStorage.getItem(NAME_STORAGE_KEY);
+};
+
+export const getAuthEmail = (): string | null => {
+  if (typeof window === 'undefined') return null; // SSR safety
+  return localStorage.getItem(EMAIL_STORAGE_KEY);
+};
+
+export const getAuthRole = (): string | null => {
+  if (typeof window === 'undefined') return null; // SSR safety
+  return localStorage.getItem(ROLE_STORAGE_KEY);
+};
+
+export const setAuthToken = ({
+  token,
+  name,
+  role,
+  email,
+}: {
+  token: string;
+  name: string;
+  role: string;
+  email: string;
+}): void => {
   if (typeof window === 'undefined') return; // SSR safety
   localStorage.setItem(TOKEN_STORAGE_KEY, token);
+  localStorage.setItem(NAME_STORAGE_KEY, name);
+  localStorage.setItem(EMAIL_STORAGE_KEY, email);
+  localStorage.setItem(ROLE_STORAGE_KEY, role);
   // Dispatch custom event for auth state changes
   window.dispatchEvent(new CustomEvent('auth-login'));
 };
@@ -19,6 +50,9 @@ export const setAuthToken = (token: string): void => {
 export const removeAuthToken = (): void => {
   if (typeof window === 'undefined') return; // SSR safety
   localStorage.removeItem(TOKEN_STORAGE_KEY);
+  localStorage.removeItem(NAME_STORAGE_KEY);
+  localStorage.removeItem(ROLE_STORAGE_KEY);
+  localStorage.removeItem(EMAIL_STORAGE_KEY);
   window.dispatchEvent(new CustomEvent('auth-logout'));
 };
 
@@ -149,6 +183,8 @@ interface LoginResponse {
   message: string;
   data: {
     authorization: string;
+    role: string;
+    name: string;
   };
 }
 
@@ -181,7 +217,12 @@ export const login = async (email: string, password: string): Promise<void> => {
     // Store token and trigger auth event
 
     const cleanToken = data.data.authorization.split(' ')[1];
-    setAuthToken(cleanToken);
+    setAuthToken({
+      token: cleanToken,
+      name: data.data.name,
+      role: data.data.role,
+      email: email,
+    });
   } catch (error) {
     if (error instanceof Error) {
       throw error;

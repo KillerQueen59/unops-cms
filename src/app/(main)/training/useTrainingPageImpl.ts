@@ -14,6 +14,7 @@ import {
   useTrainingLivelihood,
 } from '@/hooks/useGlobalConfigData';
 import { TrainingType } from './constants';
+import { useVillages } from '@/hooks/useVillageData';
 
 export const useTrainingPageImpl = () => {
   const {
@@ -76,13 +77,12 @@ export const useTrainingPageImpl = () => {
 
   const apiFilters = useMemo(
     () => ({
-      searchQuery,
       trainingType: filters.trainingType,
       village: filters.village,
       startDate: filters.startDate,
       endDate: filters.endDate,
     }),
-    [searchQuery, filters]
+    [filters]
   );
 
   // Use pagination parameters
@@ -109,6 +109,16 @@ export const useTrainingPageImpl = () => {
 
   // Ensure trainings is always an array
   const safeTrainings = Array.isArray(trainings) ? trainings : [];
+
+  // fetch village
+  const { data: villagesResponse, isLoading: isLoadingVillages } =
+    useVillages();
+  const villages = villagesResponse?.data || [];
+
+  const villageOptions = villages.map((village) => ({
+    label: village.villageName,
+    value: village.villageCode,
+  }));
 
   // Reset page when search query changes
   useEffect(() => {
@@ -207,7 +217,7 @@ export const useTrainingPageImpl = () => {
     columns,
     trainings: safeTrainings,
     error,
-    isLoading,
+    isLoading: isLoadingVillages || isLoading,
     searchQuery,
     page,
     showDeleteModal,
@@ -222,6 +232,8 @@ export const useTrainingPageImpl = () => {
     isFilterModalOpen,
     trainingOptions,
     trainingAssessmentThreshold: trainingAssessmentThreshold.data?.value || 0,
+    villageOptions,
+    filters,
   };
 
   const action = {

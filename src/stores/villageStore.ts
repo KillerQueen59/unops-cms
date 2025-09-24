@@ -3,6 +3,7 @@ import { devtools } from 'zustand/middleware';
 import { VillageData } from '@/types/village';
 import { PageEnum } from '@/constants/page';
 import { BreadcrumbItem } from '@/types/common';
+import { ca, fi } from 'zod/v4/locales';
 
 interface VillageState {
   // Village list state
@@ -20,6 +21,10 @@ interface VillageState {
   searchQuery: string;
   currentPage: number;
   itemsPerPage: number;
+  isFilterModalOpen: boolean;
+  filters: {
+    categoryId: string;
+  };
 
   // Actions
   setPage: (page: PageEnum) => void;
@@ -37,6 +42,10 @@ interface VillageState {
   setSearchQuery: (query: string) => void;
   setCurrentPage: (page: number) => void;
   setItemsPerPage: (items: number) => void;
+  setIsFilterModalOpen: (isOpen: boolean) => void;
+  setFilters: (filters: Partial<VillageState['filters']>) => void;
+  clearFilters: () => void;
+  removeFilter: (filterKey: keyof VillageState['filters']) => void;
 
   // Village CRUD actions
   addVillage: (village: VillageData) => void;
@@ -63,6 +72,9 @@ const initialState = {
   isDeleteModalOpen: false,
   page: PageEnum.LIST,
   breadcrumbs: [] as BreadcrumbItem[],
+  filters: {
+    categoryId: '',
+  },
 };
 
 export const useVillageStore = create<VillageState>()(
@@ -117,6 +129,42 @@ export const useVillageStore = create<VillageState>()(
         }
 
         set({ breadcrumbs: newBreadcrumbs, page }, false, 'updateBreadcrumbs');
+      },
+
+      setIsFilterModalOpen: (isOpen) =>
+        set({ isFilterModalOpen: isOpen }, false, 'setIsFilterModalOpen'),
+
+      setFilters: (newFilters) => {
+        const { filters } = get();
+        set(
+          { filters: { ...filters, ...newFilters }, currentPage: 1 },
+          false,
+          'setFilters'
+        );
+      },
+
+      clearFilters: () =>
+        set(
+          {
+            filters: {
+              categoryId: '',
+            },
+            currentPage: 1,
+          },
+          false,
+          'clearFilters'
+        ),
+
+      removeFilter: (filterKey) => {
+        const { filters } = get();
+        set(
+          {
+            filters: { ...filters, [filterKey]: '' },
+            currentPage: 1,
+          },
+          false,
+          'removeFilter'
+        );
       },
 
       // CRUD operations

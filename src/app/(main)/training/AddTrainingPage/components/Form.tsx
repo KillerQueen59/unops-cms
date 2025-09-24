@@ -22,24 +22,24 @@ export const Form = ({
   isSubmitting,
   submitError,
   villageOptions,
-  isLoading,
   setValue,
   handleFormSubmit,
   handleBack,
   watch,
   trainingOptions,
+  trainingAssessmentThreshold,
 }: {
   control: Control<TrainingFormData>;
   errors: FieldErrors<TrainingFormData>;
   isSubmitting: boolean;
   submitError?: string | null;
   villageOptions: { label: string; value: string }[];
-  isLoading: boolean;
   setValue: (field: keyof TrainingFormData, value: any) => void;
   handleFormSubmit: () => void;
   handleBack: () => void;
   watch: (field: keyof TrainingFormData) => any;
   trainingOptions: { label: string; value: string; category: string }[];
+  trainingAssessmentThreshold: number | null;
 }) => {
   const selectedVillage = watch('villageId');
   const selectedCategory = watch('trainingType');
@@ -161,7 +161,6 @@ export const Form = ({
                     setValue('village', newValue?.label || '');
                     setValue('villageId', newValue?.value || '');
                   }}
-                  disabled={isLoading}
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -288,7 +287,8 @@ export const Form = ({
               mb: 3,
             }}
           >
-            Training Assessment
+            Training Assessment ( Minimum Passing Grade:{' '}
+            {trainingAssessmentThreshold ?? 'N/A'} )
           </Typography>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>

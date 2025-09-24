@@ -51,6 +51,8 @@ export const useUser = (id: string | null, options?: { enabled?: boolean }) => {
     queryKey: userKeys.detail(id),
     queryFn: () => userService.getUserById(id!),
     enabled: enabled && !!id,
+    refetchOnMount: 'always',
+    staleTime: 0,
   });
 };
 

@@ -31,6 +31,10 @@ interface DemositeState {
   searchQuery: string;
   currentPage: number;
   itemsPerPage: number;
+  isFilterModalOpen: boolean;
+  filters: {
+    type: string;
+  };
 
   // Actions
   setPage: (page: DemositePageEnum) => void;
@@ -47,6 +51,10 @@ interface DemositeState {
   setSearchQuery: (query: string) => void;
   setCurrentPage: (page: number) => void;
   setItemsPerPage: (items: number) => void;
+  setIsFilterModalOpen: (isOpen: boolean) => void;
+  setFilters: (filters: Partial<DemositeState['filters']>) => void;
+  clearFilters: () => void;
+  removeFilter: (filterKey: keyof DemositeState['filters']) => void;
 
   // Demosite CRUD actions
   addDemosite: (demosite: DemositeData) => void;
@@ -72,6 +80,9 @@ const initialState = {
   isDeleteModalOpen: false,
   page: DemositePageEnum.LIST,
   breadcrumbs: [] as BreadcrumbItem[],
+  filters: {
+    type: '',
+  },
 };
 
 export const useDemositeStore = create<DemositeState>()(
@@ -90,6 +101,42 @@ export const useDemositeStore = create<DemositeState>()(
         set({ itemsPerPage: items, currentPage: 1 }, false, 'setItemsPerPage'),
 
       setPage: (page) => set({ page }, false, 'setPage'),
+
+      setIsFilterModalOpen: (isOpen) =>
+        set({ isFilterModalOpen: isOpen }, false, 'setIsFilterModalOpen'),
+
+      setFilters: (newFilters) => {
+        const { filters } = get();
+        set(
+          { filters: { ...filters, ...newFilters }, currentPage: 1 },
+          false,
+          'setFilters'
+        );
+      },
+
+      clearFilters: () =>
+        set(
+          {
+            filters: {
+              type: '',
+            },
+            currentPage: 1,
+          },
+          false,
+          'clearFilters'
+        ),
+
+      removeFilter: (filterKey) => {
+        const { filters } = get();
+        set(
+          {
+            filters: { ...filters, [filterKey]: '' },
+            currentPage: 1,
+          },
+          false,
+          'removeFilter'
+        );
+      },
 
       // Breadcrumb actions
       setBreadcrumbs: (breadcrumbs) =>

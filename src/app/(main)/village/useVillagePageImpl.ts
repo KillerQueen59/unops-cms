@@ -1,10 +1,11 @@
 import { useVillageStore } from '@/stores/villageStore';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { VillageData } from '@/types/village';
 import {
   useVillages,
   useDeleteVillage,
   useVillage,
+  useVillageCategories,
 } from '@/hooks/useVillageData';
 import { createVillageColumns } from './VillageColumn';
 import { PageEnum } from '@/constants/page';
@@ -13,6 +14,8 @@ export const useVillagePageImpl = () => {
   const {
     searchQuery,
     page,
+    filters,
+    isFilterModalOpen,
     setSearchQuery,
     updateBreadcrumbs,
     setPage,
@@ -20,6 +23,7 @@ export const useVillagePageImpl = () => {
     navigateToEdit,
     resetVillage,
     setSelectedCategory,
+    setIsFilterModalOpen,
   } = useVillageStore();
 
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -34,8 +38,19 @@ export const useVillagePageImpl = () => {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
   const [isEdit, setIsEdit] = useState(false);
+  const { data: villageCategories } = useVillageCategories();
+
+  const apiFilters = useMemo(
+    () => ({
+      categoryId:
+        villageCategories?.find((cat) => cat.name === filters.categoryId)
+          ?._id || '',
+    }),
+    [filters, villageCategories]
+  );
+
+  console.log('apiFilters:', apiFilters, villageCategories);
 
   // Use pagination parameters
   const {
@@ -46,6 +61,7 @@ export const useVillagePageImpl = () => {
     page: currentPage,
     pageSize: pageSize,
     search: searchQuery,
+    ...apiFilters,
   });
 
   // Extract villages and pagination info from response
@@ -145,7 +161,6 @@ export const useVillagePageImpl = () => {
         setVillageToDelete(null);
       } catch (error) {
         console.error('Failed to delete village:', error);
-        // Handle error (could show toast or alert)
       }
     }
   };
@@ -160,6 +175,14 @@ export const useVillagePageImpl = () => {
     onEdit: handleEdit,
     onDelete: handleDelete,
   });
+
+  const handleOpenFilter = () => {
+    setIsFilterModalOpen(true);
+  };
+
+  const handleCloseFilter = () => {
+    setIsFilterModalOpen(false);
+  };
 
   const state = {
     columns,
@@ -178,6 +201,10 @@ export const useVillagePageImpl = () => {
     totalPages,
     currentPage,
     pageSize,
+    // Filter options and current filters
+    filters,
+    isFilterModalOpen,
+    villageCategories,
   };
 
   const action = {
@@ -193,6 +220,9 @@ export const useVillagePageImpl = () => {
     // Pagination actions
     handlePageChange,
     handlePageSizeChange,
+    setIsFilterModalOpen,
+    handleOpenFilter,
+    handleCloseFilter,
   };
 
   return { state, action };

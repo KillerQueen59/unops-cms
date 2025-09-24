@@ -57,6 +57,24 @@ export const useVillage = (
     queryKey: villageKeys.detail(id),
     queryFn: () => villageService.getVillageById(id!),
     enabled: enabled && !!id,
+    refetchOnMount: 'always',
+    staleTime: 0,
+  });
+};
+
+export const useVillageCategories = () => {
+  return useQuery({
+    queryKey: ['village-categories'],
+    queryFn: async () => {
+      try {
+        return await villageService.getVillageCategories();
+      } catch (error) {
+        toast.error('Failed to fetch village categories');
+        return [];
+      }
+    },
+    refetchOnMount: 'always',
+    staleTime: 0,
   });
 };
 

@@ -12,21 +12,29 @@ import {
   Alert,
   ToggleButton,
   ToggleButtonGroup,
+  Chip,
 } from '@mui/material';
 import {
   Search as SearchIcon,
   CloudUpload as CloudUploadIcon,
   Tune as FilterIcon,
+  Close as CloseIcon,
 } from '@mui/icons-material';
-import React from 'react';
+import React, { useState } from 'react';
 import { useDataPageImpl } from './useDataPageImpl';
 import { DataTable as DataTableType } from '@/types/data';
 import { UploadModal } from './components/UploadModal';
 import { PreviewModal } from './components/PreviewModal';
+import { FilterModal } from './components/FilterModal'; // Import the FilterModal
 import { ConfirmationModal } from '@/components';
+import { useDataStore } from '@/stores/dataStore';
 
 export default function DataPage() {
   const { state, action } = useDataPageImpl();
+  const { filters, clearFilters, removeFilter } = useDataStore();
+
+  // Local state for FilterModal
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
   const {
     searchQuery,
@@ -47,7 +55,6 @@ export default function DataPage() {
   const {
     handleUpload,
     setSearchQuery,
-    setGroupBy,
     setIsGrouped,
     closeUploadModal,
     closePreviewModal,
@@ -55,6 +62,31 @@ export default function DataPage() {
     handleDeleteCancel,
     handleDownload,
   } = action;
+
+  // Check if we have any active filters
+  const hasActiveFilters = filters.area;
+
+  // Create active filter labels
+  const getActiveFilterLabels = () => {
+    const labels = [];
+
+    if (filters.area === 'others') {
+      labels.push({ key: 'area', label: 'Others' });
+    } else {
+      labels.push({ key: 'area', label: `Area: ${filters.area}` });
+    }
+
+    return labels;
+  };
+
+  const handleRemoveFilter = () => {
+    removeFilter('area');
+  };
+
+  const handleClearAllFilters = () => {
+    clearFilters();
+    setIsGrouped(false);
+  };
 
   if (error) {
     return (
@@ -136,57 +168,16 @@ export default function DataPage() {
                 }}
               />
 
-              {/* Category Filter Toggle */}
-              <ToggleButtonGroup
-                value={groupBy}
-                exclusive
-                onChange={(_, newValue) => {
-                  if (newValue !== null) {
-                    setGroupBy(newValue);
-                    setIsGrouped(true);
-                  }
-                }}
-                sx={{
-                  height: 54,
-                  '& .MuiToggleButton-root': {
-                    borderRadius: '8px',
-                    textTransform: 'none',
-                    fontWeight: 500,
-                    px: 3,
-                    '&.Mui-selected': {
-                      backgroundColor: '#0EA5E9',
-                      color: 'white',
-                      '&:hover': {
-                        backgroundColor: '#0284C7',
-                      },
-                    },
-                  },
-                }}
-              >
-                <ToggleButton
-                  value="regency"
-                  sx={{ borderRadius: '8px 0 0 8px !important' }}
-                >
-                  <FilterIcon sx={{ mr: 1 }} />
-                  Regency
-                </ToggleButton>
-                <ToggleButton
-                  value="other"
-                  sx={{ borderRadius: '0 8px 8px 0 !important' }}
-                >
-                  Other
-                </ToggleButton>
-              </ToggleButtonGroup>
-
-              {/* Show All Button */}
+              {/* Advanced Filter Button */}
               <Button
                 variant="outlined"
-                onClick={() => setIsGrouped(false)}
+                onClick={() => setIsFilterModalOpen(true)}
+                startIcon={<FilterIcon />}
                 sx={{
                   height: 54,
-                  minWidth: 100,
+                  minWidth: 140,
                   borderColor: '#D1D5DB',
-                  color: '#6B7280',
+                  color: '#374151',
                   textTransform: 'none',
                   fontWeight: 500,
                   '&:hover': {
@@ -195,7 +186,7 @@ export default function DataPage() {
                   },
                 }}
               >
-                Show All
+                Filter
               </Button>
             </Box>
             <Button
@@ -220,6 +211,73 @@ export default function DataPage() {
               Upload File
             </Button>
           </Box>
+
+          {/* Active Filters Section */}
+          {hasActiveFilters && (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2,
+                mt: 3,
+                p: 2,
+                backgroundColor: '#F8FAFC',
+                borderRadius: '12px',
+                border: '1px solid #E2E8F0',
+              }}
+            >
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 500,
+                  color: '#475569',
+                  minWidth: 'auto',
+                }}
+              >
+                Active Filters:
+              </Typography>
+
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                {getActiveFilterLabels().map((filter) => (
+                  <Chip
+                    key={filter.key}
+                    label={filter.label}
+                    onDelete={() => handleRemoveFilter()}
+                    deleteIcon={<CloseIcon />}
+                    size="small"
+                    sx={{
+                      backgroundColor: '#0EA5E9',
+                      color: 'white',
+                      fontWeight: 500,
+                      '& .MuiChip-deleteIcon': {
+                        color: 'white',
+                        '&:hover': {
+                          color: '#F1F5F9',
+                        },
+                      },
+                    }}
+                  />
+                ))}
+              </Box>
+
+              <Button
+                variant="text"
+                onClick={handleClearAllFilters}
+                sx={{
+                  color: '#6B7280',
+                  textTransform: 'none',
+                  fontWeight: 500,
+                  minWidth: 'auto',
+                  p: 1,
+                  '&:hover': {
+                    backgroundColor: '#E2E8F0',
+                  },
+                }}
+              >
+                Clear All
+              </Button>
+            </Box>
+          )}
         </Box>
 
         {isLoading ? (
@@ -242,6 +300,12 @@ export default function DataPage() {
           />
         )}
       </Paper>
+
+      {/* Filter Modal */}
+      <FilterModal
+        open={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+      />
 
       {/* Upload Modal */}
       <UploadModal open={isUploadModalOpen} onClose={closeUploadModal} />

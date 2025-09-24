@@ -45,6 +45,7 @@ export interface TrainingState {
   setIsFilterModalOpen: (open: boolean) => void;
   setFilters: (filters: Partial<TrainingState['filters']>) => void;
   clearFilters: () => void;
+  removeFilter: (filterKey: keyof TrainingState['filters']) => void;
 
   // Training CRUD actions
   addTraining: (training: TrainingData) => void;
@@ -120,6 +121,18 @@ export const useTrainingStore = create<TrainingState>()(
           false,
           'clearFilters'
         ),
+
+      removeFilter: (filterKey) => {
+        const { filters } = get();
+        set(
+          {
+            filters: { ...filters, [filterKey]: '' },
+            currentPage: 1,
+          },
+          false,
+          'removeFilter'
+        );
+      },
 
       setPage: (page) => set({ page }, false, 'setPage'),
 

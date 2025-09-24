@@ -10,11 +10,13 @@ import {
   Button,
   CircularProgress,
   Alert,
+  Chip,
 } from '@mui/material';
 import {
   Search as SearchIcon,
   Add as AddIcon,
   TuneOutlined,
+  Close as CloseIcon,
 } from '@mui/icons-material';
 import React from 'react';
 import { useActivityPageImpl } from './useActivityPageImpl';
@@ -24,6 +26,7 @@ import { DetailActivityPage } from './DetailActivityPage/DetailActivityPage';
 import { FilterModal } from './components/FilterModal';
 import { ConfirmationModal } from '@/components';
 import { PageEnum } from '@/constants/page';
+import { useActivityStore } from '@/stores/activityStore';
 
 export default function ActivityPage() {
   const { state, action } = useActivityPageImpl();
@@ -39,6 +42,8 @@ export default function ActivityPage() {
     showDeleteModal,
     activityToDelete,
     isDeleting,
+    filters,
+    villageOptions,
   } = state;
 
   const {
@@ -46,13 +51,54 @@ export default function ActivityPage() {
     setSearchQuery,
     handleOpenFilter,
     handleCloseFilter,
-    handleApplyFilter,
-    handleClearFilter,
     handleDeleteConfirm,
     handleDeleteCancel,
   } = action;
 
-  if (error) {
+  const { removeFilter, clearFilters } = useActivityStore();
+
+  const getFilterLabel = (filterType: string, filterValue: string) => {
+    switch (filterType) {
+      case 'category':
+        return `Category: ${filterValue}`;
+      case 'status':
+        return `Status: ${filterValue}`;
+      case 'startDate':
+        return `Start Date: ${new Date(filterValue).toLocaleDateString()}`;
+      case 'endDate':
+        return `End Date: ${new Date(filterValue).toLocaleDateString()}`;
+      default:
+        return filterValue;
+    }
+  };
+
+  // Helper function to remove individual filter
+  const handleRemoveFilter = (filterKey: string) => {
+    removeFilter(filterKey as keyof typeof filters);
+  };
+
+  // Get active filters for display
+  const getActiveFilters = () => {
+    const activeFilters: Array<{ key: string; value: string; label: string }> =
+      [];
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value && value.trim() !== '') {
+        activeFilters.push({
+          key,
+          value,
+          label: getFilterLabel(key, value),
+        });
+      }
+    });
+
+    return activeFilters;
+  };
+
+  const activeFilters = getActiveFilters();
+
+  // Only show error if there's an actual error and we're not loading
+  if (error && !isLoading) {
     return (
       <Alert severity="error" sx={{ m: 2 }}>
         Failed to load activity data. Please try again.
@@ -134,30 +180,28 @@ export default function ActivityPage() {
               }}
             />
 
-            <>
-              <Button
-                variant="outlined"
-                color="secondary"
-                startIcon={
-                  <TuneOutlined
-                    sx={{
-                      rotate: '90deg',
-                    }}
-                  />
-                }
-                onClick={handleOpenFilter}
-                sx={{
-                  minWidth: 120,
-                  height: 54,
-                  transform: 'translateY(-2px)',
-                  '&.MuiButton-root': {
-                    borderRadius: '12px',
-                  },
-                }}
-              >
-                Filter
-              </Button>
-            </>
+            <Button
+              variant="outlined"
+              color="secondary"
+              startIcon={
+                <TuneOutlined
+                  sx={{
+                    rotate: '90deg',
+                  }}
+                />
+              }
+              onClick={handleOpenFilter}
+              sx={{
+                minWidth: 120,
+                height: 54,
+                transform: 'translateY(-2px)',
+                '&.MuiButton-root': {
+                  borderRadius: '12px',
+                },
+              }}
+            >
+              Filter
+            </Button>
           </Box>
           <Button
             variant="contained"
@@ -177,7 +221,65 @@ export default function ActivityPage() {
             Add New
           </Button>
         </Box>
+
+        {/* Filter Chips Section */}
+        {activeFilters.length > 0 && (
+          <Box sx={{ mt: 3 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#6B7280',
+                mb: 1.5,
+                fontWeight: 500,
+              }}
+            >
+              Applied Filters:
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              {activeFilters.map((filter) => (
+                <Chip
+                  key={filter.key}
+                  label={filter.label}
+                  onDelete={() => handleRemoveFilter(filter.key)}
+                  deleteIcon={<CloseIcon />}
+                  sx={{
+                    backgroundColor: '#EEF2FF',
+                    color: '#3730A3',
+                    border: '1px solid #C7D2FE',
+                    borderRadius: '8px',
+                    '& .MuiChip-deleteIcon': {
+                      color: '#6366F1',
+                      '&:hover': {
+                        color: '#4F46E5',
+                      },
+                    },
+                    '&:hover': {
+                      backgroundColor: '#E0E7FF',
+                    },
+                  }}
+                />
+              ))}
+              {activeFilters.length > 1 && (
+                <Chip
+                  label="Clear all"
+                  onClick={() => clearFilters()}
+                  sx={{
+                    backgroundColor: '#FEF2F2',
+                    color: '#991B1B',
+                    border: '1px solid #FECACA',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      backgroundColor: '#FEE2E2',
+                    },
+                  }}
+                />
+              )}
+            </Box>
+          </Box>
+        )}
       </Box>
+
       {isLoading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
           <CircularProgress />
@@ -207,8 +309,7 @@ export default function ActivityPage() {
       <FilterModal
         open={isFilterModalOpen}
         onClose={handleCloseFilter}
-        onApplyFilter={handleApplyFilter}
-        onClearFilter={handleClearFilter}
+        villages={villageOptions}
       />
 
       {/* Delete Confirmation Modal */}

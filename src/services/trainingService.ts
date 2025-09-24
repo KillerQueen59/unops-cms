@@ -134,6 +134,12 @@ export const trainingService = {
         queryParams.append('pageSize', params.pageSize.toString());
       if (params?.search) queryParams.append('search', params.search);
       if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+      if (params?.trainingType) queryParams.append('type', params.trainingType);
+      if (params?.village) queryParams.append('search', params.village);
+      if (params?.startDate) queryParams.append('startDate', params.startDate);
+      if (params?.endDate) queryParams.append('endDate', params.endDate);
+
+      console.log('queryParams so far:', queryParams.toString());
 
       const url = `/village/training/all${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       const response = await apiClient.get<TrainingApiResponse>(url);

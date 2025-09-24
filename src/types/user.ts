@@ -3,6 +3,7 @@ export interface User extends Record<string, unknown> {
   name: string;
   email: string;
   role: UserRole;
+  roleName: string;
   status: UserStatus;
   lastLogin: string;
   createdAt: string;

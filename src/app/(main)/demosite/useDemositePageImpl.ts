@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { DemositePageEnum, useDemositeStore } from '@/stores/demositeStore';
 import {
   useDemosites,
@@ -11,14 +11,18 @@ export const useDemositePageImpl = () => {
   const {
     searchQuery,
     page,
+    filters,
+    isFilterModalOpen,
     setSearchQuery,
     updateBreadcrumbs,
     setPage,
     navigateToDetail,
     navigateToEdit,
     resetDemosite,
+    setIsFilterModalOpen,
   } = useDemositeStore();
 
+  // Modal states
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [demositeToDelete, setDemositeToDelete] = useState<DemositeData | null>(
     null
@@ -30,37 +34,28 @@ export const useDemositePageImpl = () => {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(16);
-
   const [isEdit, setIsEdit] = useState(false);
 
+  const apiFilters = useMemo(
+    () => ({
+      type: filters.type,
+    }),
+    [filters]
+  );
+
+  // Use pagination parameters with filters
   const {
     data: demositesResponse,
     isLoading,
     error,
-  } = useDemosites({
-    page: currentPage,
-    pageSize: pageSize,
-  });
+  } = useDemosites(apiFilters);
 
-  const allDemosites = demositesResponse?.data || [];
-  const filteredDemosites = allDemosites.filter((demosite) => {
-    if (!searchQuery.trim()) return true;
+  // Extract demosites and pagination info from response
+  const demosites = demositesResponse?.data || [];
+  const totalItems = demositesResponse?.totalData || 0;
+  const totalPages = demositesResponse?.totalPages || 0;
 
-    const query = searchQuery.toLowerCase();
-    const matchesType = demosite.type?.toLowerCase().includes(query) || false;
-    const matchesStory = demosite.story?.toLowerCase().includes(query) || false;
-    const matchesTitle = demosite.title?.toLowerCase().includes(query) || false;
-
-    return matchesType || matchesStory || matchesTitle;
-  });
-
-  const totalItems = filteredDemosites.length;
-  const totalPages = Math.ceil(totalItems / pageSize);
-
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const demosites = filteredDemosites.slice(startIndex, endIndex);
-
+  // Only fetch demosite detail when a demosite is selected
   const { data: demositeDetail, isLoading: isLoadingDemosite } = useDemosite(
     selectedDemositeId,
     {
@@ -70,12 +65,15 @@ export const useDemositePageImpl = () => {
 
   const deleteDemositeMutation = useDeleteDemosite();
 
+  // Ensure demosites is always an array
   const safeDemosites = Array.isArray(demosites) ? demosites : [];
 
+  // Reset page when search query changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery]);
 
+  // Pagination handlers
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -149,12 +147,21 @@ export const useDemositePageImpl = () => {
     setDemositeToDelete(null);
   };
 
+  const handleOpenFilter = () => {
+    setIsFilterModalOpen(true);
+  };
+
+  const handleCloseFilter = () => {
+    setIsFilterModalOpen(false);
+  };
+
   const state = {
     demosites: safeDemosites,
     error,
     isLoading,
     searchQuery,
     page,
+    isFilterModalOpen,
     showDeleteModal,
     demositeToDelete,
     isDeleting: deleteDemositeMutation.isPending,
@@ -164,6 +171,8 @@ export const useDemositePageImpl = () => {
     totalPages,
     currentPage,
     pageSize,
+    // Filter options and current filters
+    filters,
   };
 
   const action = {
@@ -174,10 +183,11 @@ export const useDemositePageImpl = () => {
     handleDeleteConfirm,
     handleDeleteCancel,
     setSearchQuery,
+    handleOpenFilter,
+    handleCloseFilter,
     // Pagination actions
     handlePageChange,
     handlePageSizeChange,
-    setCurrentPage,
   };
 
   return { state, action };
