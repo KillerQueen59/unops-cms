@@ -99,10 +99,10 @@ export const useUpdateActivity = () => {
       activityData: UpdateActivityData;
       files?: UnifiedFile[];
     }) => activityService.updateActivity(activityId, activityData, files),
-    onSuccess: (updatedActivity, { activityId }) => {
+    onSuccess: (updatedActivity) => {
       queryClient.invalidateQueries({ queryKey: activityKeys.lists() });
       queryClient.setQueryData(
-        activityKeys.detail(activityId),
+        activityKeys.detail(updatedActivity._id),
         updatedActivity
       );
       toast.success('Activity updated successfully');

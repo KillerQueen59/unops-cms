@@ -206,10 +206,7 @@ export const activityService = {
     activityId: string,
     activityData: UpdateActivityData,
     files?: UnifiedFile[]
-  ): Promise<{
-    status: boolean;
-    message: string;
-  }> {
+  ): Promise<Activity> {
     // Separate existing files from new files
     const existingFiles = files?.filter(isApiFile) || [];
     const newFiles =
@@ -221,15 +218,10 @@ export const activityService = {
       newFiles,
       existingFiles
     );
-    const response = await apiClient.put<SingleActivityApiResponse>(
+    return await apiClient.put<Activity>(
       `/village/activity/${activityId}`,
       formData
     );
-
-    return {
-      status: response.status,
-      message: response.message,
-    };
   },
 
   async deleteActivity(activityId: string): Promise<void> {
