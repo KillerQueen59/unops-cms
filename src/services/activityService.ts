@@ -124,7 +124,7 @@ export const activityService = {
       // Always add sortBy for consistent results
       queryParams.append('sortBy', params?.sortBy || 'createdAt');
       if (params?.search) queryParams.append('search', params.search);
-      if (params?.village) queryParams.append('village', params.village);
+      if (params?.village) queryParams.append('search', params.village);
       if (params?.status) queryParams.append('status', params.status);
       if (params?.type) queryParams.append('type', params.type);
       if (params?.startDate) queryParams.append('startDate', params.startDate);
@@ -140,7 +140,8 @@ export const activityService = {
         const totalData = response.data.totalData || 0;
         const page = response.data.page || params?.page || 1;
         const pageSize = params?.pageSize || 10;
-        const totalPages = response.data.totalPages || Math.ceil(totalData / pageSize);
+        const totalPages =
+          response.data.totalPages || Math.ceil(totalData / pageSize);
 
         return {
           data: activities,
