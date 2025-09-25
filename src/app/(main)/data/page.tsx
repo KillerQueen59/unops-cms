@@ -10,8 +10,6 @@ import {
   Button,
   CircularProgress,
   Alert,
-  ToggleButton,
-  ToggleButtonGroup,
   Chip,
 } from '@mui/material';
 import {
@@ -298,14 +296,17 @@ export default function DataPage() {
             data={dataFiles}
             columns={columns}
             title="File Download"
-            searchable={true}
-            filterable={true}
-            pageSize={10}
+            searchable={false}
+            filterable={false}
+            pageSize={state.pageSize}
             pageSizeOptions={[5, 10, 25, 50]}
             stickyHeader={true}
             maxHeight={600}
-            externalGlobalFilter={searchQuery}
-            setExternalGlobalFilter={setSearchQuery}
+            manualPagination={true}
+            totalItems={state.totalItems}
+            currentPage={state.currentPage}
+            onPageChange={action.handlePageChange}
+            onPageSizeChange={action.handlePageSizeChange}
           />
         )}
       </Paper>

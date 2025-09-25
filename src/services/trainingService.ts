@@ -87,6 +87,8 @@ interface TrainingApiResponse {
       };
     }>;
     totalData: number;
+    page: number;
+    totalPages: number;
   };
 }
 
@@ -132,30 +134,31 @@ export const trainingService = {
       if (params?.page) queryParams.append('page', params.page.toString());
       if (params?.pageSize)
         queryParams.append('pageSize', params.pageSize.toString());
+      // Always add sortBy for consistent results
+      queryParams.append('sortBy', params?.sortBy || 'createdAt');
       if (params?.search) queryParams.append('search', params.search);
-      if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
       if (params?.trainingType) queryParams.append('type', params.trainingType);
-      if (params?.village) queryParams.append('search', params.village);
+      if (params?.village) queryParams.append('village', params.village);
       if (params?.startDate) queryParams.append('startDate', params.startDate);
       if (params?.endDate) queryParams.append('endDate', params.endDate);
-
-      console.log('queryParams so far:', queryParams.toString());
 
       const url = `/village/training/all${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       const response = await apiClient.get<TrainingApiResponse>(url);
 
       if (response.status && response.data?.trainings) {
         const trainings = response.data.trainings.map(transformTrainingFromAPI);
-        const totalData = response.data.totalData || trainings.length;
-        const page = params?.page || 1;
+        const totalData = response.data.totalData || 0;
+        const page = response.data.page || params?.page || 1;
         const pageSize = params?.pageSize || 10;
+        const totalPages =
+          response.data.totalPages || Math.ceil(totalData / pageSize);
 
         return {
           data: trainings,
           totalData,
           page,
           limit: pageSize,
-          totalPages: Math.ceil(totalData / pageSize),
+          totalPages,
         };
       }
 

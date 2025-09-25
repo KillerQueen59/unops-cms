@@ -95,9 +95,6 @@ const globalFilterFn = <T,>(
 export default function DataTable<T extends Record<string, unknown>>({
   data,
   columns,
-  title = 'Training Data',
-  searchable = true,
-  filterable = true,
   loading = false,
   dense = false,
   stickyHeader = false,
@@ -126,19 +123,13 @@ export default function DataTable<T extends Record<string, unknown>>({
     }
   }, [externalGlobalFilter]);
 
-  const handleGlobalFilterChange = (value: string) => {
-    setGlobalFilter(value);
-    // Reset to first page when filtering
-    if (manualPagination && onPageChange) {
-      onPageChange(1);
-    } else {
-      setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-    }
-    // Update external filter if provided
-    if (setExternalGlobalFilter) {
-      setExternalGlobalFilter(value);
-    }
-  };
+  // Update pagination state when pageSize prop changes (for server-side pagination)
+  useEffect(() => {
+    setPagination((prev) => ({
+      ...prev,
+      pageSize: pageSize,
+    }));
+  }, [pageSize]);
 
   const table = useReactTable({
     data,
@@ -179,9 +170,7 @@ export default function DataTable<T extends Record<string, unknown>>({
       | React.ChangeEvent<{ value: unknown }>
       | SelectChangeEvent<number>
   ) => {
-    const value =
-      (event.target as HTMLInputElement).value ||
-      (event.target as { value: unknown }).value;
+    const value = event.target.value;
     const newPageSize = Number(value);
 
     if (manualPagination && onPageSizeChange) {

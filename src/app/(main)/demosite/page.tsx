@@ -11,6 +11,11 @@ import {
   Alert,
   Pagination,
   Chip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -61,6 +66,7 @@ export default function DemositePage() {
     setSearchQuery,
     // Pagination actions
     handlePageChange,
+    handlePageSizeChange,
     handleCloseFilter,
     handleOpenFilter,
   } = action;
@@ -158,7 +164,7 @@ export default function DemositePage() {
               }}
             >
               This page shows a list of demosite programs.{' '}
-              {isLoading ? 'Loading...' : `${demosites.length} demosites found`}
+              {isLoading ? 'Loading...' : `${totalItems} demosites found`}
             </Typography>
           </Box>
         </Box>
@@ -379,6 +385,24 @@ export default function DemositePage() {
                 </Box>{' '}
                 of {totalItems} items.
               </Typography>
+              <FormControl size="small" variant="outlined">
+                <InputLabel>Rows per page</InputLabel>
+                <Select
+                  value={pageSize}
+                  onChange={(event: SelectChangeEvent<number>) => {
+                    const newPageSize = Number(event.target.value);
+                    handlePageSizeChange(newPageSize);
+                  }}
+                  label="Rows per page"
+                  sx={{ minWidth: 120 }}
+                >
+                  {[8, 16, 32, 64].map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Box>
 
             {/* Pagination Container */}

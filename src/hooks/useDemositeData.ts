@@ -25,7 +25,7 @@ export const useDemosites = (params?: DemositeQueryParams) => {
       try {
         const result = await demositeService.getDemosites(params);
         return result;
-      } catch (error) {
+      } catch {
         toast.error('Failed to fetch demosites');
         return {
           data: [],

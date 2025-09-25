@@ -70,6 +70,8 @@ interface ActivityApiResponse {
   data: {
     activities: Activity[];
     totalData: number;
+    page: number;
+    totalPages: number;
   };
 }
 
@@ -119,10 +121,12 @@ export const activityService = {
       if (params?.page) queryParams.append('page', params.page.toString());
       if (params?.pageSize)
         queryParams.append('pageSize', params.pageSize.toString());
-      if (params?.village) queryParams.append('search', params.village);
+      // Always add sortBy for consistent results
+      queryParams.append('sortBy', params?.sortBy || 'createdAt');
+      if (params?.search) queryParams.append('search', params.search);
+      if (params?.village) queryParams.append('village', params.village);
       if (params?.status) queryParams.append('status', params.status);
       if (params?.type) queryParams.append('type', params.type);
-      if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
       if (params?.startDate) queryParams.append('startDate', params.startDate);
       if (params?.endDate) queryParams.append('endDate', params.endDate);
 
@@ -133,16 +137,17 @@ export const activityService = {
         const activities = response.data.activities.map(
           transformActivityFromAPI
         );
-        const totalData = response.data.totalData || activities.length;
-        const page = params?.page || 1;
+        const totalData = response.data.totalData || 0;
+        const page = response.data.page || params?.page || 1;
         const pageSize = params?.pageSize || 10;
+        const totalPages = response.data.totalPages || Math.ceil(totalData / pageSize);
 
         return {
           data: activities,
           totalData,
           page,
           limit: pageSize,
-          totalPages: Math.ceil(totalData / pageSize),
+          totalPages,
         };
       }
 

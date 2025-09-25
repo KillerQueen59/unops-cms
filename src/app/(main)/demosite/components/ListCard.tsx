@@ -1,6 +1,7 @@
 import { DemositeData } from '@/types/demosite';
 import { Box, CardMedia, Typography } from '@mui/material';
-import { ArrowRightIcon } from '@phosphor-icons/react';
+import { ArrowRightIcon, Image as ImageIcon } from '@phosphor-icons/react';
+import { useState } from 'react';
 
 export const ListCard = ({
   demosite,
@@ -11,17 +12,14 @@ export const ListCard = ({
   handleEdit: (data: DemositeData) => void;
   handleDelete: (data: DemositeData) => void;
 }) => {
-  const placeholderUrl = 'https://via.placeholder.com/300x200?text=No+Image';
+  const [imageError, setImageError] = useState(false);
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    e.currentTarget.src = placeholderUrl;
+  const handleImageError = () => {
+    setImageError(true);
   };
 
-  // Ensure we have a valid image URL or fall back to placeholder
-  const imageUrl =
-    demosite.header && demosite.header.trim() !== ''
-      ? `${demosite.header}`
-      : placeholderUrl;
+  // Check if we have a valid image URL
+  const hasValidImage = demosite.header && demosite.header.trim() !== '' && !imageError;
 
   return (
     <Box
@@ -33,18 +31,35 @@ export const ListCard = ({
       onClick={() => handleView(demosite)}
     >
       {/* Card Image */}
-      <CardMedia
-        component="img"
-        height="180"
-        image={imageUrl}
-        alt={demosite.title || 'Demosite image'}
-        onError={handleImageError}
-        sx={{
-          objectFit: 'cover',
-          borderRadius: '16px',
-          mb: '16px',
-        }}
-      />
+      {hasValidImage ? (
+        <CardMedia
+          component="img"
+          height="180"
+          image={demosite.header}
+          alt={demosite.title || 'Demosite image'}
+          onError={handleImageError}
+          sx={{
+            objectFit: 'cover',
+            borderRadius: '16px',
+            mb: '16px',
+          }}
+        />
+      ) : (
+        <Box
+          sx={{
+            height: '180px',
+            backgroundColor: '#f5f5f5',
+            borderRadius: '16px',
+            mb: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: '1px solid #e0e0e0',
+          }}
+        >
+          <ImageIcon size={48} color="#9e9e9e" weight="light" />
+        </Box>
+      )}
 
       <Box>
         {/* Type Badge */}

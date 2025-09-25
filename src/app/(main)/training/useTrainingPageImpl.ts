@@ -77,12 +77,15 @@ export const useTrainingPageImpl = () => {
 
   const apiFilters = useMemo(
     () => ({
+      page: currentPage,
+      pageSize: pageSize,
+      search: searchQuery,
       trainingType: filters.trainingType,
       village: filters.village,
       startDate: filters.startDate,
       endDate: filters.endDate,
     }),
-    [filters]
+    [currentPage, pageSize, searchQuery, filters]
   );
 
   // Use pagination parameters
@@ -113,10 +116,10 @@ export const useTrainingPageImpl = () => {
   // fetch village options from global store
   const { villageOptions, isLoading: isLoadingVillages } = useGlobalVillages();
 
-  // Reset page when search query changes
+  // Reset page when search query or filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, filters]);
 
   // Pagination handlers
   const handlePageChange = (page: number) => {

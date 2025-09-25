@@ -48,6 +48,8 @@ const TrainingPage = () => {
     villageOptions,
     filters,
     pageSize,
+    totalItems,
+    currentPage,
   } = state;
 
   const {
@@ -57,6 +59,8 @@ const TrainingPage = () => {
     handleCloseFilter,
     handleDeleteCancel,
     handleDeleteConfirm,
+    handlePageChange,
+    handlePageSizeChange,
   } = action;
 
   // Helper function to get filter label
@@ -165,7 +169,7 @@ const TrainingPage = () => {
               }}
             >
               This page shows a list of training programs.{' '}
-              {isLoading ? 'Loading...' : `${trainings.length} trainings found`}
+              {isLoading ? 'Loading...' : `${totalItems} trainings found`}
             </Typography>
           </Box>
         </Box>
@@ -310,14 +314,18 @@ const TrainingPage = () => {
           data={trainings}
           columns={columns}
           title="Training Data"
-          searchable={true}
-          filterable={true}
+          searchable={false}
+          filterable={false}
+          loading={isLoading}
           pageSize={pageSize}
           pageSizeOptions={[5, 10, 25, 50]}
           stickyHeader={true}
           maxHeight={600}
-          externalGlobalFilter={searchQuery}
-          setExternalGlobalFilter={setSearchQuery}
+          manualPagination={true}
+          totalItems={totalItems}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
         />
       )}
 

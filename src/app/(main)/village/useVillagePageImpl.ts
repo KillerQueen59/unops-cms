@@ -43,24 +43,18 @@ export const useVillagePageImpl = () => {
 
   const apiFilters = useMemo(
     () => ({
+      page: currentPage,
+      pageSize: pageSize,
+      search: searchQuery,
       categoryId:
         villageCategories?.find((cat) => cat.name === filters.categoryId)
           ?._id || '',
     }),
-    [filters, villageCategories]
+    [currentPage, pageSize, searchQuery, filters, villageCategories]
   );
 
   // Use pagination parameters
-  const {
-    data: villagesResponse,
-    isLoading,
-    error,
-  } = useVillages({
-    page: currentPage,
-    pageSize: pageSize,
-    search: searchQuery,
-    ...apiFilters,
-  });
+  const { data: villagesResponse, isLoading, error } = useVillages(apiFilters);
 
   // Extract villages and pagination info from response
   const villages = villagesResponse?.data || [];
@@ -80,10 +74,10 @@ export const useVillagePageImpl = () => {
   // Ensure villages is always an array
   const safeVillages = Array.isArray(villages) ? villages : [];
 
-  // Reset page when search query changes
+  // Reset page when search query or filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, filters]);
 
   // Pagination handlers
   const handlePageChange = (page: number) => {
@@ -121,6 +115,7 @@ export const useVillagePageImpl = () => {
     navigateToDetail,
     isEdit,
     navigateToEdit,
+    setSelectedCategory,
   ]);
 
   const handleView = (data: VillageData) => {

@@ -27,11 +27,7 @@ import { CategorySelectionModal } from './components/CategorySelectionModal';
 import { VillageTable } from '@/types/village';
 import { PageEnum } from '@/constants/page';
 import { useVillageStore } from '@/stores/villageStore';
-import {
-  VillageCategory,
-  VillageCategoryLabel,
-  villageCategoryOptions,
-} from './constants';
+import { VillageCategory, VillageCategoryLabel } from './constants';
 import { FilterModal } from './components/FilterModal';
 
 export default function VillagePage() {
@@ -54,8 +50,6 @@ export default function VillagePage() {
     isFilterModalOpen,
     villageCategories,
   } = state;
-
-  console.log('pageSize:', pageSize);
 
   const {
     handleAddNew,
@@ -157,7 +151,7 @@ export default function VillagePage() {
               }}
             >
               This page shows a list of village programs.{' '}
-              {isLoading ? 'Loading...' : `${villages.length} villages found`}
+              {isLoading ? 'Loading...' : `${totalItems} villages found`}
             </Typography>
           </Box>
         </Box>
@@ -297,14 +291,18 @@ export default function VillagePage() {
           data={villages || []}
           columns={columns}
           title="Village Data"
-          searchable={true}
-          filterable={true}
+          searchable={false}
+          filterable={false}
+          loading={isLoading}
           pageSize={pageSize}
           pageSizeOptions={[5, 10, 25, 50]}
           stickyHeader={true}
           maxHeight={600}
-          externalGlobalFilter={searchQuery}
-          setExternalGlobalFilter={setSearchQuery}
+          manualPagination={true}
+          totalItems={totalItems}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
         />
       )}
 

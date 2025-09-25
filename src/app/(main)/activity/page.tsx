@@ -44,6 +44,9 @@ export default function ActivityPage() {
     isDeleting,
     filters,
     villageOptions,
+    totalItems,
+    currentPage,
+    pageSize,
   } = state;
 
   const {
@@ -53,6 +56,8 @@ export default function ActivityPage() {
     handleCloseFilter,
     handleDeleteConfirm,
     handleDeleteCancel,
+    handlePageChange,
+    handlePageSizeChange,
   } = action;
 
   const { removeFilter, clearFilters } = useActivityStore();
@@ -149,9 +154,7 @@ export default function ActivityPage() {
               }}
             >
               This page shows a list of activity programs.{' '}
-              {isLoading
-                ? 'Loading...'
-                : `${activities.length} activities found`}
+              {isLoading ? 'Loading...' : `${totalItems} activities found`}
             </Typography>
           </Box>
         </Box>
@@ -291,22 +294,21 @@ export default function ActivityPage() {
         </Box>
       ) : (
         <DataTable<ActivityTable>
-          data={activities.filter((activity) => {
-            if (!searchQuery) return true;
-            return activity.activityName
-              .toLowerCase()
-              .includes(searchQuery.toLowerCase());
-          })}
+          data={activities}
           columns={columns}
           title="Activity Data"
-          searchable={true}
-          filterable={true}
-          pageSize={10}
+          searchable={false}
+          filterable={false}
+          loading={isLoading}
+          pageSize={pageSize}
           pageSizeOptions={[5, 10, 25, 50]}
           stickyHeader={true}
           maxHeight={600}
-          externalGlobalFilter={searchQuery}
-          setExternalGlobalFilter={setSearchQuery}
+          manualPagination={true}
+          totalItems={totalItems}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
         />
       )}
 

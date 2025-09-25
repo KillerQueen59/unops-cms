@@ -50,6 +50,8 @@ interface DemositeApiResponse {
       photos?: string[];
     }>;
     totalData: number;
+    page: number;
+    totalPages: number;
   };
 }
 
@@ -90,25 +92,27 @@ export const demositeService = {
       if (params?.page) queryParams.append('page', params.page.toString());
       if (params?.pageSize)
         queryParams.append('pageSize', params.pageSize.toString());
+      // Always add sortBy for consistent results
+      queryParams.append('sortBy', params?.sortBy || 'createdAt');
       if (params?.type) queryParams.append('type', params.type);
       if (params?.search) queryParams.append('search', params.search);
-      if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
 
       const url = `/demosite/all${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       const response = await apiClient.get<DemositeApiResponse>(url);
 
       if (response.status && response.data?.demosites) {
         const demosites = response.data.demosites.map(transformDemositeFromAPI);
-        const totalData = response.data.totalData || demosites.length;
-        const page = params?.page || 1;
-        const pageSize = params?.pageSize || 10;
+        const totalData = response.data.totalData || 0;
+        const page = response.data.page || params?.page || 1;
+        const pageSize = params?.pageSize || 16;
+        const totalPages = response.data.totalPages || Math.ceil(totalData / pageSize);
 
         return {
           data: demosites,
           totalData,
           page,
           limit: pageSize,
-          totalPages: Math.ceil(totalData / pageSize),
+          totalPages,
         };
       }
 
@@ -116,7 +120,7 @@ export const demositeService = {
         data: [],
         totalData: 0,
         page: params?.page || 1,
-        limit: params?.pageSize || 10,
+        limit: params?.pageSize || 16,
         totalPages: 0,
       };
     } catch (error) {
@@ -125,7 +129,7 @@ export const demositeService = {
         data: [],
         totalData: 0,
         page: params?.page || 1,
-        limit: params?.pageSize || 10,
+        limit: params?.pageSize || 16,
         totalPages: 0,
       };
     }

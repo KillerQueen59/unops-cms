@@ -69,7 +69,7 @@ export const useDataPageImpl = () => {
       } else {
         toast.error('Download failed');
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred during download');
     }
   };

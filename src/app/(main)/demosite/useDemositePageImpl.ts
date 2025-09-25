@@ -38,9 +38,12 @@ export const useDemositePageImpl = () => {
 
   const apiFilters = useMemo(
     () => ({
+      page: currentPage,
+      pageSize: pageSize,
+      search: searchQuery,
       type: filters.type,
     }),
-    [filters]
+    [currentPage, pageSize, searchQuery, filters]
   );
 
   // Use pagination parameters with filters
@@ -51,26 +54,9 @@ export const useDemositePageImpl = () => {
   } = useDemosites(apiFilters);
 
   // Extract demosites and pagination info from response
-  // Filter demosites locally by search query (title)
-  const filteredDemosites = useMemo(() => {
-    const allDemosites = demositesResponse?.data || [];
-    if (!searchQuery.trim()) {
-      return allDemosites;
-    }
-    return allDemosites.filter((demosite) =>
-      demosite.title.toLowerCase().includes(searchQuery.toLowerCase().trim())
-    );
-  }, [demositesResponse?.data, searchQuery]);
-
-  // Calculate pagination for filtered results
-  const totalItems = filteredDemosites.length;
-  const totalPages = Math.ceil(totalItems / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const paginatedDemosites = filteredDemosites.slice(startIndex, endIndex);
-
-  // Use paginated demosites for display
-  const demosites = paginatedDemosites;
+  const demosites = demositesResponse?.data || [];
+  const totalItems = demositesResponse?.totalData || 0;
+  const totalPages = demositesResponse?.totalPages || 0;
 
   // Ensure demosites is always an array
   const safeDemosites = Array.isArray(demosites) ? demosites : [];
@@ -85,10 +71,10 @@ export const useDemositePageImpl = () => {
 
   const deleteDemositeMutation = useDeleteDemosite();
 
-  // Reset page when search query changes
+  // Reset page when search query or filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, filters]);
 
   // Pagination handlers
   const handlePageChange = (page: number) => {

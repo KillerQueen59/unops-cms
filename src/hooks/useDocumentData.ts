@@ -23,7 +23,7 @@ export const useDocuments = (params?: PaginationParams) => {
       try {
         const result = await documentService.getDocuments(params);
         return result;
-      } catch (error) {
+      } catch {
         toast.error('Failed to fetch documents');
         return {
           data: [],

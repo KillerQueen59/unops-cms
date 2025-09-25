@@ -44,13 +44,16 @@ export const useActivityPageImpl = () => {
 
   const apiFilters = useMemo(
     () => ({
+      page: currentPage,
+      pageSize: pageSize,
+      search: searchQuery,
       type: filters.type,
       village: filters.village,
       status: filters.status,
       startDate: filters.startDate,
       endDate: filters.endDate,
     }),
-    [filters]
+    [currentPage, pageSize, searchQuery, filters]
   );
 
   // Use pagination parameters with filters
@@ -81,10 +84,10 @@ export const useActivityPageImpl = () => {
   // Ensure activities is always an array
   const safeActivities = Array.isArray(activities) ? activities : [];
 
-  // Reset page when search query changes
+  // Reset page when search query or filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, filters]);
 
   // Pagination handlers
   const handlePageChange = (page: number) => {

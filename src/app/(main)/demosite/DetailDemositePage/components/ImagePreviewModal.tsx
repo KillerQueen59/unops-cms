@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,8 +10,8 @@ import {
 import {
   Close as CloseIcon,
   Download as DownloadIcon,
-  ZoomIn as ZoomInIcon,
 } from '@mui/icons-material';
+import { Image as ImageIcon } from '@phosphor-icons/react';
 import toast from 'react-hot-toast';
 
 interface ImagePreviewModalProps {
@@ -27,6 +27,7 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
   imageUrl,
   title,
 }) => {
+  const [imageError, setImageError] = useState(false);
   const handleDownload = async () => {
     try {
       const response = await fetch(imageUrl);
@@ -58,9 +59,17 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
   };
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    setImageError(true);
     toast.error('Failed to load image');
     console.error('Image load error:', e);
   };
+
+  // Reset image error when modal opens with new image
+  React.useEffect(() => {
+    if (open) {
+      setImageError(false);
+    }
+  }, [open, imageUrl]);
 
   return (
     <Dialog
@@ -133,30 +142,55 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
               mb: 3,
             }}
           >
-            <img
-              src={imageUrl}
-              alt={title}
-              style={{
-                maxWidth: '100%',
-                maxHeight: '100%',
-                objectFit: 'contain',
-                borderRadius: '8px',
-                transition: 'transform 0.2s ease-in-out',
-                cursor: 'zoom-in',
-              }}
-              onError={handleImageError}
-              onClick={(e) => {
-                // Simple zoom on click
-                const img = e.currentTarget;
-                if (img.style.transform === 'scale(2)') {
-                  img.style.transform = 'scale(1)';
-                  img.style.cursor = 'zoom-in';
-                } else {
-                  img.style.transform = 'scale(2)';
-                  img.style.cursor = 'zoom-out';
-                }
-              }}
-            />
+            {!imageError ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={imageUrl}
+                alt={title}
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  objectFit: 'contain',
+                  borderRadius: '8px',
+                  transition: 'transform 0.2s ease-in-out',
+                  cursor: 'zoom-in',
+                }}
+                onError={handleImageError}
+                onClick={(e) => {
+                  // Simple zoom on click
+                  const img = e.currentTarget;
+                  if (img.style.transform === 'scale(2)') {
+                    img.style.transform = 'scale(1)';
+                    img.style.cursor = 'zoom-in';
+                  } else {
+                    img.style.transform = 'scale(2)';
+                    img.style.cursor = 'zoom-out';
+                  }
+                }}
+              />
+            ) : (
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 2,
+                  minHeight: 200,
+                }}
+              >
+                <ImageIcon size={64} color="#9e9e9e" weight="light" />
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: '#9CA3AF',
+                    textAlign: 'center',
+                  }}
+                >
+                  Image could not be loaded
+                </Typography>
+              </Box>
+            )}
           </Box>
 
           {/* Action Buttons */}

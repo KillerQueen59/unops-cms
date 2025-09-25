@@ -22,12 +22,11 @@ import {
   PresentationChartIcon,
   PuzzlePieceIcon,
   UsersIcon,
+  ChartBarIcon,
 } from '@phosphor-icons/react';
 import { usePathname } from 'next/navigation';
 import { GearIcon, SolarRoofIcon } from '@phosphor-icons/react/dist/ssr';
-import { getAuthEmail, getAuthName, getAuthRole, logout } from '@/lib/api';
-import { useAuthStatus } from '@/hooks/useAuth';
-import { SettingsIcon } from 'lucide-react';
+import { getAuthEmail, getAuthRole, logout } from '@/lib/api';
 
 const drawerWidth = 240;
 
@@ -208,12 +207,29 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
             ]),
       ],
     },
-    ...(role === 'admin'
-      ? []
-      : [
-          {
-            section: 'Administration',
-            items: [
+    {
+      section: 'Administration',
+      items: [
+        // Dashboard Website - available to all roles
+        {
+          text: 'Dashboard Website',
+          icon: <ChartBarIcon size={20} />,
+          activeIcon: (
+            <ChartBarIcon
+              size={20}
+              color={theme.palette.primary.main}
+              weight="fill"
+            />
+          ),
+          href:
+            process.env.NEXT_PUBLIC_API_DASHBOARD_URL ||
+            'https://simelaproklim.com',
+          external: true,
+        },
+        // Other admin items - restricted to non-admin roles
+        ...(role === 'admin'
+          ? []
+          : [
               {
                 text: 'User Management',
                 icon: <UsersIcon size={20} />,
@@ -238,9 +254,9 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
                 ),
                 href: '/global-config',
               },
-            ],
-          },
-        ]),
+            ]),
+      ],
+    },
   ];
 
   React.useEffect(() => {
@@ -374,11 +390,11 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
                   sx={{
                     display: 'block',
                     backgroundColor:
-                      pathname === subItem.href
+                      !subItem.external && pathname === subItem.href
                         ? theme.palette.primary.light
                         : 'transparent',
                     color:
-                      pathname === subItem.href
+                      !subItem.external && pathname === subItem.href
                         ? theme.palette.primary.main
                         : theme.palette.grey[400],
                   }}
@@ -386,6 +402,8 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
                   <ListItemButton
                     component="a"
                     href={subItem.href}
+                    target={subItem.external ? '_blank' : undefined}
+                    rel={subItem.external ? 'noopener noreferrer' : undefined}
                     sx={[
                       {
                         minHeight: 48,
@@ -415,7 +433,7 @@ export default function BaseDrawer({ children }: BaseDrawerProps) {
                             },
                       ]}
                     >
-                      {pathname === subItem.href
+                      {!subItem.external && pathname === subItem.href
                         ? subItem.activeIcon
                         : subItem.icon}
                     </ListItemIcon>

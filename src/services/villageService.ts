@@ -162,32 +162,40 @@ export const villageService = {
   ): Promise<PaginatedResponse<VillageData>> {
     try {
       const queryParams = new URLSearchParams();
+      
+      if (params?.page) queryParams.append('page', params.page.toString());
+      if (params?.pageSize)
+        queryParams.append('pageSize', params.pageSize.toString());
+      // Always add sortBy for consistent results
+      queryParams.append('sortBy', params?.sortBy || 'createdAt');
       if (params?.search) queryParams.append('search', params.search);
       if (params?.categoryId)
         queryParams.append('categoryId', params.categoryId);
-      if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
 
       const url = `/village/all${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       const response = await apiClient.get<VillageApiResponse>(url);
 
       if (response.status && response.data?.villages) {
         const villages = response.data.villages.map(transformVillageFromAPI);
-        const totalData = response.data.totalData || villages.length;
+        const totalData = response.data.totalData || 0;
+        const page = params?.page || 1;
+        const pageSize = params?.pageSize || 10;
+        const totalPages = Math.ceil(totalData / pageSize);
 
         return {
           data: villages,
           totalData,
-          page: 1,
-          limit: 100,
-          totalPages: Math.ceil(totalData / 100),
+          page,
+          limit: pageSize,
+          totalPages,
         };
       }
 
       return {
         data: [],
         totalData: 0,
-        page: 1,
-        limit: 100,
+        page: params?.page || 1,
+        limit: params?.pageSize || 10,
         totalPages: 0,
       };
     } catch (error) {
@@ -195,8 +203,8 @@ export const villageService = {
       return {
         data: [],
         totalData: 0,
-        page: 1,
-        limit: 100,
+        page: params?.page || 1,
+        limit: params?.pageSize || 10,
         totalPages: 0,
       };
     }
