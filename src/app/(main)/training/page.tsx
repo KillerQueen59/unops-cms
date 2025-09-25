@@ -124,7 +124,7 @@ const TrainingPage = () => {
   }
 
   if (page === PageEnum.DETAIL) {
-    return <DetailTrainingPage />;
+    return <DetailTrainingPage villageOptions={villageOptions} />;
   }
 
   if (page === PageEnum.ADD) {

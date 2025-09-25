@@ -12,12 +12,14 @@ export const Header = ({
   handleBack,
   handleDelete,
   handleEdit,
+  villageOptions,
 }: {
   breadcrumbs: BreadcrumbItem[];
   trainingData: TrainingData;
   handleBack: () => void;
   handleDelete: () => void;
   handleEdit: () => void;
+  villageOptions: { label: string; value: string }[];
 }) => {
   return (
     <Box>
@@ -115,13 +117,30 @@ export const Header = ({
           </Typography>
         </Box>
 
-        {/* Desa */}
+        {/* Village */}
         <Box>
           <Typography
             variant="body2"
             sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
           >
-            Desa
+            Village
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
+          >
+            {villageOptions.find(
+              (option) => option.value === trainingData.village
+            )?.label || 'N/A'}
+          </Typography>
+        </Box>
+        {/* Village */}
+        <Box>
+          <Typography
+            variant="body2"
+            sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
+          >
+            Village ID
           </Typography>
           <Typography
             variant="body1"

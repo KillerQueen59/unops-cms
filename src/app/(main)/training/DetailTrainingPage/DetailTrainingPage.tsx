@@ -24,7 +24,11 @@ import { PageEnum } from '@/constants/page';
 import { ConfirmationModal } from '@/components';
 import { useDeleteTraining } from '@/hooks/useTrainingData';
 
-export const DetailTrainingPage = () => {
+export const DetailTrainingPage = ({
+  villageOptions,
+}: {
+  villageOptions: { label: string; value: string }[];
+}) => {
   const {
     updateBreadcrumbs,
     setPage,
@@ -191,6 +195,7 @@ export const DetailTrainingPage = () => {
             setShowDeleteModal(true);
           }}
           handleEdit={() => navigateToEdit(trainingData)}
+          villageOptions={villageOptions}
         />
       </Paper>
 
