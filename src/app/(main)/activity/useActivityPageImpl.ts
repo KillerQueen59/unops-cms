@@ -61,7 +61,7 @@ export const useActivityPageImpl = () => {
   } = useActivities(apiFilters);
 
   // fetch village options from global store
-  const { villageOptions, isLoading: isLoadingVillages } = useGlobalVillages();
+  const { villageOptions } = useGlobalVillages();
 
   // Extract activities and pagination info from response
   const activities = activitiesResponse?.data || [];

@@ -47,6 +47,7 @@ const TrainingPage = () => {
     trainingAssessmentThreshold,
     villageOptions,
     filters,
+    pageSize,
   } = state;
 
   const {
@@ -311,7 +312,7 @@ const TrainingPage = () => {
           title="Training Data"
           searchable={true}
           filterable={true}
-          pageSize={10}
+          pageSize={pageSize}
           pageSizeOptions={[5, 10, 25, 50]}
           stickyHeader={true}
           maxHeight={600}

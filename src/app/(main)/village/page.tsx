@@ -55,6 +55,8 @@ export default function VillagePage() {
     villageCategories,
   } = state;
 
+  console.log('pageSize:', pageSize);
+
   const {
     handleAddNew,
     setSearchQuery,
@@ -303,13 +305,6 @@ export default function VillagePage() {
           maxHeight={600}
           externalGlobalFilter={searchQuery}
           setExternalGlobalFilter={setSearchQuery}
-          // Server-side pagination props
-          manualPagination={true}
-          totalItems={totalItems}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-          onPageSizeChange={handlePageSizeChange}
-          loading={isLoading}
         />
       )}
 

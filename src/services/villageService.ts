@@ -162,10 +162,6 @@ export const villageService = {
   ): Promise<PaginatedResponse<VillageData>> {
     try {
       const queryParams = new URLSearchParams();
-
-      if (params?.page) queryParams.append('page', params.page.toString());
-      if (params?.pageSize)
-        queryParams.append('pageSize', params.pageSize.toString());
       if (params?.search) queryParams.append('search', params.search);
       if (params?.categoryId)
         queryParams.append('categoryId', params.categoryId);
@@ -177,23 +173,21 @@ export const villageService = {
       if (response.status && response.data?.villages) {
         const villages = response.data.villages.map(transformVillageFromAPI);
         const totalData = response.data.totalData || villages.length;
-        const page = params?.page || 1;
-        const pageSize = params?.pageSize || 10;
 
         return {
           data: villages,
           totalData,
-          page,
-          limit: pageSize,
-          totalPages: Math.ceil(totalData / pageSize),
+          page: 1,
+          limit: 100,
+          totalPages: Math.ceil(totalData / 100),
         };
       }
 
       return {
         data: [],
         totalData: 0,
-        page: params?.page || 1,
-        limit: params?.pageSize || 10,
+        page: 1,
+        limit: 100,
         totalPages: 0,
       };
     } catch (error) {
@@ -201,8 +195,8 @@ export const villageService = {
       return {
         data: [],
         totalData: 0,
-        page: params?.page || 1,
-        limit: params?.pageSize || 10,
+        page: 1,
+        limit: 100,
         totalPages: 0,
       };
     }

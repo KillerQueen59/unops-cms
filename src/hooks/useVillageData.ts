@@ -37,8 +37,8 @@ export const useVillages = (params?: PaginationParams) => {
         return {
           data: [],
           totalData: 0,
-          page: params?.page || 1,
-          limit: params?.pageSize || 10,
+          page: 1,
+          limit: 100,
           totalPages: 0,
         };
       }

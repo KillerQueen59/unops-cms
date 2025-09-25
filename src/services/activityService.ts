@@ -59,6 +59,8 @@ export interface ActivityListParams {
   type?: string;
   village?: string;
   sortBy?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 // API Response interfaces
@@ -121,6 +123,8 @@ export const activityService = {
       if (params?.status) queryParams.append('status', params.status);
       if (params?.type) queryParams.append('type', params.type);
       if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+      if (params?.startDate) queryParams.append('startDate', params.startDate);
+      if (params?.endDate) queryParams.append('endDate', params.endDate);
 
       const url = `/village/activity/all${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       const response = await apiClient.get<ActivityApiResponse>(url);

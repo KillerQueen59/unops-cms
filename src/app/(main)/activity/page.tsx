@@ -59,10 +59,10 @@ export default function ActivityPage() {
 
   const getFilterLabel = (filterType: string, filterValue: string) => {
     switch (filterType) {
-      case 'category':
-        return `Category: ${filterValue}`;
+      case 'type':
+        return `Type: ${filterValue.charAt(0).toUpperCase() + filterValue.slice(1)}`;
       case 'status':
-        return `Status: ${filterValue}`;
+        return `Status: ${filterValue.charAt(0).toUpperCase() + filterValue.slice(1)}`;
       case 'village':
         return `Village: ${
           villageOptions.find((v) => v.value === filterValue)?.label ||
