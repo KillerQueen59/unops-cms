@@ -91,18 +91,25 @@ export const MapPicker: React.FC<MapPickerProps> = ({
   regencyCode,
   error = false,
 }) => {
+  const isCoordinateProvided =
+    (latitude != null && Math.abs(latitude) > 0.000001) ||
+    (longitude != null && Math.abs(longitude) > 0.000001);
+
   const defaultCenter = useMemo<[number, number]>(() => {
+    if (isCoordinateProvided) {
+      return [latitude ?? 0, longitude ?? 0];
+    }
     if (provinceGeojson) {
       try {
         const bounds = L.geoJSON(provinceGeojson as any).getBounds();
         const c = bounds.getCenter();
         return [c.lat, c.lng];
       } catch {
-        return [-2.5489, 104.0261]; // fallback to Sumsel center
+        return [-2.5489, 104.0261];
       }
     }
     return [-2.5489, 104.0261];
-  }, [provinceGeojson]);
+  }, [provinceGeojson, latitude, longitude]);
 
   const [isOpen, setIsOpen] = useState(false);
   const [lat, setLat] = useState<number>(latitude ?? defaultCenter[0]);
@@ -153,12 +160,12 @@ export const MapPicker: React.FC<MapPickerProps> = ({
   const baseStyle: L.PathOptions = {
     color: '#111827',
     weight: 1.2,
-    fillOpacity: 0.15,
+    fillOpacity: 0,
   };
   const highlightStyle: L.PathOptions = {
     color: '#2563eb',
     weight: 2,
-    fillOpacity: 0.25,
+    fillOpacity: 0,
   };
 
   return (
@@ -309,7 +316,9 @@ export const MapPicker: React.FC<MapPickerProps> = ({
                       });
                     }}
                   />
-                  <FitToBounds geojson={boundsTarget} />
+                  {!isCoordinateProvided && (
+                    <FitToBounds geojson={boundsTarget} />
+                  )}
                 </>
               )}
 

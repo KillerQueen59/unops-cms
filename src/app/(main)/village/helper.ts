@@ -1,4 +1,4 @@
-import { southSumatraRegencies, villagesByRegency } from './constants';
+import { southSumatraRegencies, villagesByRegency, allVillages } from './constants';
 
 export const getRegencyOptions = () => {
   return southSumatraRegencies.map((regency) => ({
@@ -45,4 +45,10 @@ export const getTotalVillagesCount = () => {
 
 export const getVillagesCountByRegency = (regencyCode: string) => {
   return villagesByRegency[regencyCode]?.length || 0;
+};
+
+// Get village centroid coordinates by village code
+export const getVillageCentroid = (villageCode: string) => {
+  const village = allVillages.find((v) => v.code === villageCode);
+  return village?.centroid || null;
 };

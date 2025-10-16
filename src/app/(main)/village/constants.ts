@@ -91,6 +91,7 @@ export interface Village {
   kabupaten: string;
   category: VillageCategory;
   type: string;
+  centroid: { lat: number; lon: number };
 }
 
 export const category1Villages: Village[] = [
@@ -102,6 +103,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kota Prabumulih',
     category: VillageCategory.Category1,
     type: 'kelurahan',
+    centroid: { lat: -3.3997115, lon: 104.2682153 },
   },
   {
     no: 2,
@@ -111,6 +113,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kota Prabumulih',
     category: VillageCategory.Category1,
     type: 'kelurahan',
+    centroid: { lat: -3.4358416, lon: 104.2892559 },
   },
   {
     no: 3,
@@ -120,6 +123,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kota Prabumulih',
     category: VillageCategory.Category1,
     type: 'kelurahan',
+    centroid: { lat: -3.4102299, lon: 104.1814851 },
   },
   {
     no: 4,
@@ -129,6 +133,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kota Prabumulih',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.4609418, lon: 104.1857519 },
   },
   {
     no: 5,
@@ -138,6 +143,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kota Prabumulih',
     category: VillageCategory.Category1,
     type: 'kelurahan',
+    centroid: { lat: -3.4260373, lon: 104.2281552 },
   },
   {
     no: 6,
@@ -147,6 +153,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kota Prabumulih',
     category: VillageCategory.Category1,
     type: 'kelurahan',
+    centroid: { lat: -3.3380577, lon: 104.1348099 },
   },
   {
     no: 7,
@@ -156,6 +163,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kota Prabumulih',
     category: VillageCategory.Category1,
     type: 'kelurahan',
+    centroid: { lat: -3.4345368, lon: 104.2307545 },
   },
   {
     no: 8,
@@ -165,6 +173,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kota Prabumulih',
     category: VillageCategory.Category1,
     type: 'kelurahan',
+    centroid: { lat: -3.5114571, lon: 104.2150822 },
   },
   {
     no: 9,
@@ -174,6 +183,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.1661722, lon: 104.7503924 },
   },
   {
     no: 10,
@@ -183,6 +193,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.1586818, lon: 104.7553551 },
   },
   {
     no: 11,
@@ -192,6 +203,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.1994895, lon: 104.7215573 },
   },
   {
     no: 12,
@@ -201,6 +213,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.3614723, lon: 104.7722315 },
   },
   {
     no: 13,
@@ -210,6 +223,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.1180403, lon: 104.602881 },
   },
   {
     no: 14,
@@ -219,6 +233,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.5347322, lon: 104.5469316 },
   },
   {
     no: 15,
@@ -228,6 +243,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.1593742, lon: 104.7287736 },
   },
   {
     no: 16,
@@ -237,6 +253,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.1423234, lon: 104.5727274 },
   },
   {
     no: 17,
@@ -246,6 +263,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.1426528, lon: 104.7333849 },
   },
   {
     no: 18,
@@ -255,6 +273,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Penukal Abab Lematang Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.3195854, lon: 104.1406611 },
   },
   {
     no: 19,
@@ -264,6 +283,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Penukal Abab Lematang Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.1599343, lon: 104.165686 },
   },
   {
     no: 20,
@@ -273,6 +293,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Penukal Abab Lematang Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.2077969, lon: 103.9330266 },
   },
   {
     no: 21,
@@ -282,6 +303,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Penukal Abab Lematang Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.1813846, lon: 103.8353954 },
   },
   {
     no: 22,
@@ -291,6 +313,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Penukal Abab Lematang Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.3223956, lon: 104.1745452 },
   },
   {
     no: 23,
@@ -300,6 +323,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Penukal Abab Lematang Ilir',
     category: VillageCategory.Category1,
     type: 'kelurahan',
+    centroid: { lat: -3.2839706, lon: 103.818791 },
   },
   {
     no: 24,
@@ -309,6 +333,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Penukal Abab Lematang Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.1474649, lon: 104.116064 },
   },
   {
     no: 25,
@@ -318,6 +343,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Penukal Abab Lematang Ilir',
     category: VillageCategory.Category1,
     type: 'kelurahan',
+    centroid: { lat: -3.274445, lon: 103.8301507 },
   },
   {
     no: 26,
@@ -327,6 +353,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Penukal Abab Lematang Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.2026491, lon: 103.8697665 },
   },
   {
     no: 27,
@@ -336,6 +363,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Rawas',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.1756999, lon: 102.9265776 },
   },
   {
     no: 28,
@@ -345,6 +373,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Rawas',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.1313614, lon: 102.9475719 },
   },
   {
     no: 29,
@@ -354,6 +383,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Rawas',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.0942205, lon: 102.9169531 },
   },
   {
     no: 30,
@@ -363,6 +393,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Rawas',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.1301024, lon: 102.9642715 },
   },
   {
     no: 31,
@@ -372,6 +403,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Rawas',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.0998807, lon: 102.9755376 },
   },
   {
     no: 32,
@@ -381,6 +413,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Rawas',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.0626101, lon: 103.0017958 },
   },
   {
     no: 33,
@@ -390,6 +423,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Rawas',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.1680387, lon: 102.963717 },
   },
   {
     no: 34,
@@ -399,6 +433,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Rawas',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.9205357, lon: 103.150371 },
   },
   {
     no: 35,
@@ -408,6 +443,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Rawas',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.0686734, lon: 103.0537566 },
   },
   {
     no: 36,
@@ -417,6 +453,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Empat Lawang',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.7846738, lon: 102.8667796 },
   },
   {
     no: 37,
@@ -426,6 +463,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Empat Lawang',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.733173, lon: 102.7881161 },
   },
   {
     no: 38,
@@ -435,6 +473,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Empat Lawang',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.7542021, lon: 102.7393343 },
   },
   {
     no: 39,
@@ -444,6 +483,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Empat Lawang',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.7592339, lon: 102.7657085 },
   },
   {
     no: 40,
@@ -453,6 +493,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Empat Lawang',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.8044649, lon: 103.0116112 },
   },
   {
     no: 41,
@@ -462,6 +503,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Empat Lawang',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.7870896, lon: 102.9839759 },
   },
   {
     no: 42,
@@ -471,6 +513,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Empat Lawang',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.792215, lon: 103.0064718 },
   },
   {
     no: 43,
@@ -480,6 +523,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Empat Lawang',
     category: VillageCategory.Category1,
     type: 'kelurahan',
+    centroid: { lat: -3.7878559, lon: 102.9644157 },
   },
   {
     no: 44,
@@ -489,6 +533,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Empat Lawang',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.762107, lon: 102.9368632 },
   },
   {
     no: 45,
@@ -498,6 +543,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Banyuasin',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -1.9208417, lon: 103.626744 },
   },
   {
     no: 46,
@@ -507,6 +553,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Banyuasin',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.3463114, lon: 103.8300079 },
   },
   {
     no: 47,
@@ -516,6 +563,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Banyuasin',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -1.9743454, lon: 103.6891876 },
   },
   {
     no: 48,
@@ -525,6 +573,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Banyuasin',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.0444776, lon: 103.6561769 },
   },
   {
     no: 49,
@@ -534,6 +583,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Banyuasin',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.0483755, lon: 103.6808235 },
   },
   {
     no: 50,
@@ -543,6 +593,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Banyuasin',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.0610983, lon: 103.6856304 },
   },
   {
     no: 51,
@@ -552,6 +603,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Banyuasin',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.7179379, lon: 103.497136 },
   },
   {
     no: 52,
@@ -561,6 +613,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Banyuasin',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.7929454, lon: 103.3755182 },
   },
   {
     no: 53,
@@ -570,6 +623,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Banyuasin',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.6152693, lon: 103.8042061 },
   },
   {
     no: 54,
@@ -579,6 +633,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Rawas Utara',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.6755908, lon: 103.0178416 },
   },
   {
     no: 55,
@@ -588,6 +643,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Rawas Utara',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.6296739, lon: 102.7637206 },
   },
   {
     no: 56,
@@ -597,6 +653,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Rawas Utara',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.556946, lon: 102.7257291 },
   },
   {
     no: 57,
@@ -606,6 +663,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Rawas Utara',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.6847079, lon: 102.6174372 },
   },
   {
     no: 58,
@@ -615,6 +673,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Rawas Utara',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.5736866, lon: 102.7895121 },
   },
   {
     no: 59,
@@ -624,6 +683,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Rawas Utara',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.8068156, lon: 103.0735734 },
   },
   {
     no: 60,
@@ -633,6 +693,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Rawas Utara',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.6627297, lon: 102.6765597 },
   },
   {
     no: 61,
@@ -642,6 +703,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Rawas Utara',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.6568648, lon: 102.697773 },
   },
   {
     no: 62,
@@ -651,6 +713,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Rawas Utara',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.598382, lon: 102.7582183 },
   },
   {
     no: 63,
@@ -660,6 +723,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Komering Ulu Timur',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -4.2732388, lon: 104.5073766 },
   },
   {
     no: 64,
@@ -669,6 +733,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Komering Ulu Timur',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -4.4303722, lon: 104.3227394 },
   },
   {
     no: 65,
@@ -678,6 +743,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Komering Ulu Timur',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -4.2575087, lon: 104.457739 },
   },
   {
     no: 66,
@@ -687,6 +753,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Komering Ulu Timur',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -4.2677951, lon: 104.4760702 },
   },
   {
     no: 67,
@@ -696,6 +763,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Komering Ulu Timur',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -4.2905357, lon: 104.4777335 },
   },
   {
     no: 68,
@@ -705,6 +773,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Komering Ulu Timur',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -4.2211355, lon: 104.4791378 },
   },
   {
     no: 69,
@@ -714,6 +783,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Komering Ulu Timur',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -4.2945658, lon: 104.4554536 },
   },
   {
     no: 70,
@@ -723,6 +793,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Komering Ulu Timur',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -4.2854769, lon: 104.443895 },
   },
   {
     no: 71,
@@ -732,6 +803,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Komering Ulu Timur',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -4.240349, lon: 104.4560255 },
   },
   {
     no: 72,
@@ -741,6 +813,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Banyuasin',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.849124, lon: 104.4476068 },
   },
   {
     no: 73,
@@ -750,6 +823,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Banyuasin',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.8031956, lon: 104.5387735 },
   },
   {
     no: 74,
@@ -759,6 +833,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Banyuasin',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.3936853, lon: 104.8302021 },
   },
   {
     no: 75,
@@ -768,6 +843,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Banyuasin',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.7925835, lon: 104.1882246 },
   },
   {
     no: 76,
@@ -777,6 +853,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Banyuasin',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.0885877, lon: 104.9806784 },
   },
   {
     no: 77,
@@ -786,6 +863,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Banyuasin',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.6563371, lon: 104.3285706 },
   },
   {
     no: 78,
@@ -795,6 +873,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Banyuasin',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.6651262, lon: 104.6624505 },
   },
   {
     no: 79,
@@ -804,6 +883,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Banyuasin',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -2.5897576, lon: 104.7454856 },
   },
   {
     no: 80,
@@ -813,6 +893,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Komering Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.2582209, lon: 105.2810978 },
   },
   {
     no: 81,
@@ -822,6 +903,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Komering Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.6231702, lon: 105.3476262 },
   },
   {
     no: 82,
@@ -831,6 +913,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Komering Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.7244147, lon: 105.3383011 },
   },
   {
     no: 83,
@@ -840,6 +923,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Komering Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.5578524, lon: 105.0444432 },
   },
   {
     no: 84,
@@ -849,6 +933,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Komering Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.2471752, lon: 105.3046358 },
   },
   {
     no: 85,
@@ -858,6 +943,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Komering Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.2454705, lon: 105.2745479 },
   },
   {
     no: 86,
@@ -867,6 +953,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Komering Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.4710125, lon: 105.0727761 },
   },
   {
     no: 87,
@@ -876,6 +963,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Komering Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.1629394, lon: 105.285174 },
   },
   {
     no: 88,
@@ -885,6 +973,7 @@ export const category1Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Komering Ilir',
     category: VillageCategory.Category1,
     type: 'desa',
+    centroid: { lat: -3.5904208, lon: 105.2188172 },
   },
 ];
 
@@ -898,6 +987,7 @@ export const category2Villages: Village[] = [
     kabupaten: 'Kota Prabumulih',
     category: VillageCategory.Category2,
     type: 'kelurahan',
+    centroid: { lat: -3.4188534, lon: 104.2541184 },
   },
   {
     no: 90,
@@ -907,6 +997,7 @@ export const category2Villages: Village[] = [
     kabupaten: 'Kota Prabumulih',
     category: VillageCategory.Category2,
     type: 'desa',
+    centroid: { lat: -3.4291006, lon: 104.2437372 },
   },
   {
     no: 91,
@@ -916,6 +1007,7 @@ export const category2Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Ilir',
     category: VillageCategory.Category2,
     type: 'desa',
+    centroid: { lat: -3.1353524, lon: 104.7500689 },
   },
   {
     no: 92,
@@ -925,6 +1017,7 @@ export const category2Villages: Village[] = [
     kabupaten: 'Kabupaten Penukal Abab Lematang Ilir',
     category: VillageCategory.Category2,
     type: 'desa',
+    centroid: { lat: -3.3036311, lon: 104.2150249 },
   },
   {
     no: 93,
@@ -934,6 +1027,7 @@ export const category2Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Rawas',
     category: VillageCategory.Category2,
     type: 'desa',
+    centroid: { lat: -3.1143665, lon: 103.0029995 },
   },
   {
     no: 94,
@@ -943,6 +1037,7 @@ export const category2Villages: Village[] = [
     kabupaten: 'Kabupaten Empat Lawang',
     category: VillageCategory.Category2,
     type: 'desa',
+    centroid: { lat: -3.758328, lon: 102.7940528 },
   },
   {
     no: 95,
@@ -952,6 +1047,7 @@ export const category2Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Banyuasin',
     category: VillageCategory.Category2,
     type: 'desa',
+    centroid: { lat: -1.9345257, lon: 103.6622777 },
   },
   {
     no: 96,
@@ -961,6 +1057,7 @@ export const category2Villages: Village[] = [
     kabupaten: 'Kabupaten Musi Rawas Utara',
     category: VillageCategory.Category2,
     type: 'desa',
+    centroid: { lat: -2.6281982, lon: 102.7977317 },
   },
   {
     no: 97,
@@ -970,6 +1067,7 @@ export const category2Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Komering Ulu Timur',
     category: VillageCategory.Category2,
     type: 'desa',
+    centroid: { lat: -4.2987253, lon: 104.425569 },
   },
   {
     no: 98,
@@ -979,6 +1077,7 @@ export const category2Villages: Village[] = [
     kabupaten: 'Kabupaten Banyuasin',
     category: VillageCategory.Category2,
     type: 'desa',
+    centroid: { lat: -2.830128, lon: 104.4324935 },
   },
   {
     no: 99,
@@ -988,6 +1087,7 @@ export const category2Villages: Village[] = [
     kabupaten: 'Kabupaten Banyuasin',
     category: VillageCategory.Category2,
     type: 'desa',
+    centroid: { lat: -3.0323049, lon: 104.8349005 },
   },
   {
     no: 100,
@@ -997,6 +1097,7 @@ export const category2Villages: Village[] = [
     kabupaten: 'Kabupaten Ogan Komering Ilir',
     category: VillageCategory.Category2,
     type: 'desa',
+    centroid: { lat: -3.536894, lon: 104.8143048 },
   },
 ];
 

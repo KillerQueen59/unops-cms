@@ -20,7 +20,7 @@ import {
   VillageCategoryLabel,
 } from '../../constants';
 import { useEffect, useMemo, useState } from 'react';
-import { getVillageOptions } from '../../helper';
+import { getVillageOptions, getVillageCentroid } from '../../helper';
 import { MapPicker } from '@/components/MapPicker';
 import southSumatraOnly from '@/hooks/sumatra-only';
 import { ControlledFieldContainer } from '@/components';
@@ -88,6 +88,19 @@ export const Form = ({
       if (villageCode && !triggerChangeRegency) {
         const selectedVillage = villages.find((v) => v.value === villageCode);
         setSelectedVillage(selectedVillage?.value || '');
+
+        if (
+          isEditMode &&
+          selectedData &&
+          selectedData.villageLat === 0 &&
+          selectedData.villageLng === 0
+        ) {
+          const centroid = getVillageCentroid(villageCode);
+          if (centroid) {
+            setValue('villageLat', centroid.lat);
+            setValue('villageLng', centroid.lon);
+          }
+        }
       } else {
         setSelectedVillage('');
       }
@@ -95,7 +108,14 @@ export const Form = ({
       setVillageOptions([]);
       setSelectedVillage('');
     }
-  }, [selectedRegency, triggerChangeRegency, villageCode]);
+  }, [
+    selectedRegency,
+    triggerChangeRegency,
+    villageCode,
+    isEditMode,
+    selectedData,
+    setValue,
+  ]);
 
   return (
     <form
@@ -270,6 +290,18 @@ export const Form = ({
                     // Update both village code and village name in the form
                     setValue('villageCode', newValue?.value || '');
                     setValue('villageName', newValue?.label || '');
+
+                    if (newValue?.value) {
+                      const centroid = getVillageCentroid(newValue.value);
+                      if (centroid) {
+                        setValue('villageLat', centroid.lat);
+                        setValue('villageLng', centroid.lon);
+                        validateLocation(centroid.lat, centroid.lon);
+                      }
+                    } else {
+                      setValue('villageLat', 0);
+                      setValue('villageLng', 0);
+                    }
                   }}
                   disabled={!selectedRegency}
                   renderInput={(params) => (
@@ -485,17 +517,67 @@ export const Form = ({
             {/* Map Picker for Coordinates */}
             <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
               <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
-                <Typography
-                  variant="body2"
+                <Box
                   sx={{
-                    color: '#374151',
-                    fontWeight: 500,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
                     mb: 1,
                   }}
                 >
-                  Village Location
-                  <span style={{ color: '#EF4444', marginLeft: '4px' }}>*</span>
-                </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: '#374151',
+                      fontWeight: 500,
+                    }}
+                  >
+                    Village Location
+                    <span style={{ color: '#EF4444', marginLeft: '4px' }}>
+                      *
+                    </span>
+                  </Typography>
+                  {(() => {
+                    const currentLat = watch('villageLat');
+                    const currentLng = watch('villageLng');
+                    const defaultCentroid = selectedVillage
+                      ? getVillageCentroid(selectedVillage)
+                      : null;
+
+                    const hasMovedFromDefault =
+                      defaultCentroid &&
+                      (Math.abs(currentLat - defaultCentroid.lat) > 0.0001 ||
+                        Math.abs(currentLng - defaultCentroid.lon) > 0.0001);
+
+                    return hasMovedFromDefault ? (
+                      <Button
+                        size="small"
+                        variant="text"
+                        onClick={() => {
+                          if (defaultCentroid) {
+                            setValue('villageLat', defaultCentroid.lat);
+                            setValue('villageLng', defaultCentroid.lon);
+                            validateLocation(
+                              defaultCentroid.lat,
+                              defaultCentroid.lon
+                            );
+                          }
+                        }}
+                        sx={{
+                          fontSize: '0.75rem',
+                          textTransform: 'none',
+                          minWidth: 'auto',
+                          padding: '2px 8px',
+                          '&:hover': {
+                            backgroundColor: '#EEF2FF',
+                          },
+                        }}
+                      >
+                        Reset to default
+                      </Button>
+                    ) : null;
+                  })()}
+                </Box>
                 <Controller
                   name="villageLat"
                   control={control}

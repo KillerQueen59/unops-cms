@@ -11,18 +11,12 @@ import type {
 type Geometry = Polygon | MultiPolygon;
 type G = FeatureCollection<Geometry>;
 
-function isSouthSumatraFeature(
-  f: Feature<Geometry, GeoJsonProperties>
-): boolean {
-  return f.properties?.provinsi === 'SUMATERA SELATAN';
-}
-
 // ✅ Only filter by province with proper types
 const southSumatraOnly: G = {
   type: 'FeatureCollection',
-  features: IDBoundary.features
-    .map((f) => f as Feature<Geometry, GeoJsonProperties>)
-    .filter(isSouthSumatraFeature),
+  features: IDBoundary.features.map(
+    (f) => f as Feature<Geometry, GeoJsonProperties>
+  ),
 };
 
 export default southSumatraOnly;
