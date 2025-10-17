@@ -21,6 +21,7 @@ export interface ActivityData {
   activityName: string;
   villageId: string;
   description: string;
+  remarks: string;
   startDate: string;
   endDate: string;
   status: 'not yet' | 'ongoing' | 'completed';

@@ -47,6 +47,7 @@ export default function ActivityPage() {
     totalItems,
     currentPage,
     pageSize,
+    villageCategories,
   } = state;
 
   const {
@@ -121,7 +122,7 @@ export default function ActivityPage() {
   }
 
   if (page === PageEnum.ADD || page === PageEnum.EDIT) {
-    return <AddActivityPage />;
+    return <AddActivityPage villageCategories={villageCategories} />;
   }
 
   return (

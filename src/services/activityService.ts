@@ -15,6 +15,7 @@ export interface Activity {
   start_date: string;
   end_date: string;
   description: string;
+  remarks?: string;
   status: 'not yet' | 'ongoing' | 'completed';
   type: 'training' | 'workshop' | 'demosite';
   percentage: number;
@@ -26,6 +27,10 @@ export interface Activity {
     name: string;
     areaId: string;
   };
+  category?: {
+    _id: string;
+    name: string;
+  };
 }
 
 export interface CreateActivityData {
@@ -34,9 +39,11 @@ export interface CreateActivityData {
   start_date: string;
   end_date: string;
   description: string;
+  remarks?: string;
   status: 'not yet' | 'ongoing' | 'completed';
   type: 'training' | 'workshop' | 'demosite';
   percentage: number;
+  categoryId?: string;
 }
 
 export interface UpdateActivityData {
@@ -45,9 +52,11 @@ export interface UpdateActivityData {
   start_date?: string;
   end_date?: string;
   description?: string;
+  remarks?: string;
   status?: 'not yet' | 'ongoing' | 'completed';
   type?: 'training' | 'workshop' | 'demosite';
   percentage?: number;
+  categoryId?: string;
 }
 
 // Pagination interfaces
@@ -106,7 +115,8 @@ const transformActivityFromAPI = (apiActivity: Activity): ActivityData => {
         isExisting: true,
       })) || [],
     type: apiActivity.type,
-    category: apiActivity.type,
+    category: apiActivity.category?._id,
+    remarks: apiActivity.remarks || '',
   };
 };
 
@@ -254,6 +264,8 @@ export const createActivityFormData = (
   if (data.end_date) formData.append('end_date', data.end_date);
   if (data.status) formData.append('status', data.status);
   if (data.type) formData.append('type', data.type);
+  if (data.categoryId) formData.append('categoryId', data.categoryId);
+  if (data.remarks) formData.append('remarks', data.remarks);
 
   if (data.percentage !== undefined)
     formData.append('percentage', data.percentage.toString());

@@ -8,8 +8,8 @@ export const activityFormSchema = z
       .min(3, 'Activity name must be at least 3 characters')
       .max(100, 'Activity name must not exceed 100 characters'),
 
-    // activityCategory: z.string().min(1, 'Activity category is required'),
-    villageId: z.string().min(1, 'Village is required'),
+    activityCategory: z.string().min(1, 'Activity category is required'),
+    villageCode: z.string().min(1, 'Location is required'),
 
     description: z
       .string()
@@ -50,6 +50,14 @@ export const activityFormSchema = z
       ),
 
     files: z.array(z.any()),
+
+    remarks: z
+      .string()
+      .optional()
+      .refine(
+        (val) => !val || val.length >= 5,
+        'Remarks must be at least 5 characters if provided'
+      ),
   })
   .refine(
     (data) => {

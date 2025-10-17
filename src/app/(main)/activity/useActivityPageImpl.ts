@@ -12,6 +12,7 @@ import { ActivityData } from '@/types/activity';
 import toast from 'react-hot-toast';
 import { PageEnum } from '@/constants/page';
 import { useGlobalVillages } from '@/hooks/useGlobalVillages';
+import { useVillageCategories } from '@/hooks/useVillageData';
 
 export const useActivityPageImpl = () => {
   const {
@@ -41,6 +42,8 @@ export const useActivityPageImpl = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [isEdit, setIsEdit] = useState(false);
+
+  const { data: villageCategories } = useVillageCategories();
 
   const apiFilters = useMemo(
     () => ({
@@ -197,6 +200,7 @@ export const useActivityPageImpl = () => {
     // Filter options and current filters
     filters,
     villageOptions,
+    villageCategories,
   };
 
   const action = {

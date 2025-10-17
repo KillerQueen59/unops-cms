@@ -6,7 +6,6 @@ import {
   useUpdateActivity,
   useActivity,
 } from '@/hooks/useActivityData';
-import { useGlobalVillages } from '@/hooks/useGlobalVillages';
 import {
   CreateActivityData,
   UpdateActivityData,
@@ -37,15 +36,7 @@ export const useAddActivityPageImpl = () => {
 
   // Use detailed data if available, fallback to store data
   const activityData = detailedActivity || selectedActivity;
-
-  // fetch village options from global store
-  const { villages, isLoading } = useGlobalVillages();
-
-  const villageOptions = villages.map((village) => ({
-    label: village.villageName,
-    value: village.villageCode,
-    category: village.categoryName,
-  }));
+  console.log('activityData', activityData);
 
   const formatDateForInput = (dateString: string | undefined): string => {
     if (!dateString) return '';
@@ -73,7 +64,8 @@ export const useAddActivityPageImpl = () => {
     resolver: zodResolver(activityFormSchema),
     defaultValues: {
       activityName: activityData?.activityName || '',
-      villageId: activityData?.villageId || '',
+      activityCategory: activityData?.category || '',
+      villageCode: activityData?.villageId || '16',
       description: activityData?.description || '',
       startDate: formatDateForInput(activityData?.startDate),
       endDate: formatDateForInput(activityData?.endDate),
@@ -81,12 +73,14 @@ export const useAddActivityPageImpl = () => {
       percentage: activityData?.percentage || '',
       type: activityData?.type || 'workshop',
       files: activityData?.files ? activityData?.files : [],
+      remarks: activityData?.remarks || '',
     },
   });
 
   const watchedValues = watch([
     'activityName',
-    'villageId',
+    'activityCategory',
+    'villageCode',
     'description',
     'startDate',
     'endDate',
@@ -94,6 +88,7 @@ export const useAddActivityPageImpl = () => {
     'percentage',
     'type',
     'files',
+    'remarks',
   ]);
 
   const hasUnsavedChanges = useCallback(() => {
@@ -114,7 +109,8 @@ export const useAddActivityPageImpl = () => {
     if (activityData) {
       reset({
         activityName: activityData.activityName || '',
-        villageId: activityData.villageId || '',
+        activityCategory: activityData.category || '',
+        villageCode: activityData.villageId || '16', // Map villageId from API to villageCode in form, default to province code
         description: activityData.description || '',
         startDate: formatDateForInput(activityData.startDate),
         endDate: formatDateForInput(activityData.endDate),
@@ -122,6 +118,7 @@ export const useAddActivityPageImpl = () => {
         percentage: activityData.percentage || '',
         type: activityData.type || 'workshop',
         files: activityData.files ? activityData.files : [],
+        remarks: activityData.remarks || '',
       });
     }
   }, [activityData, reset]);
@@ -168,13 +165,15 @@ export const useAddActivityPageImpl = () => {
       if (isEditMode && activityData?.id) {
         const updateData: UpdateActivityData = {
           name: data.activityName,
-          villageId: data.villageId,
+          villageId: data.villageCode,
           description: data.description,
           start_date: data.startDate,
           end_date: data.endDate,
           status: data.status,
           percentage: Number(data.percentage),
           type: data.type,
+          categoryId: data.activityCategory,
+          remarks: data.remarks,
         };
 
         await updateActivityMutation.mutateAsync({
@@ -185,13 +184,15 @@ export const useAddActivityPageImpl = () => {
       } else {
         const createActivityData: CreateActivityData = {
           name: data.activityName,
-          villageId: data.villageId,
+          villageId: data.villageCode,
           description: data.description,
           start_date: data.startDate,
           end_date: data.endDate,
           status: data.status,
           percentage: Number(data.percentage),
           type: data.type,
+          categoryId: data.activityCategory,
+          remarks: data.remarks,
         };
 
         // Create new training
@@ -220,8 +221,6 @@ export const useAddActivityPageImpl = () => {
     showLeaveModal,
     isSubmitting,
     errors,
-    villageOptions,
-    isLoadingVillages: isLoading,
     submitError,
     selectedActivity: activityData,
     isLoadingActivity,

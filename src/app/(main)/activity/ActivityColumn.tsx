@@ -7,6 +7,7 @@ import {
 } from '@phosphor-icons/react';
 import dayjs from 'dayjs';
 import { ActivityData } from '@/types/activity';
+import { getLocationName } from './helper';
 
 interface ActivityColumnProps {
   onView?: (data: ActivityData) => void;
@@ -19,7 +20,6 @@ export const createActivityColumns = ({
   onView,
   onEdit,
   onDelete,
-  villageOptions,
 }: ActivityColumnProps): ColumnDef<ActivityData, unknown>[] => [
   {
     accessorKey: 'activityName',
@@ -29,10 +29,7 @@ export const createActivityColumns = ({
     accessorKey: 'villageName',
     header: 'Village Name',
     cell: ({ row }) => {
-      const villageId = row.original.villageId;
-      return (
-        villageOptions?.find((v) => v.value === villageId)?.label || villageId
-      );
+      return getLocationName(row.original.villageId);
     },
   },
   {

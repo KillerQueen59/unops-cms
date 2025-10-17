@@ -91,6 +91,7 @@ export const DetailActivityPage = () => {
     files: [],
     villageId: '',
     category: '',
+    remarks: '',
   };
 
   const handleDeleteCancel = () => {
@@ -169,7 +170,6 @@ export const DetailActivityPage = () => {
           breadcrumbs={breadcrumbs}
           activityData={activityData}
           handleBack={handleBack}
-          villageName={villageName}
           category={category}
           handleDelete={() => {
             setShowDeleteModal(true);

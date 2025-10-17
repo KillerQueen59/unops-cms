@@ -6,7 +6,16 @@ import { Header } from './components/Header';
 import { Form } from './components/Form';
 import { useAddActivityPageImpl } from './useAddActivityPageImpl';
 
-export const AddActivityPage = () => {
+export const AddActivityPage = ({
+  villageCategories,
+}: {
+  villageCategories:
+    | {
+        _id: string;
+        name: string;
+      }[]
+    | undefined;
+}) => {
   const { state, action } = useAddActivityPageImpl();
   const {
     control,
@@ -16,8 +25,6 @@ export const AddActivityPage = () => {
     showLeaveModal,
     isSubmitting,
     errors,
-    villageOptions,
-    isLoadingVillages,
     selectedActivity,
     isLoadingActivity,
     activityError,
@@ -80,11 +87,10 @@ export const AddActivityPage = () => {
           errors={errors}
           isSubmitting={isSubmitting}
           handleFormSubmit={handleFormSubmit}
-          villageOptions={villageOptions}
           watch={watch}
           setValue={setValue}
-          isLoadingVillage={isLoadingVillages}
           initialFiles={selectedActivity?.files || []}
+          villageCategories={villageCategories || []}
         />
       </Box>
 

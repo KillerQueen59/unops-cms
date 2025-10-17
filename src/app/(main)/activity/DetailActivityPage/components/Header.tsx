@@ -9,21 +9,20 @@ import {
   VillageCategoryLabel,
 } from '@/app/(main)/village/constants';
 import dayjs from 'dayjs';
+import { getLocationName } from '../../helper';
 
 export const Header = ({
   breadcrumbs,
   activityData,
-  handleBack,
-  villageName,
   category,
+  handleBack,
   handleDelete,
   handleEdit,
 }: {
   breadcrumbs: BreadcrumbItem[];
   activityData: ActivityData;
-  handleBack: () => void;
-  villageName: string;
   category: string;
+  handleBack: () => void;
   handleDelete: () => void;
   handleEdit: () => void;
 }) => {
@@ -68,6 +67,7 @@ export const Header = ({
   const statusColors = getStatusColors(activityData.status);
   const statusLabel = getStatusLabel(activityData.status);
 
+  const locationName = getLocationName(activityData.villageId);
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
@@ -170,13 +170,13 @@ export const Header = ({
             variant="body2"
             sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
           >
-            Village Name
+            Location Name
           </Typography>
           <Typography
             variant="body1"
             sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
           >
-            {villageName}
+            {locationName}
           </Typography>
         </Box>
 
@@ -222,6 +222,30 @@ export const Header = ({
             sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
           >
             {activityData.percentage}%
+          </Typography>
+        </Box>
+      </Box>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(1, 1fr)',
+          gap: 4,
+          mb: 4,
+          px: 2,
+        }}
+      >
+        <Box>
+          <Typography
+            variant="body2"
+            sx={{ color: '#6B7280', fontSize: '13px', mb: 0.5 }}
+          >
+            Remarks
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ color: '#1F2937', fontWeight: 600, fontSize: '16px' }}
+          >
+            {activityData.remarks || '-'}
           </Typography>
         </Box>
       </Box>

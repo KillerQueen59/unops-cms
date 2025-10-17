@@ -23,6 +23,14 @@ import { File as FileIcon, Trash } from '@phosphor-icons/react';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
 import { useCallback, useState, useEffect } from 'react';
 import Image from 'next/image';
+import {
+  PROVINCE_NAME,
+  southSumatraRegencies,
+  allVillages,
+  VillageCategory,
+  villageCategoryOptions,
+} from '@/app/(main)/village/constants';
+import { getVillageOptions } from '@/app/(main)/village/helper';
 
 interface ApiFile {
   url: string;
@@ -45,38 +53,39 @@ export const Form = ({
   errors,
   isSubmitting,
   handleFormSubmit,
-  villageOptions,
   watch,
   setValue,
-  isLoadingVillage,
   initialFiles = [],
+  villageCategories = [],
 }: {
   control: Control<ActivityFormData>;
   errors: FieldErrors<ActivityFormData>;
   isSubmitting: boolean;
   handleFormSubmit: () => void;
-  villageOptions: {
-    label: string;
-    value: string;
-    category: string | undefined;
-  }[];
   watch: (names?: string | string[]) => any;
   setValue: (
     name: keyof ActivityFormData,
     value: any,
     options?: object
   ) => void;
-  isLoadingVillage: boolean;
   initialFiles?: UnifiedFile[];
+  villageCategories?: { _id: string; name: string }[];
 }) => {
   const [allFiles, setAllFiles] = useState<UnifiedFile[]>(initialFiles);
-
   const [isDragOver, setIsDragOver] = useState(false);
-  const selectedVillage = watch('villageId');
+
+  // Location selection states
+  const [selectedRegency, setSelectedRegency] = useState<string>('');
+  const [selectedVillage, setSelectedVillage] = useState<string>('');
+  const [villageOptions, setVillageOptions] = useState<
+    Array<{ value: string; label: string }>
+  >([]);
 
   const currentStatus = watch('status');
   const startDate = watch('startDate');
   const endDate = watch('endDate');
+
+  const currentVillageCode = watch('villageCode');
 
   // Helper functions
   const isApiFile = (file: UnifiedFile): file is ApiFileWithMetadata => {
@@ -115,6 +124,49 @@ export const Form = ({
   useEffect(() => {
     setValue('files', allFiles, { shouldValidate: true });
   }, [allFiles, setValue]);
+
+  useEffect(() => {
+    if (currentVillageCode && currentVillageCode !== '') {
+      const codeParts = currentVillageCode.split('.');
+
+      if (codeParts.length >= 2) {
+        const regencyCode = codeParts.slice(0, 2).join('.');
+        const regency = southSumatraRegencies.find(
+          (reg) => reg.code === regencyCode
+        );
+
+        if (regency) {
+          setSelectedRegency(regencyCode);
+
+          if (codeParts.length >= 4) {
+            // Village options will be loaded by the regency useEffect, then we set the village
+            setTimeout(() => {
+              setSelectedVillage(currentVillageCode);
+            }, 100);
+          }
+        }
+      }
+    } else {
+      // If no villageCode is set, default to province code "16"
+      setValue('villageCode', '16');
+    }
+  }, [currentVillageCode, setValue]);
+
+  // Update village options when regency changes
+  useEffect(() => {
+    if (selectedRegency) {
+      const villages = getVillageOptions(selectedRegency);
+      setVillageOptions(villages);
+    } else {
+      // If no regency selected, show all villages
+      const allVillageOptions = allVillages.map((village) => ({
+        value: village.code,
+        label: village.name,
+        category: village.category,
+      }));
+      setVillageOptions(allVillageOptions);
+    }
+  }, [selectedRegency]);
 
   // Effect to handle percentage changes based on status
   useEffect(() => {
@@ -274,7 +326,7 @@ export const Form = ({
       }}
     >
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {/* Activity Name and Village */}
+        {/* Activity Name and Category */}
         <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
           <ControlledFieldContainer
             label="Activity Name"
@@ -283,14 +335,191 @@ export const Form = ({
             placeholder="Masukkan activity name..."
             required
             error={errors.activityName}
+            sx={{ flex: 1, minWidth: '300px' }}
           />
+
           <ControlledFieldContainer
-            label="Village"
-            name="villageId"
+            label="Activity Category"
+            name="activityCategory"
             control={control}
             required
-            error={errors.villageId}
+            error={errors.activityCategory}
+            sx={{ flex: 1, minWidth: '300px' }}
           >
+            <Controller
+              name="activityCategory"
+              control={control}
+              render={({ field }) => (
+                <FormControl fullWidth error={!!errors.activityCategory}>
+                  <Select
+                    {...field}
+                    displayEmpty
+                    sx={{
+                      borderRadius: '12px',
+                      backgroundColor: '#fff',
+                    }}
+                  >
+                    <MenuItem value="" disabled>
+                      <Typography color="textSecondary">
+                        Select activity category...
+                      </Typography>
+                    </MenuItem>
+                    {villageCategories.map((category) => (
+                      <MenuItem key={category._id} value={category._id}>
+                        {category.name === VillageCategory.Category1
+                          ? 'Category 1'
+                          : 'Category 2'}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+            />
+          </ControlledFieldContainer>
+        </Box>
+
+        {/* Location */}
+
+        <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+          <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#374151',
+                fontWeight: 500,
+                mb: 1,
+              }}
+            >
+              Province
+            </Typography>
+            <TextField
+              fullWidth
+              disabled
+              value={PROVINCE_NAME}
+              sx={{
+                backgroundColor: '#f9fafb',
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '12px',
+                  backgroundColor: '#f9fafb',
+                  '& fieldset': {
+                    borderColor: '#e5e7eb',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#e5e7eb',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#e5e7eb',
+                  },
+                },
+                '& .MuiInputBase-input': {
+                  color: '#9CA3AF',
+                },
+              }}
+            />
+          </Box>
+
+          {/* Regency/City - Searchable Autocomplete */}
+          <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#374151',
+                fontWeight: 500,
+                mb: 1,
+              }}
+            >
+              Regency/City
+            </Typography>
+            <Autocomplete
+              options={southSumatraRegencies}
+              getOptionLabel={(option) => option.name}
+              value={
+                southSumatraRegencies.find(
+                  (reg) => reg.code === selectedRegency
+                ) || null
+              }
+              onChange={(event, newValue) => {
+                setSelectedRegency(newValue?.code || '');
+                setSelectedVillage(''); // Reset village when regency changes
+                // Set village code based on selection state
+                if (newValue?.code) {
+                  // If regency is selected, use regency code
+                  setValue('villageCode', newValue.code);
+                } else {
+                  // If no regency selected, default to province code "16"
+                  setValue('villageCode', '16');
+                }
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Search regency/city..."
+                  error={
+                    !!errors.villageCode && !selectedRegency && !selectedVillage
+                  }
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '12px',
+                      '& fieldset': {
+                        borderColor:
+                          !!errors.villageCode &&
+                          !selectedRegency &&
+                          !selectedVillage
+                            ? '#EF4444'
+                            : undefined,
+                      },
+                    },
+                  }}
+                />
+              )}
+              renderOption={(props, option) => (
+                <Box component="li" {...props} key={option.code}>
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      {option.name}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: '#6B7280' }}>
+                      Capital: {option.capital} •{' '}
+                      {option.type === 'city' ? 'City' : 'Regency'}
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+              noOptionsText="No regency/city found"
+              sx={{
+                '& .MuiAutocomplete-inputRoot': {
+                  borderRadius: '12px',
+                },
+              }}
+            />
+            {!!errors.villageCode && !selectedRegency && !selectedVillage && (
+              <Typography
+                variant="caption"
+                sx={{
+                  color: '#EF4444',
+                  mt: 1,
+                  display: 'block',
+                }}
+              >
+                Please select either a regency/city or village
+              </Typography>
+            )}
+          </Box>
+        </Box>
+
+        {/* Village Selection */}
+        <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+          <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#374151',
+                fontWeight: 500,
+                mb: 1,
+              }}
+            >
+              Village
+            </Typography>
             <Autocomplete
               options={villageOptions}
               getOptionLabel={(option) => option.label}
@@ -300,20 +529,39 @@ export const Form = ({
                 ) || null
               }
               onChange={(event, newValue) => {
-                setValue('villageId', newValue?.value || '');
+                setSelectedVillage(newValue?.value || '');
+                // When village is selected, clear regency selection and use village code
+                if (newValue?.value) {
+                  setSelectedRegency(''); // Clear regency selection
+                  setValue('villageCode', newValue.value);
+                } else {
+                  // If village is cleared but regency is still selected, use regency code
+                  if (selectedRegency) {
+                    setValue('villageCode', selectedRegency);
+                  } else {
+                    // If neither village nor regency selected, default to province code "16"
+                    setValue('villageCode', '16');
+                  }
+                }
               }}
-              disabled={isLoadingVillage}
+              disabled={false}
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  placeholder={'Search village..'}
+                  placeholder={
+                    selectedRegency
+                      ? 'Search village in selected regency...'
+                      : 'Search all villages...'
+                  }
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       borderRadius: '12px',
-                      backgroundColor: !selectedVillage ? '#f9fafb' : '#fff',
+                      backgroundColor: '#fff',
                       '& fieldset': {
                         borderColor:
-                          !!errors.villageId && !selectedVillage
+                          !!errors.villageCode &&
+                          !selectedRegency &&
+                          !selectedVillage
                             ? '#EF4444'
                             : undefined,
                       },
@@ -333,14 +581,14 @@ export const Form = ({
                   </Box>
                 </Box>
               )}
-              noOptionsText={'No villages found'}
+              noOptionsText="No villages found"
               sx={{
                 '& .MuiAutocomplete-inputRoot': {
                   borderRadius: '12px',
                 },
               }}
             />
-            {!!errors.villageId && !selectedVillage && (
+            {!!errors.villageCode && !selectedRegency && !selectedVillage && (
               <Typography
                 variant="caption"
                 sx={{
@@ -349,12 +597,55 @@ export const Form = ({
                   display: 'block',
                 }}
               >
-                Please select a village
+                Please select either a regency/city or village
               </Typography>
             )}
-          </ControlledFieldContainer>
-        </Box>
+          </Box>
 
+          <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#374151',
+                fontWeight: 500,
+                mb: 1,
+              }}
+            >
+              Village Code
+            </Typography>
+            <Controller
+              name="villageCode"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  disabled
+                  value={currentVillageCode || ''}
+                  sx={{
+                    backgroundColor: '#f9fafb',
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '12px',
+                      backgroundColor: '#f9fafb',
+                      '& fieldset': {
+                        borderColor: '#e5e7eb',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#e5e7eb',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#e5e7eb',
+                      },
+                    },
+                    '& .MuiInputBase-input': {
+                      color: '#9CA3AF',
+                    },
+                  }}
+                />
+              )}
+            />
+          </Box>
+        </Box>
         {/* Start Date and End Date */}
         <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
           <ControlledFieldContainer
@@ -534,6 +825,18 @@ export const Form = ({
             required
             rows={4}
             error={errors.description}
+          />
+        </Box>
+
+        {/* Remarks */}
+        <Box>
+          <TextAreaFieldContainer
+            label="Remarks"
+            name="remarks"
+            control={control}
+            placeholder="Add any additional remarks or notes..."
+            rows={3}
+            error={errors.remarks}
           />
         </Box>
 
