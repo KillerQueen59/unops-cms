@@ -20,6 +20,7 @@ export interface Activity {
   type: 'training' | 'workshop' | 'demosite';
   percentage: number;
   files?: ApiFile[];
+  calendarEventIds?: Record<string, string>;
   createdAt: string;
   updatedAt: string;
   village?: {
@@ -87,7 +88,15 @@ interface ActivityApiResponse {
 interface SingleActivityApiResponse {
   status: boolean;
   message: string;
-  data: Activity;
+  data?: Activity;
+}
+
+interface CreateActivityApiResponse {
+  status: boolean;
+  message: string;
+  data?: {
+    _id?: string;
+  };
 }
 
 interface ActivityCategoriesResponse {
@@ -117,6 +126,7 @@ const transformActivityFromAPI = (apiActivity: Activity): ActivityData => {
     type: apiActivity.type,
     category: apiActivity.category?._id,
     remarks: apiActivity.remarks || '',
+    calendarEventIds: apiActivity.calendarEventIds,
   };
 };
 
@@ -197,6 +207,22 @@ export const activityService = {
     }
   },
 
+  async getActivityByIdRaw(id: string): Promise<Activity> {
+    try {
+      const response = await apiClient.get<SingleActivityApiResponse>(
+        `/village/activity/${id}`
+      );
+
+      if (response.status && response.data) {
+        return response.data;
+      }
+      throw new Error('Activity not found');
+    } catch (error) {
+      console.error('Failed to fetch activity by ID:', error);
+      throw error;
+    }
+  },
+
   async getCategories(): Promise<ActivityCategoriesResponse> {
     const endpoint = '/village/activity/categories';
     return apiClient.get<ActivityCategoriesResponse>(endpoint);
@@ -208,24 +234,115 @@ export const activityService = {
   ): Promise<{
     status: boolean;
     message: string;
+    calendarSyncStatus?: string;
   }> {
     // Use FormData for consistency with API (since it supports file uploads)
     const formData = createActivityFormData(activityData, files);
-    const response = await apiClient.post<SingleActivityApiResponse>(
+    const response = await apiClient.post<CreateActivityApiResponse>(
       '/village/activity',
       formData
     );
 
+    // Sync to Google Calendar (non-blocking) using the submitted form data
+    let calendarSyncStatus = 'skipped';
+
+    if (response.status && activityData) {
+      calendarSyncStatus = 'pending';
+      // Use the activity data we just submitted to create calendar event
+      this.syncCalendarCreateFromFormData(activityData)
+        .then(() => {
+          calendarSyncStatus = 'synced';
+          console.log('Activity synced to Google Calendar');
+        })
+        .catch((error) => {
+          console.error('Calendar sync failed:', error);
+          calendarSyncStatus = 'failed';
+        });
+    }
+
     return {
       status: response.status,
       message: response.message,
+      calendarSyncStatus,
     };
+  },
+
+  /**
+   * Sync created activity to Google Calendar from form data
+   */
+  async syncCalendarCreateFromFormData(activityData: CreateActivityData): Promise<void> {
+    try {
+      const attendeesList = ['fauzanramadhan59@gmail.com']; // Add your attendees here
+
+      const eventData = {
+        summary: `${activityData.type ? `[${activityData.type.toUpperCase()}] ` : ''}${activityData.name}`,
+        description: `${activityData.description}\n\nStatus: ${activityData.status}\nProgress: ${activityData.percentage}%${activityData.remarks ? `\n\nRemarks: ${activityData.remarks}` : ''}\n\nAttendees: ${attendeesList.join(', ')}\n\nVillage: ${activityData.villageId}`,
+        location: '', // Village name not available in form data
+        startDate: activityData.start_date,
+        endDate: activityData.end_date,
+        // Note: Service accounts cannot invite attendees without Domain-Wide Delegation
+        // Users can view events by accessing the shared calendar directly
+      };
+
+      const response = await fetch('/api/calendar/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create', eventData }),
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.eventIds && Object.keys(result.eventIds).length > 0) {
+        console.log('Activity synced to Google Calendar:', result.eventIds);
+        // Note: Calendar event IDs won't be saved to the activity since we don't have the activity ID
+        // They will be synced on the first update
+      } else if (result.errors && result.errors.length > 0) {
+        console.warn('Some calendar syncs failed:', result.errors);
+      }
+    } catch (error) {
+      console.error('Failed to sync activity to calendar:', error);
+    }
+  },
+
+  /**
+   * Sync created activity to Google Calendar
+   */
+  async syncCalendarCreate(activity: Activity): Promise<void> {
+    try {
+      const eventData = {
+        summary: `${activity.type ? `[${activity.type.toUpperCase()}] ` : ''}${activity.name}`,
+        description: `${activity.description}\n\nActivity ID: ${activity._id}\nStatus: ${activity.status}\nProgress: ${activity.percentage}%${activity.remarks ? `\n\nRemarks: ${activity.remarks}` : ''}`,
+        location: activity.village?.name || '',
+        startDate: activity.start_date,
+        endDate: activity.end_date,
+        // Note: No attendees - service accounts cannot invite without Domain-Wide Delegation
+      };
+
+      const response = await fetch('/api/calendar/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create', eventData }),
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.eventIds && Object.keys(result.eventIds).length > 0) {
+        // Update the activity with calendar event IDs
+        await this.updateActivity(activity._id, {}, [], result.eventIds);
+        console.log('Activity synced to Google Calendar:', result.eventIds);
+      } else if (result.errors && result.errors.length > 0) {
+        console.warn('Some calendar syncs failed:', result.errors);
+      }
+    } catch (error) {
+      console.error('Failed to sync activity to calendar:', error);
+    }
   },
 
   async updateActivity(
     activityId: string,
     activityData: UpdateActivityData,
-    files?: UnifiedFile[]
+    files?: UnifiedFile[],
+    calendarEventIds?: Record<string, string>
   ): Promise<Activity> {
     // Separate existing files from new files
     const existingFiles = files?.filter(isApiFile) || [];
@@ -238,14 +355,118 @@ export const activityService = {
       newFiles,
       existingFiles
     );
-    return await apiClient.put<Activity>(
+
+    // Add calendar event IDs if provided
+    if (calendarEventIds) {
+      formData.append('calendarEventIds', JSON.stringify(calendarEventIds));
+    }
+
+    const response = await apiClient.put<Activity>(
       `/village/activity/${activityId}`,
       formData
     );
+
+    // Sync to Google Calendar if activity data was updated (non-blocking)
+    if (Object.keys(activityData).length > 0) {
+      this.syncCalendarUpdate(response, activityData).catch((error) => {
+        console.error('Calendar sync failed:', error);
+      });
+    }
+
+    return response;
+  },
+
+  /**
+   * Sync updated activity to Google Calendar
+   */
+  async syncCalendarUpdate(
+    activity: Activity,
+    updatedData: UpdateActivityData
+  ): Promise<void> {
+    try {
+      // If no calendar event IDs exist, create new calendar events
+      if (!activity.calendarEventIds || Object.keys(activity.calendarEventIds).length === 0) {
+        console.log('No calendar event IDs found - creating new calendar event');
+        await this.syncCalendarCreate(activity);
+        return;
+      }
+
+      const eventData = {
+        summary: `${activity.type ? `[${activity.type.toUpperCase()}] ` : ''}${activity.name}`,
+        description: `${activity.description}\n\nActivity ID: ${activity._id}\nStatus: ${activity.status}\nProgress: ${activity.percentage}%${activity.remarks ? `\n\nRemarks: ${activity.remarks}` : ''}`,
+        location: activity.village?.name || '',
+        startDate: activity.start_date,
+        endDate: activity.end_date,
+        // Note: No attendees - service accounts cannot invite without Domain-Wide Delegation
+      };
+
+      const response = await fetch('/api/calendar/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          eventIds: activity.calendarEventIds,
+          eventData,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('Activity updated in Google Calendar');
+      } else if (result.errors && result.errors.length > 0) {
+        console.warn('Some calendar updates failed:', result.errors);
+      }
+    } catch (error) {
+      console.error('Failed to update calendar event:', error);
+    }
   },
 
   async deleteActivity(activityId: string): Promise<void> {
-    await apiClient.delete(`/village/activity/${activityId}`);
+    // Get activity details first to retrieve calendar event IDs
+    try {
+      const activity = await this.getActivityById(activityId);
+
+      // Delete the activity from the database
+      await apiClient.delete(`/village/activity/${activityId}`);
+
+      // Sync deletion to Google Calendar (non-blocking)
+      if (activity.calendarEventIds && Object.keys(activity.calendarEventIds).length > 0) {
+        this.syncCalendarDelete(activity.calendarEventIds).catch((error) => {
+          console.error('Calendar delete sync failed:', error);
+        });
+      }
+    } catch (error) {
+      // If getting activity details fails, still try to delete
+      await apiClient.delete(`/village/activity/${activityId}`);
+      throw error;
+    }
+  },
+
+  /**
+   * Sync deleted activity to Google Calendar
+   */
+  async syncCalendarDelete(calendarEventIds: Record<string, string>): Promise<void> {
+    try {
+      const response = await fetch('/api/calendar/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          eventIds: calendarEventIds,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('Activity deleted from Google Calendar');
+      } else if (result.errors && result.errors.length > 0) {
+        console.warn('Some calendar deletions failed:', result.errors);
+      }
+    } catch (error) {
+      console.error('Failed to delete calendar event:', error);
+    }
   },
 };
 
