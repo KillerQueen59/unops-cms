@@ -39,7 +39,7 @@ export const AddDemositePage = () => {
         />
       </Box>
       <Box sx={{ padding: '28px' }}>
-        <Form villageOptions={villageOptions} isLoading={isLoading} />
+        <Form />
       </Box>
     </Paper>
   );

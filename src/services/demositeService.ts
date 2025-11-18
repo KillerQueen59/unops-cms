@@ -1,12 +1,11 @@
 import { apiClient } from '@/lib/api';
 import { PaginatedResponse } from '@/types/common';
-import { DemositeData, DemositeType } from '@/types/demosite';
+import { DemositeData } from '@/types/demosite';
 
 // Demosite API interfaces based on Postman collection
 export interface CreateDemositeData {
   header: File;
   title: string;
-  type: 'hero' | 'location';
   name: string;
   story: string;
   link?: string;
@@ -17,7 +16,6 @@ export interface UpdateDemositeData {
   id: string;
   header?: File;
   title: string;
-  type: 'hero' | 'location';
   name: string;
   story: string;
   link?: string;
@@ -29,7 +27,6 @@ export interface UpdateDemositeData {
 export interface DemositeQueryParams {
   page?: number;
   pageSize?: number;
-  type?: string;
   search?: string;
   sortBy?: string;
 }
@@ -43,7 +40,6 @@ interface DemositeApiResponse {
       _id: string;
       header: string;
       title: string;
-      type: 'hero' | 'location';
       name: string;
       story: string;
       link: string;
@@ -63,10 +59,6 @@ const transformDemositeFromAPI = (
     id: apiDemosite._id,
     header: apiDemosite.header || '',
     title: apiDemosite.title || '',
-    type:
-      apiDemosite.type === 'hero'
-        ? DemositeType.LocalHeroes
-        : DemositeType.StoryOfVillage,
     name: apiDemosite.name || '',
     story: apiDemosite.story || '',
     link: apiDemosite.link || '',
@@ -94,7 +86,6 @@ export const demositeService = {
         queryParams.append('pageSize', params.pageSize.toString());
       // Always add sortBy for consistent results
       queryParams.append('sortBy', params?.sortBy || 'createdAt');
-      if (params?.type) queryParams.append('type', params.type);
       if (params?.search) queryParams.append('search', params.search);
 
       const url = `/demosite/all${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
@@ -105,7 +96,8 @@ export const demositeService = {
         const totalData = response.data.totalData || 0;
         const page = response.data.page || params?.page || 1;
         const pageSize = params?.pageSize || 16;
-        const totalPages = response.data.totalPages || Math.ceil(totalData / pageSize);
+        const totalPages =
+          response.data.totalPages || Math.ceil(totalData / pageSize);
 
         return {
           data: demosites,
@@ -188,7 +180,6 @@ export const createDemositeFormData = (
   // Add text fields
   if (data.header) formData.append('header', data.header);
   if (data.title) formData.append('title', data.title);
-  if (data.type) formData.append('type', data.type);
   if (data.name) formData.append('name', data.name);
   if (data.story) formData.append('story', data.story);
   if (data.link) formData.append('link', data.link);

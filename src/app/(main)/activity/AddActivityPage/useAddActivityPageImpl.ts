@@ -36,7 +36,6 @@ export const useAddActivityPageImpl = () => {
 
   // Use detailed data if available, fallback to store data
   const activityData = detailedActivity || selectedActivity;
-  console.log('activityData', activityData);
 
   const formatDateForInput = (dateString: string | undefined): string => {
     if (!dateString) return '';

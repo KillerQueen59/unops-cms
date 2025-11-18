@@ -17,7 +17,13 @@ export interface Activity {
   description: string;
   remarks?: string;
   status: 'not yet' | 'ongoing' | 'completed';
-  type: 'training' | 'workshop' | 'demosite';
+  type:
+    | 'training'
+    | 'workshop'
+    | 'demosite'
+    | 'meeting'
+    | 'field visit'
+    | 'fgd';
   percentage: number;
   files?: ApiFile[];
   createdAt: string;
@@ -41,7 +47,13 @@ export interface CreateActivityData {
   description: string;
   remarks?: string;
   status: 'not yet' | 'ongoing' | 'completed';
-  type: 'training' | 'workshop' | 'demosite';
+  type:
+    | 'training'
+    | 'workshop'
+    | 'demosite'
+    | 'meeting'
+    | 'field visit'
+    | 'fgd';
   percentage: number;
   categoryId?: string;
 }
@@ -54,7 +66,13 @@ export interface UpdateActivityData {
   description?: string;
   remarks?: string;
   status?: 'not yet' | 'ongoing' | 'completed';
-  type?: 'training' | 'workshop' | 'demosite';
+  type?:
+    | 'training'
+    | 'workshop'
+    | 'demosite'
+    | 'meeting'
+    | 'field visit'
+    | 'fgd';
   percentage?: number;
   categoryId?: string;
 }

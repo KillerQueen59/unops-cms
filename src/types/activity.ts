@@ -26,7 +26,13 @@ export interface ActivityData {
   endDate: string;
   status: 'not yet' | 'ongoing' | 'completed';
   percentage: string;
-  type?: 'workshop' | 'training' | 'demosite';
+  type?:
+    | 'workshop'
+    | 'training'
+    | 'demosite'
+    | 'meeting'
+    | 'field visit'
+    | 'fgd';
   files: UnifiedFile[];
   category?: string;
 }

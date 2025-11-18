@@ -67,7 +67,9 @@ export const EditDemositePage = () => {
             Error loading demosite
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {demositeError instanceof Error ? demositeError.message : 'Unknown error occurred'}
+            {demositeError instanceof Error
+              ? demositeError.message
+              : 'Unknown error occurred'}
           </Typography>
         </Box>
       </Paper>
@@ -97,11 +99,7 @@ export const EditDemositePage = () => {
         />
       </Box>
       <Box sx={{ padding: '28px' }}>
-        <Form 
-          villageOptions={villageOptions} 
-          isLoading={isLoading} 
-          demositeData={demositeData}
-        />
+        <Form demositeData={demositeData} />
       </Box>
     </Paper>
   );

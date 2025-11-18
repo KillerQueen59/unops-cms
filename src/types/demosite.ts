@@ -2,7 +2,6 @@ export interface DemositeData {
   id: string;
   header: string;
   title: string;
-  type: DemositeType;
   name: string;
   description: string;
   photos: string[];
@@ -18,8 +17,3 @@ export interface DemositeData {
 export type DemositeTable = {
   [key in keyof DemositeData]: DemositeData[key];
 };
-
-export enum DemositeType {
-  LocalHeroes = 'Local Heroes',
-  StoryOfVillage = 'Story of Village',
-}
