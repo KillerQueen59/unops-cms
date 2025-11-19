@@ -29,7 +29,7 @@ export interface ActivityData {
   type?: 'workshop' | 'training' | 'demosite';
   files: UnifiedFile[];
   category?: string;
-  calendarEventIds?: Record<string, string>; // Maps calendarId to eventId for Google Calendar sync
+  event_id?: string; 
 }
 
 // Helper functions for type checking

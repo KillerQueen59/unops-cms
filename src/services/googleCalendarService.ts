@@ -88,7 +88,18 @@ class GoogleCalendarService {
 
       const timezone = process.env.GOOGLE_CALENDAR_TIMEZONE || 'Asia/Jakarta';
 
-      const event = {
+      const event: {
+        summary: string;
+        description: string;
+        location?: string;
+        start: { date: string; timeZone: string };
+        end: { date: string; timeZone: string };
+        attendees?: Array<{ email: string }>;
+        reminders: {
+          useDefault: boolean;
+          overrides: Array<{ method: string; minutes: number }>;
+        };
+      } = {
         summary: eventData.summary,
         description: eventData.description,
         location: eventData.location,
@@ -100,7 +111,6 @@ class GoogleCalendarService {
           date: eventData.endDate,
           timeZone: timezone,
         },
-        attendees: eventData.attendees?.map((email) => ({ email })),
         reminders: {
           useDefault: false,
           overrides: [
@@ -110,10 +120,15 @@ class GoogleCalendarService {
         },
       };
 
+      if (eventData.attendees && eventData.attendees.length > 0) {
+        event.attendees = eventData.attendees.map((email) => ({ email }));
+      }
+
       const response = await this.calendar.events.insert({
         calendarId,
         requestBody: event,
-        sendUpdates: 'all',
+        sendUpdates:
+          event.attendees && event.attendees.length > 0 ? 'all' : 'none',
       });
 
       return {
@@ -199,7 +214,14 @@ class GoogleCalendarService {
 
       const timezone = process.env.GOOGLE_CALENDAR_TIMEZONE || 'Asia/Jakarta';
 
-      const event = {
+      const event: {
+        summary: string;
+        description: string;
+        location?: string;
+        start: { date: string; timeZone: string };
+        end: { date: string; timeZone: string };
+        attendees?: Array<{ email: string }>;
+      } = {
         summary: eventData.summary,
         description: eventData.description,
         location: eventData.location,
@@ -211,14 +233,19 @@ class GoogleCalendarService {
           date: eventData.endDate,
           timeZone: timezone,
         },
-        attendees: eventData.attendees?.map((email) => ({ email })),
       };
+
+      // Only add attendees if provided and not empty
+      if (eventData.attendees && eventData.attendees.length > 0) {
+        event.attendees = eventData.attendees.map((email) => ({ email }));
+      }
 
       await this.calendar.events.update({
         calendarId,
         eventId,
         requestBody: event,
-        sendUpdates: 'all',
+        sendUpdates:
+          event.attendees && event.attendees.length > 0 ? 'all' : 'none',
       });
 
       return {
@@ -231,9 +258,10 @@ class GoogleCalendarService {
           ? error.message
           : 'Failed to update calendar event';
       console.error(
-        `Failed to update event ${eventId} in calendar ${calendarId}:`,
+        `❌ Failed to update event ${eventId} in calendar ${calendarId}:`,
         error
       );
+      console.error('Error details:', JSON.stringify(error, null, 2));
       return {
         success: false,
         error: errorMessage,
@@ -248,6 +276,8 @@ class GoogleCalendarService {
     eventIds: Record<string, string>,
     eventData: CalendarEventData
   ): Promise<{ success: boolean; errors: string[] }> {
+    console.log('updateEvent eventIds:', eventIds, 'eventData:', eventData);
+
     if (!isCalendarSyncEnabled()) {
       console.log('Calendar sync is disabled');
       return { success: true, errors: [] };
@@ -279,6 +309,7 @@ class GoogleCalendarService {
         errors.push(`${config.email}: ${error}`);
       }
     });
+    console.log('updateEvent errors:', errors);
 
     return {
       success: errors.length === 0,
