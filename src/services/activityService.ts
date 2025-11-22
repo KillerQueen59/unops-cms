@@ -167,9 +167,7 @@ export const activityService = {
     const codeParts = villageCode.split('.');
     if (codeParts.length >= 2) {
       const regencyCode = codeParts.slice(0, 2).join('.');
-      const regency = southSumatraRegencies.find(
-        (r) => r.code === regencyCode
-      );
+      const regency = southSumatraRegencies.find((r) => r.code === regencyCode);
       if (regency) {
         parts.push(regency.name);
       }
