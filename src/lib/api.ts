@@ -93,11 +93,11 @@ class ApiClient {
       // Handle authentication errors
       if (response.status === 401) {
         // Remove invalid token and redirect to login
-        // removeAuthToken();
-        // if (typeof window !== 'undefined') {
-        // window.location.href = '/login';
-        // }
-        throw new Error('Authentication failed. Please check your token.');
+        removeAuthToken();
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
+        throw new Error('Authentication failed. Please login again.');
       }
 
       if (response.status === 403) {
