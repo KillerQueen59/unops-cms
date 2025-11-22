@@ -27,14 +27,14 @@ export const createActivityColumns = ({
   },
   {
     accessorKey: 'villageName',
-    header: 'Village Name',
+    header: 'Location Name',
     cell: ({ row }) => {
       return getLocationName(row.original.villageId);
     },
   },
   {
     accessorKey: 'villageId',
-    header: 'Village ID',
+    header: 'Location ID',
   },
   {
     accessorKey: 'startDate',

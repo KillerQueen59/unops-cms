@@ -142,8 +142,50 @@ const getVillageName = async (villageId: string): Promise<string> => {
   }
 };
 
+// Import location constants
+import {
+  PROVINCE_NAME,
+  southSumatraRegencies,
+  allVillages,
+} from '@/app/(main)/village/constants';
+
 // Activity API Service
 export const activityService = {
+  /**
+   * Build location name from village code (not ID)
+   * Extracts province, regency, and village names from the village code
+   * @param villageCode - The village code (e.g., "16", "16.05", "16.05.01.2001")
+   */
+  getLocationNameFromCode(villageCode: string): string {
+    if (!villageCode) {
+      return PROVINCE_NAME;
+    }
+
+    const parts: string[] = [PROVINCE_NAME];
+
+    // Extract regency from village code (first two parts: e.g., "16.05")
+    const codeParts = villageCode.split('.');
+    if (codeParts.length >= 2) {
+      const regencyCode = codeParts.slice(0, 2).join('.');
+      const regency = southSumatraRegencies.find(
+        (r) => r.code === regencyCode
+      );
+      if (regency) {
+        parts.push(regency.name);
+      }
+    }
+
+    // Add village name if available (full code with 4 parts)
+    if (codeParts.length >= 4) {
+      const village = allVillages.find((v) => v.code === villageCode);
+      if (village) {
+        parts.push(village.name);
+      }
+    }
+
+    return parts.join(', ');
+  },
+
   async getActivities(
     params?: ActivityListParams
   ): Promise<PaginatedResponse<ActivityData>> {
@@ -300,13 +342,13 @@ export const activityService = {
     try {
       const attendeesList = ['fauzanramadhan59@gmail.com']; // Add your attendees here
 
-      // Fetch village name
-      const villageName = await getVillageName(activityData.villageId);
+      // Build location name from village code (villageId is actually the village code)
+      const locationName = this.getLocationNameFromCode(activityData.villageId);
 
       const eventData = {
         summary: `${activityData.type ? `[${activityData.type.toUpperCase()}] ` : ''}${activityData.name}`,
-        description: `${activityData.description}\n\nVillage: ${villageName || activityData.villageId}\nStatus: ${activityData.status}\nProgress: ${activityData.percentage}%${activityData.remarks ? `\n\nRemarks: ${activityData.remarks}` : ''}\n\nAttendees: ${attendeesList.join(', ')}`,
-        location: villageName,
+        description: `${activityData.description}\n\nLocation: ${locationName}\nStatus: ${activityData.status}\nProgress: ${activityData.percentage}%${activityData.remarks ? `\n\nRemarks: ${activityData.remarks}` : ''}\n\nAttendees: ${attendeesList.join(', ')}`,
+        location: locationName,
         startDate: activityData.start_date,
         endDate: activityData.end_date,
       };
@@ -338,13 +380,13 @@ export const activityService = {
     try {
       const attendeesList = ['fauzanramadhan59@gmail.com']; // Add your attendees here
 
-      // Fetch village name
-      const villageName = await getVillageName(activityData.villageId);
+      // Build location name from village code (villageId is actually the village code)
+      const locationName = this.getLocationNameFromCode(activityData.villageId);
 
       const eventData = {
         summary: `${activityData.type ? `[${activityData.type.toUpperCase()}] ` : ''}${activityData.name}`,
-        description: `${activityData.description}\n\nVillage: ${villageName || activityData.villageId}\nActivity ID: ${activityId}\nStatus: ${activityData.status}\nProgress: ${activityData.percentage}%${activityData.remarks ? `\n\nRemarks: ${activityData.remarks}` : ''}\n\nAttendees: ${attendeesList.join(', ')}`,
-        location: villageName,
+        description: `${activityData.description}\n\nLocation: ${locationName}\nActivity ID: ${activityId}\nStatus: ${activityData.status}\nProgress: ${activityData.percentage}%${activityData.remarks ? `\n\nRemarks: ${activityData.remarks}` : ''}\n\nAttendees: ${attendeesList.join(', ')}`,
+        location: locationName,
         startDate: activityData.start_date,
         endDate: activityData.end_date,
       };
@@ -383,13 +425,13 @@ export const activityService = {
     try {
       const attendeesList = ['fauzanramadhan59@gmail.com']; // Add your attendees here
 
-      // Fetch village name
-      const villageName = await getVillageName(activityData.villageId);
+      // Build location name from village code (villageId is actually the village code)
+      const locationName = this.getLocationNameFromCode(activityData.villageId);
 
       const eventData = {
         summary: `${activityData.type ? `[${activityData.type.toUpperCase()}] ` : ''}${activityData.name}`,
-        description: `${activityData.description}\n\nVillage: ${villageName || activityData.villageId}\nStatus: ${activityData.status}\nProgress: ${activityData.percentage}%${activityData.remarks ? `\n\nRemarks: ${activityData.remarks}` : ''}\n\nAttendees: ${attendeesList.join(', ')}`,
-        location: villageName,
+        description: `${activityData.description}\n\nLocation: ${locationName}\nStatus: ${activityData.status}\nProgress: ${activityData.percentage}%${activityData.remarks ? `\n\nRemarks: ${activityData.remarks}` : ''}\n\nAttendees: ${attendeesList.join(', ')}`,
+        location: locationName,
         startDate: activityData.start_date,
         endDate: activityData.end_date,
         // Note: Service accounts cannot invite attendees without Domain-Wide Delegation
@@ -429,10 +471,13 @@ export const activityService = {
         return dateString.split('T')[0];
       };
 
+      // Build location name from village code (villageId is actually the village code)
+      const locationName = this.getLocationNameFromCode(activity.villageId);
+
       const eventData = {
         summary: `${activity.type ? `[${activity.type.toUpperCase()}] ` : ''}${activity.name}`,
-        description: `${activity.description}\n\nActivity ID: ${activity._id}\nStatus: ${activity.status}\nProgress: ${activity.percentage}%${activity.remarks ? `\n\nRemarks: ${activity.remarks}` : ''}`,
-        location: activity.village?.name || '',
+        description: `${activity.description}\n\nLocation: ${locationName}\nActivity ID: ${activity._id}\nStatus: ${activity.status}\nProgress: ${activity.percentage}%${activity.remarks ? `\n\nRemarks: ${activity.remarks}` : ''}`,
+        location: locationName,
         startDate: extractDate(activity.start_date),
         endDate: extractDate(activity.end_date),
         // Note: No attendees - service accounts cannot invite without Domain-Wide Delegation
@@ -514,16 +559,13 @@ export const activityService = {
         return dateString.split('T')[0];
       };
 
-      // Get village name - use populated village.name or fetch by villageId
-      let villageName = activity.village?.name || '';
-      if (!villageName && activity.villageId) {
-        villageName = await getVillageName(activity.villageId);
-      }
+      // Build location name from village code (villageId is actually the village code)
+      const locationName = this.getLocationNameFromCode(activity.villageId);
 
       const eventData = {
         summary: `${activity.type ? `[${activity.type.toUpperCase()}] ` : ''}${activity.name}`,
-        description: `${activity.description}\n\nVillage: ${villageName}\nActivity ID: ${activity._id}\nStatus: ${activity.status}\nProgress: ${activity.percentage}%${activity.remarks ? `\n\nRemarks: ${activity.remarks}` : ''}`,
-        location: villageName,
+        description: `${activity.description}\n\nLocation: ${locationName}\nActivity ID: ${activity._id}\nStatus: ${activity.status}\nProgress: ${activity.percentage}%${activity.remarks ? `\n\nRemarks: ${activity.remarks}` : ''}`,
+        location: locationName,
         startDate: extractDate(activity.start_date),
         endDate: extractDate(activity.end_date),
       };
