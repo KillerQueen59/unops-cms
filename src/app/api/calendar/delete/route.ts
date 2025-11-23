@@ -23,7 +23,6 @@ export async function DELETE(request: NextRequest) {
 
     // Build eventIds object for the service
     const eventIds = { [calendarId]: eventId };
-
     const result = await googleCalendarService.deleteEvent(eventIds);
 
     if (result.success) {

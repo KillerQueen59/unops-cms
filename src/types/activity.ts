@@ -29,7 +29,7 @@ export interface ActivityData {
   type?: 'workshop' | 'training' | 'demosite';
   files: UnifiedFile[];
   category?: string;
-  event_id?: string; 
+  event_id?: string;
 }
 
 // Helper functions for type checking
@@ -60,3 +60,101 @@ export const getFileId = (file: UnifiedFile, index: number): string => {
 export type ActivityTable = {
   [key in keyof ActivityData]: ActivityData[key];
 };
+
+// Activity API interfaces based on the curl commands
+export interface Activity {
+  _id: string;
+  villageId: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  description: string;
+  remarks?: string;
+  status: 'not yet' | 'ongoing' | 'completed';
+  type: 'training' | 'workshop' | 'demosite';
+  percentage: number;
+  files?: ApiFile[];
+  event_id?: string;
+  createdAt: string;
+  updatedAt: string;
+  village?: {
+    _id: string;
+    name: string;
+    areaId: string;
+  };
+  category?: {
+    _id: string;
+    name: string;
+  };
+}
+
+export interface CreateActivityData {
+  villageId: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  description: string;
+  remarks?: string;
+  status: 'not yet' | 'ongoing' | 'completed';
+  type: 'training' | 'workshop' | 'demosite';
+  percentage: number;
+  categoryId?: string;
+}
+
+export interface UpdateActivityData {
+  villageId?: string;
+  name?: string;
+  start_date?: string;
+  end_date?: string;
+  description?: string;
+  remarks?: string;
+  status?: 'not yet' | 'ongoing' | 'completed';
+  type?: 'training' | 'workshop' | 'demosite';
+  percentage?: number;
+  categoryId?: string;
+}
+
+// Pagination interfaces
+export interface ActivityListParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  status?: string;
+  type?: string;
+  village?: string;
+  sortBy?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+// API Response interfaces
+export interface ActivityApiResponse {
+  status: boolean;
+  message: string;
+  data: {
+    activities: Activity[];
+    totalData: number;
+    page: number;
+    totalPages: number;
+  };
+}
+
+export interface SingleActivityApiResponse {
+  status: boolean;
+  message: string;
+  data?: Activity;
+}
+
+export interface CreateActivityApiResponse {
+  status: boolean;
+  message: string;
+  data?: {
+    _id?: string;
+  };
+}
+
+export interface ActivityCategoriesResponse {
+  status: boolean;
+  message: string;
+  data: string[];
+}
