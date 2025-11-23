@@ -809,7 +809,7 @@ export const Form = ({
                     <MenuItem value="workshop">Workshop</MenuItem>
                     <MenuItem value="demosite">Demo Site</MenuItem>
                     <MenuItem value="meeting">Meeting</MenuItem>
-                    <MenuItem value="field visit">Field Visit</MenuItem>
+                    <MenuItem value="field_visit">Field Visit</MenuItem>
                     <MenuItem value="fgd">FGD</MenuItem>
                   </Select>
                 </FormControl>

@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { activityService } from '@/services/activityService';
 import {
-  activityService,
-  CreateActivityData,
-  UpdateActivityData,
+  ActivityData,
   ActivityListParams,
-} from '@/services/activityService';
-import { ActivityData, UnifiedFile } from '@/types/activity';
+  CreateActivityData,
+  UnifiedFile,
+  UpdateActivityData,
+} from '@/types/activity';
 import toast from 'react-hot-toast';
 import { PaginatedResponse } from '@/types/common';
 

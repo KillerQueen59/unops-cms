@@ -31,7 +31,7 @@ export interface ActivityData {
     | 'training'
     | 'demosite'
     | 'meeting'
-    | 'fieldVisit'
+    | 'field_visit'
     | 'fgd';
   files: UnifiedFile[];
   category?: string;
@@ -77,7 +77,13 @@ export interface Activity {
   description: string;
   remarks?: string;
   status: 'not yet' | 'ongoing' | 'completed';
-  type: 'training' | 'workshop' | 'demosite' | 'meeting' | 'fieldVisit' | 'fgd';
+  type:
+    | 'training'
+    | 'workshop'
+    | 'demosite'
+    | 'meeting'
+    | 'field_visit'
+    | 'fgd';
   percentage: number;
   files?: ApiFile[];
   event_id?: string;
@@ -102,7 +108,13 @@ export interface CreateActivityData {
   description: string;
   remarks?: string;
   status: 'not yet' | 'ongoing' | 'completed';
-  type: 'training' | 'workshop' | 'demosite' | 'meeting' | 'fieldVisit' | 'fgd';
+  type:
+    | 'training'
+    | 'workshop'
+    | 'demosite'
+    | 'meeting'
+    | 'field_visit'
+    | 'fgd';
   percentage: number;
   categoryId?: string;
 }
@@ -120,7 +132,7 @@ export interface UpdateActivityData {
     | 'workshop'
     | 'demosite'
     | 'meeting'
-    | 'fieldVisit'
+    | 'field_visit'
     | 'fgd';
   percentage?: number;
   categoryId?: string;

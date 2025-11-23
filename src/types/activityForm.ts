@@ -36,7 +36,7 @@ export const activityFormSchema = z
     }),
 
     type: z.enum(
-      ['workshop', 'training', 'demosite', 'meeting', 'field visit', 'fgd'],
+      ['workshop', 'training', 'demosite', 'meeting', 'field_visit', 'fgd'],
       {
         message: 'Type must be either workshop, training, or demosite',
       }

@@ -63,7 +63,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
     },
     {
       label: 'Field Visit',
-      value: 'field visit',
+      value: 'field_visit',
     },
     {
       label: 'FGD',

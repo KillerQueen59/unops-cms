@@ -6,11 +6,9 @@ import {
   useUpdateActivity,
   useActivity,
 } from '@/hooks/useActivityData';
-import {
-  CreateActivityData,
-  UpdateActivityData,
-} from '@/services/activityService';
+import {} from '@/services/activityService';
 import { useActivityStore } from '@/stores/activityStore';
+import { UpdateActivityData, CreateActivityData } from '@/types/activity';
 import { ActivityFormData, activityFormSchema } from '@/types/activityForm';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useCallback, useEffect } from 'react';
