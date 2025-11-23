@@ -1,100 +1,20 @@
 import { apiClient } from '@/lib/api';
 import { PaginatedResponse } from '@/types/common';
 import {
+  Activity,
+  ActivityApiResponse,
+  ActivityCategoriesResponse,
   ActivityData,
+  ActivityListParams,
   ApiFile,
+  CreateActivityApiResponse,
+  CreateActivityData,
+  SingleActivityApiResponse,
   UnifiedFile,
+  UpdateActivityData,
   isApiFile,
 } from '@/types/activity';
-
-// Activity API interfaces based on the curl commands
-export interface Activity {
-  _id: string;
-  villageId: string;
-  name: string;
-  start_date: string;
-  end_date: string;
-  description: string;
-  remarks?: string;
-  status: 'not yet' | 'ongoing' | 'completed';
-  type: 'training' | 'workshop' | 'demosite';
-  percentage: number;
-  files?: ApiFile[];
-  createdAt: string;
-  updatedAt: string;
-  village?: {
-    _id: string;
-    name: string;
-    areaId: string;
-  };
-  category?: {
-    _id: string;
-    name: string;
-  };
-}
-
-export interface CreateActivityData {
-  villageId: string;
-  name: string;
-  start_date: string;
-  end_date: string;
-  description: string;
-  remarks?: string;
-  status: 'not yet' | 'ongoing' | 'completed';
-  type: 'training' | 'workshop' | 'demosite';
-  percentage: number;
-  categoryId?: string;
-}
-
-export interface UpdateActivityData {
-  villageId?: string;
-  name?: string;
-  start_date?: string;
-  end_date?: string;
-  description?: string;
-  remarks?: string;
-  status?: 'not yet' | 'ongoing' | 'completed';
-  type?: 'training' | 'workshop' | 'demosite';
-  percentage?: number;
-  categoryId?: string;
-}
-
-// Pagination interfaces
-export interface ActivityListParams {
-  page?: number;
-  pageSize?: number;
-  search?: string;
-  status?: string;
-  type?: string;
-  village?: string;
-  sortBy?: string;
-  startDate?: string;
-  endDate?: string;
-}
-
-// API Response interfaces
-interface ActivityApiResponse {
-  status: boolean;
-  message: string;
-  data: {
-    activities: Activity[];
-    totalData: number;
-    page: number;
-    totalPages: number;
-  };
-}
-
-interface SingleActivityApiResponse {
-  status: boolean;
-  message: string;
-  data: Activity;
-}
-
-interface ActivityCategoriesResponse {
-  status: boolean;
-  message: string;
-  data: string[];
-}
+import { calendarService } from './calendarService';
 
 // Transform API response to our internal format
 const transformActivityFromAPI = (apiActivity: Activity): ActivityData => {
@@ -117,6 +37,7 @@ const transformActivityFromAPI = (apiActivity: Activity): ActivityData => {
     type: apiActivity.type,
     category: apiActivity.category?._id,
     remarks: apiActivity.remarks || '',
+    event_id: apiActivity.event_id,
   };
 };
 
@@ -197,6 +118,22 @@ export const activityService = {
     }
   },
 
+  async getActivityByIdRaw(id: string): Promise<Activity> {
+    try {
+      const response = await apiClient.get<SingleActivityApiResponse>(
+        `/village/activity/${id}`
+      );
+
+      if (response.status && response.data) {
+        return response.data;
+      }
+      throw new Error('Activity not found');
+    } catch (error) {
+      console.error('Failed to fetch activity by ID:', error);
+      throw error;
+    }
+  },
+
   async getCategories(): Promise<ActivityCategoriesResponse> {
     const endpoint = '/village/activity/categories';
     return apiClient.get<ActivityCategoriesResponse>(endpoint);
@@ -208,10 +145,38 @@ export const activityService = {
   ): Promise<{
     status: boolean;
     message: string;
+    calendarSyncStatus?: string;
+    activityId?: string;
   }> {
-    // Use FormData for consistency with API (since it supports file uploads)
+    let calendarSyncStatus = 'skipped';
+    let eventId: string | undefined;
+
+    try {
+      const calendarResult =
+        await calendarService.createCalendarEvent(activityData);
+      if (calendarResult.success && calendarResult.eventIds) {
+        const eventIds = Object.values(calendarResult.eventIds);
+        if (eventIds.length > 0) {
+          eventId = eventIds[0];
+          calendarSyncStatus = 'synced';
+          console.log('Google Calendar event created:', eventId);
+        }
+      } else {
+        console.warn('Calendar creation had errors:', calendarResult.errors);
+        calendarSyncStatus = 'partial';
+      }
+    } catch (error) {
+      console.error('Failed to create calendar event:', error);
+      calendarSyncStatus = 'failed';
+    }
+
     const formData = createActivityFormData(activityData, files);
-    const response = await apiClient.post<SingleActivityApiResponse>(
+
+    if (eventId) {
+      formData.append('event_id', eventId);
+    }
+
+    const response = await apiClient.post<CreateActivityApiResponse>(
       '/village/activity',
       formData
     );
@@ -219,13 +184,16 @@ export const activityService = {
     return {
       status: response.status,
       message: response.message,
+      calendarSyncStatus,
+      activityId: response.data?._id,
     };
   },
 
   async updateActivity(
     activityId: string,
     activityData: UpdateActivityData,
-    files?: UnifiedFile[]
+    files?: UnifiedFile[],
+    eventId?: string
   ): Promise<Activity> {
     // Separate existing files from new files
     const existingFiles = files?.filter(isApiFile) || [];
@@ -238,14 +206,45 @@ export const activityService = {
       newFiles,
       existingFiles
     );
-    return await apiClient.put<Activity>(
-      `/village/activity/${activityId}`,
-      formData
-    );
+
+    // Add calendar event ID if provided
+    if (eventId) {
+      formData.append('event_id', eventId);
+    }
+
+    await apiClient.put(`/village/activity/${activityId}`, formData);
+
+    const updatedActivity = await this.getActivityByIdRaw(activityId);
+
+    // Sync to Google Calendar if activity data was updated (non-blocking)
+    if (Object.keys(activityData).length > 0) {
+      calendarService.syncCalendarUpdate(updatedActivity).catch((error) => {
+        console.error('Calendar sync failed:', error);
+      });
+    }
+
+    return updatedActivity;
   },
 
   async deleteActivity(activityId: string): Promise<void> {
-    await apiClient.delete(`/village/activity/${activityId}`);
+    // Get activity details first to retrieve calendar event ID
+    try {
+      const activity = await this.getActivityById(activityId);
+
+      // Delete the activity from the database
+      await apiClient.delete(`/village/activity/${activityId}`);
+
+      // Sync deletion to Google Calendar (non-blocking)
+      if (activity.event_id) {
+        calendarService.syncCalendarDelete(activity.event_id).catch((error) => {
+          console.error('Calendar delete sync failed:', error);
+        });
+      }
+    } catch (error) {
+      // If getting activity details fails, still try to delete
+      await apiClient.delete(`/village/activity/${activityId}`);
+      throw error;
+    }
   },
 };
 
