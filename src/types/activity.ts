@@ -26,7 +26,13 @@ export interface ActivityData {
   endDate: string;
   status: 'not yet' | 'ongoing' | 'completed';
   percentage: string;
-  type?: 'workshop' | 'training' | 'demosite';
+  type?:
+    | 'workshop'
+    | 'training'
+    | 'demosite'
+    | 'meeting'
+    | 'field_visit'
+    | 'fgd';
   files: UnifiedFile[];
   category?: string;
   event_id?: string;
@@ -71,7 +77,13 @@ export interface Activity {
   description: string;
   remarks?: string;
   status: 'not yet' | 'ongoing' | 'completed';
-  type: 'training' | 'workshop' | 'demosite';
+  type:
+    | 'training'
+    | 'workshop'
+    | 'demosite'
+    | 'meeting'
+    | 'field_visit'
+    | 'fgd';
   percentage: number;
   files?: ApiFile[];
   event_id?: string;
@@ -96,7 +108,13 @@ export interface CreateActivityData {
   description: string;
   remarks?: string;
   status: 'not yet' | 'ongoing' | 'completed';
-  type: 'training' | 'workshop' | 'demosite';
+  type:
+    | 'training'
+    | 'workshop'
+    | 'demosite'
+    | 'meeting'
+    | 'field_visit'
+    | 'fgd';
   percentage: number;
   categoryId?: string;
 }
@@ -109,7 +127,13 @@ export interface UpdateActivityData {
   description?: string;
   remarks?: string;
   status?: 'not yet' | 'ongoing' | 'completed';
-  type?: 'training' | 'workshop' | 'demosite';
+  type?:
+    | 'training'
+    | 'workshop'
+    | 'demosite'
+    | 'meeting'
+    | 'field_visit'
+    | 'fgd';
   percentage?: number;
   categoryId?: string;
 }

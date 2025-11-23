@@ -35,9 +35,12 @@ export const activityFormSchema = z
       message: 'Status must be either not yet, ongoing, or completed',
     }),
 
-    type: z.enum(['workshop', 'training', 'demosite'], {
-      message: 'Type must be either workshop, training, or demosite',
-    }),
+    type: z.enum(
+      ['workshop', 'training', 'demosite', 'meeting', 'field_visit', 'fgd'],
+      {
+        message: 'Type must be either workshop, training, or demosite',
+      }
+    ),
     percentage: z
       .string()
       .min(1, 'Percentage is required')

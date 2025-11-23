@@ -57,6 +57,18 @@ export const FilterModal: React.FC<FilterModalProps> = ({
       label: 'Workshop',
       value: 'workshop',
     },
+    {
+      label: 'Meeting',
+      value: 'meeting',
+    },
+    {
+      label: 'Field Visit',
+      value: 'field_visit',
+    },
+    {
+      label: 'FGD',
+      value: 'fgd',
+    },
   ];
 
   // Local state for form values

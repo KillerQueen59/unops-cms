@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { DemositeType } from './demosite';
 
 // File validation helpers
 const isValidImageFile = (file: File) => {
@@ -37,10 +36,6 @@ export const demositeFormSchema = z.object({
       (file) => isValidImageFile(file),
       'Header photo must be JPG or PNG'
     ),
-
-  type: z.nativeEnum(DemositeType, {
-    message: 'Please select a valid type',
-  }),
 
   name: z
     .string()
@@ -93,10 +88,6 @@ export const demositeEditFormSchema = z.object({
     )
     .refine((file) => isValidImageFile(file), 'Header photo must be JPG or PNG')
     .optional(),
-
-  type: z.nativeEnum(DemositeType, {
-    message: 'Please select a valid type',
-  }),
 
   name: z
     .string()

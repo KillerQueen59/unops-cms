@@ -19,7 +19,8 @@ export const ListCard = ({
   };
 
   // Check if we have a valid image URL
-  const hasValidImage = demosite.header && demosite.header.trim() !== '' && !imageError;
+  const hasValidImage =
+    demosite.header && demosite.header.trim() !== '' && !imageError;
 
   return (
     <Box
@@ -70,9 +71,6 @@ export const ListCard = ({
             justifyContent: 'space-between',
           }}
         >
-          <Typography fontSize={12} color="secondary.main" fontWeight={'bold'}>
-            {demosite.type}
-          </Typography>
           <Typography fontSize={12}>{demosite.createdAt}</Typography>
         </Box>
 

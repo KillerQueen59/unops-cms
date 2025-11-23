@@ -81,27 +81,6 @@ export const Header = ({
               >
                 {demositeData?.name}
               </Typography>
-
-              {demositeData?.name && demositeData?.type && (
-                <Box
-                  sx={{
-                    width: '4px',
-                    height: '4px',
-                    borderRadius: '50%',
-                    backgroundColor: '#9CA3AF',
-                  }}
-                />
-              )}
-
-              <Typography
-                variant="body1"
-                sx={{
-                  color: '#9CA3AF',
-                  fontSize: '16px',
-                }}
-              >
-                {demositeData?.type}
-              </Typography>
             </Box>
           </div>
         </Box>

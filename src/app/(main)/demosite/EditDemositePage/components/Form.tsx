@@ -6,16 +6,11 @@ import {
   Box,
   Button,
   Typography,
-  Select,
-  MenuItem,
-  FormControl,
   IconButton,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Autocomplete,
-  TextField,
 } from '@mui/material';
 import { File as FileIcon, Trash } from '@phosphor-icons/react';
 import {
@@ -23,13 +18,13 @@ import {
   ControlledFieldContainer,
   TextAreaFieldContainer,
 } from '@/components';
-import { DemositeType, DemositeData } from '@/types/demosite';
+import { DemositeData } from '@/types/demosite';
 import {
   DemositeEditFormData,
   demositeEditFormSchema,
 } from '@/types/demositeForm';
 import { useDemositeStore, DemositePageEnum } from '@/stores/demositeStore';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdateDemosite } from '@/hooks/useDemositeData';
 import { UpdateDemositeData } from '@/services/demositeService';
@@ -42,15 +37,7 @@ interface ExistingPhoto {
 
 type UnifiedPhoto = File | ExistingPhoto;
 
-export const Form = ({
-  villageOptions,
-  isLoading,
-  demositeData,
-}: {
-  villageOptions: { label: string; value: string }[];
-  isLoading: boolean;
-  demositeData?: DemositeData;
-}) => {
+export const Form = ({ demositeData }: { demositeData?: DemositeData }) => {
   const { setPage, updateBreadcrumbs } = useDemositeStore();
   const [allPhotos, setAllPhotos] = useState<UnifiedPhoto[]>([]);
   const [headerPhoto, setHeaderPhoto] = useState<File | null>(null);
@@ -68,7 +55,6 @@ export const Form = ({
     resolver: zodResolver(demositeEditFormSchema),
     defaultValues: {
       title: '',
-      type: DemositeType.LocalHeroes,
       name: '',
       story: '',
       link: undefined,
@@ -82,7 +68,6 @@ export const Form = ({
     if (demositeData) {
       reset({
         title: demositeData.title || '',
-        type: demositeData.type || DemositeType.LocalHeroes,
         name: demositeData.name || '',
         story: demositeData.story || '',
         link: demositeData.link || undefined,
@@ -108,7 +93,6 @@ export const Form = ({
   }, [demositeData, reset]);
 
   const name = watch('name');
-  const type = watch('type');
   const updateMutation = useUpdateDemosite();
 
   // Helper functions for unified photo handling
@@ -134,8 +118,6 @@ export const Form = ({
     const newPhotos = allPhotos.filter(
       (photo): photo is File => !isExistingPhoto(photo)
     );
-
-    console.log('newPhotos', newPhotos);
 
     setValue('photos', newPhotos, { shouldValidate: true });
   }, [allPhotos, setValue]);
@@ -198,8 +180,6 @@ export const Form = ({
     e.preventDefault();
     setIsDragOver(false);
   }, []);
-
-  console.log('errors', errors);
 
   const handleFileInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -303,7 +283,6 @@ export const Form = ({
         id: demositeData.id,
         header: data.header || undefined,
         title: data.title,
-        type: data.type === DemositeType.LocalHeroes ? 'hero' : 'location',
         name: data.name,
         story: data.story,
         link: data.link,
@@ -537,100 +516,13 @@ export const Form = ({
           {/* Location Name and Type Row */}
           <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
             <ControlledFieldContainer
-              label="Type"
-              name="type"
+              label="Name"
+              name="name"
               control={control}
+              placeholder="Input Local Hero Name here..."
               required
-              error={errors.type}
-            >
-              <Controller
-                name="type"
-                control={control}
-                render={({ field }) => (
-                  <FormControl fullWidth error={!!errors.type}>
-                    <Select
-                      {...field}
-                      displayEmpty
-                      sx={{
-                        borderRadius: '12px',
-                      }}
-                    >
-                      <MenuItem value="" disabled>
-                        <span style={{ color: '#9CA3AF' }}>Pilih type...</span>
-                      </MenuItem>
-                      <MenuItem value={DemositeType.LocalHeroes}>
-                        Local Heroes
-                      </MenuItem>
-                      <MenuItem value={DemositeType.StoryOfVillage}>
-                        Story of Village
-                      </MenuItem>
-                    </Select>
-                  </FormControl>
-                )}
-              />
-            </ControlledFieldContainer>
-
-            {type === DemositeType.StoryOfVillage ? (
-              <ControlledFieldContainer
-                label="Name"
-                name="name"
-                control={control}
-                required
-                error={errors.name}
-              >
-                <Autocomplete
-                  options={villageOptions}
-                  getOptionLabel={(option) => option.label}
-                  value={
-                    villageOptions.find((village) => village.label === name) ||
-                    null
-                  }
-                  onChange={(event, newValue) => {
-                    setValue('name', newValue?.label || '');
-                  }}
-                  disabled={isLoading}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      placeholder={'Search Village..'}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: '12px',
-                          backgroundColor: '#fff',
-                        },
-                      }}
-                    />
-                  )}
-                  renderOption={(props, option) => (
-                    <Box component="li" {...props} key={option.value}>
-                      <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                          {option.label}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: '#6B7280' }}>
-                          Code: {option.value}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  )}
-                  noOptionsText={'No villages found'}
-                  sx={{
-                    '& .MuiAutocomplete-inputRoot': {
-                      borderRadius: '12px',
-                    },
-                  }}
-                />
-              </ControlledFieldContainer>
-            ) : (
-              <ControlledFieldContainer
-                label="Name"
-                name="name"
-                control={control}
-                placeholder="Input Local Hero Name here..."
-                required
-                error={errors.name}
-              />
-            )}
+              error={errors.name}
+            />
           </Box>
 
           {/* Links */}
